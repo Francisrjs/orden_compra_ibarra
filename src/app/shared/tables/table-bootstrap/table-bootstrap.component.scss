@@ -1,0 +1,42 @@
+.card {
+  border: none;
+  border-radius: 0.5rem;
+
+  .table {
+    th {
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+      }
+
+      &.sort-asc,
+      &.sort-desc {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .pagination {
+    .page-item {
+      &.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+      }
+
+      .page-link {
+        color: #0d6efd;
+        border-radius: 0.25rem;
+        margin: 0 0.15rem;
+        min-width: 2.5rem;
+        text-align: center;
+      }
+    }
+  }
+}

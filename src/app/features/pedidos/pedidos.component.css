@@ -1,0 +1,9 @@
+#indicadores app-card-dashboard-icon {
+  flex-grow: 1; /* Permite que las tarjetas crezcan para llenar el espacio */
+  flex-shrink: 1; /* Permite que las tarjetas se encojan */
+  flex-basis: 0; /* Indica que el tamaño base inicial es 0, y se distribuirá el espacio equitativamente */
+}
+
+app-card-dashboard-icon {
+  min-width: 0;
+}

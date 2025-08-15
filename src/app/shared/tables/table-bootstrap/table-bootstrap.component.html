@@ -1,0 +1,107 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <!-- Search Input -->
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar..."
+        [(ngModel)]="searchText"
+        (input)="currentPage = 1"
+      />
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <ng-container
+              *ngTemplateOutlet="headerTemplate || defaultHeader"
+            ></ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of paginatedData">
+            <ng-container
+              *ngTemplateOutlet="rowTemplate; context: { $implicit: item }"
+            ></ng-container>
+          </tr>
+          <tr *ngIf="filteredData.length === 0">
+            <td colspan="100%" class="text-center text-muted py-4">
+              No se encontraron registros
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      *ngIf="showPagination && totalPages > 1"
+      class="d-flex justify-content-between align-items-center mt-3"
+    >
+      <div class="text-muted">
+        Mostrando {{ getShowingFrom() }} a {{ getShowingTo() }} de
+        {{ filteredData.length }} registros
+      </div>
+      <nav>
+        <ul class="pagination mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link" href="javascript:;" (click)="prevPage()"
+              >Anterior</a
+            >
+          </li>
+
+          <li class="page-item" *ngIf="pageNumbers[0] > 1">
+            <a class="page-link" href="javascript:;" (click)="changePage(1)"
+              >1</a
+            >
+          </li>
+          <li class="page-item disabled" *ngIf="pageNumbers[0] > 2">
+            <span class="page-link">...</span>
+          </li>
+
+          <li
+            *ngFor="let page of pageNumbers"
+            class="page-item"
+            [class.active]="page === currentPage"
+          >
+            <a class="page-link" href="javascript:;" (click)="changePage(page)">
+              {{ page }}
+            </a>
+          </li>
+
+          <li
+            class="page-item disabled"
+            *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1"
+          >
+            <span class="page-link">...</span>
+          </li>
+          <li
+            class="page-item"
+            *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages"
+          >
+            <a
+              class="page-link"
+              href="javascript:;"
+              (click)="changePage(totalPages)"
+              >{{ totalPages }}</a
+            >
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link" href="javascript:;" (click)="nextPage()"
+              >Siguiente</a
+            >
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Plantilla de encabezado por defecto -->
+    <ng-template #defaultHeader>
+      <th *ngFor="let key of getKeys(data[0])">{{ key }}</th>
+    </ng-template>
+  </div>
+</div>

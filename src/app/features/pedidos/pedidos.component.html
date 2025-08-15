@@ -1,0 +1,87 @@
+<div id="indicadores" class="d-flex justify-content-center">
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="secondary"
+      title="Pedidos totales"
+      [value]="value"
+      icon="bi-airplane-fill"
+    ></app-card-dashboard-icon>
+  </div>
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="warning"
+      title="Mis pedidos pendientes"
+      [value]="value"
+      icon="bi-airplane-fill"
+      [hasCustomIconColor]="true"
+    ></app-card-dashboard-icon>
+  </div>
+</div>
+
+<div>
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="warning"
+      title="Mis Pedidos aceptados"
+      [value]="value"
+      icon="bi-airplane-fill"
+      [hasCustomIconColor]="true"
+    ></app-card-dashboard-icon>
+  </div>
+</div>
+<app-table-bootstrap
+  [data]="tableData"
+  [pageSize]="10"
+  app-table-bootstrap
+  [data]="tableData"
+  [pageSize]="5"
+>
+  <!-- Plantilla personalizada para el encabezado -->
+  <ng-template #headerTemplate>
+    <th>Name</th>
+    <th>Title</th>
+    <th>Status</th>
+    <th>Position</th>
+    <th>Actions</th>
+  </ng-template>
+
+  <!-- Plantilla personalizada para las filas -->
+  <ng-template #rowTemplate let-item>
+    <td>
+      <div class="d-flex align-items-center">
+        <img
+          [src]="item.avatar || 'https://mdbootstrap.com/img/new/avatars/8.jpg'"
+          alt=""
+          style="width: 45px; height: 45px"
+          class="rounded-circle"
+        />
+        <div class="ms-3">
+          <p class="fw-bold mb-1">{{ item.name }}</p>
+          <p class="text-muted mb-0">{{ item.email }}</p>
+        </div>
+      </div>
+    </td>
+    <td>
+      <p class="fw-normal mb-1">{{ item.position }}</p>
+      <p class="text-muted mb-0">{{ item.department }}</p>
+    </td>
+    <td>
+      <span
+        class="badge rounded-pill d-inline"
+        [class.badge-success]="item.status === 'Active'"
+        [class.badge-primary]="item.status === 'Onboarding'"
+        [class.badge-warning]="item.status === 'Awaiting'"
+      >
+        {{ item.status }}
+      </span>
+    </td>
+    <td>{{ item.level }}</td>
+    <td>
+      <button type="button" class="btn btn-link btn-sm btn-rounded">
+        Edit
+      </button>
+    </td>
+  </ng-template>
+</app-table-bootstrap>
+
+<button (click)="pedidos()">Get pedidos</button>
