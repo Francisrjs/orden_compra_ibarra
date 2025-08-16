@@ -2,13 +2,20 @@
   <div class="card-body">
     <!-- Search Input -->
     <div class="mb-3">
-      <input
+      <div class="d-flex justify-between">
+<input
         type="text"
         class="form-control"
         placeholder="Buscar..."
         [(ngModel)]="searchText"
         (input)="currentPage = 1"
       />
+      <div class="d-flex">
+        
+        <button type="button" class="btn btn-outline-primary"> <i class="bi bi-plus-circle-fill"></i>Añadir Pedidos</button>
+      </div>
+      
+      </div>
     </div>
 
     <!-- Table -->

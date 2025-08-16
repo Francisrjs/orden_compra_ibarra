@@ -7,6 +7,8 @@ import { PedidosComponent } from './features/pedidos/pedidos.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableBootstrapComponent } from './shared/tables/table-bootstrap/table-bootstrap.component';
+import { PedidosFormComponent } from './features/pedidos/pedidos-form/pedidos-form.component';
+import { PedidosDetalleComponent } from './features/pedidos-detalle/pedidos-detalle.component';
 
 @NgModule({
   declarations: [
@@ -14,6 +16,8 @@ import { TableBootstrapComponent } from './shared/tables/table-bootstrap/table-b
     PedidosComponent,
     CardDashboardIconComponent,
     TableBootstrapComponent,
+    PedidosFormComponent,
+    PedidosDetalleComponent,
   ],
   imports: [BrowserModule, CommonModule, FormsModule],
   providers: [],

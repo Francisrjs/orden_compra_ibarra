@@ -3,7 +3,7 @@
     <app-card-dashboard-icon
       borderColor="secondary"
       title="Pedidos totales"
-      [value]="value"
+      value="10"
       icon="bi-airplane-fill"
     ></app-card-dashboard-icon>
   </div>
@@ -11,77 +11,54 @@
     <app-card-dashboard-icon
       borderColor="warning"
       title="Mis pedidos pendientes"
-      [value]="value"
+      value="value"
       icon="bi-airplane-fill"
       [hasCustomIconColor]="true"
     ></app-card-dashboard-icon>
   </div>
 </div>
 
-<div>
-  <div class="col-md-4 col-lg-3 mx-2">
-    <app-card-dashboard-icon
-      borderColor="warning"
-      title="Mis Pedidos aceptados"
-      [value]="value"
-      icon="bi-airplane-fill"
-      [hasCustomIconColor]="true"
-    ></app-card-dashboard-icon>
-  </div>
-</div>
 <app-table-bootstrap
-  [data]="tableData"
+  [data]="pedidos"
   [pageSize]="10"
-  app-table-bootstrap
-  [data]="tableData"
-  [pageSize]="5"
 >
   <!-- Plantilla personalizada para el encabezado -->
   <ng-template #headerTemplate>
-    <th>Name</th>
-    <th>Title</th>
-    <th>Status</th>
-    <th>Position</th>
-    <th>Actions</th>
+    <th>Id</th>
+    <th>Titulo</th>
+    <th>Numero de Pedido</th>
+    <th>Estado</th>
+    <th>Plazo de entrega</th>
+    <th>Fecha de creacion</th>
+    <th>Responsable</th>
   </ng-template>
 
   <!-- Plantilla personalizada para las filas -->
   <ng-template #rowTemplate let-item>
     <td>
       <div class="d-flex align-items-center">
-        <img
-          [src]="item.avatar || 'https://mdbootstrap.com/img/new/avatars/8.jpg'"
-          alt=""
-          style="width: 45px; height: 45px"
-          class="rounded-circle"
-        />
         <div class="ms-3">
-          <p class="fw-bold mb-1">{{ item.name }}</p>
-          <p class="text-muted mb-0">{{ item.email }}</p>
+          <p class="fw-bold mb-1">{{ item.id }}</p>
+          <p class="text-muted mb-0">{{ item.responsable }}</p>
         </div>
       </div>
     </td>
     <td>
-      <p class="fw-normal mb-1">{{ item.position }}</p>
-      <p class="text-muted mb-0">{{ item.department }}</p>
+      <p class="fw-normal mb-1">{{ item.titulo }}</p>
     </td>
+    <td>{{ item.numero_pedido }}</td>
     <td>
-      <span
-        class="badge rounded-pill d-inline"
-        [class.badge-success]="item.status === 'Active'"
-        [class.badge-primary]="item.status === 'Onboarding'"
-        [class.badge-warning]="item.status === 'Awaiting'"
-      >
-        {{ item.status }}
-      </span>
+
+        {{ item.estado }}
+      
     </td>
-    <td>{{ item.level }}</td>
+    <td>{{ item.plazo_entrega | date:'medium'}}</td>
+    <td>{{ item.fecha_creacion | date }}</td>
     <td>
-      <button type="button" class="btn btn-link btn-sm btn-rounded">
-        Edit
+      <button type="button" class="btn btn-outline-primary">
+        Ver productos cargados
       </button>
     </td>
   </ng-template>
 </app-table-bootstrap>
 
-<button (click)="pedidos()">Get pedidos</button>
