@@ -59,7 +59,7 @@ export class PedidoService {
     // En una app real, esto vendría del servicio de autenticación.
     const dataToInsert = {
       ...pedidoData,
-      responsable_id: 'f4d9d3f8-487a-4665-89b2-dfa52cc36be7', // UUID que me proporcionaste
+      responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12', // UUID que me proporcionaste
     };
 
     const { data, error } = await this._supabaseClient

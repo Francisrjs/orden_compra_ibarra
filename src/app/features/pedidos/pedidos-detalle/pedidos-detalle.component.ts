@@ -8,10 +8,6 @@ import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/t
   templateUrl: './pedidos-detalle.component.html',
   styleUrls: ['./pedidos-detalle.component.css'],
   standalone: true,
-  imports: [
-    CommonModule, // Para el pipe 'date'
-    CardDashboardIconComponent, // Para poder usar <app-card-dashboard-icon>
-    TableBootstrapComponent, // Para poder usar <app-table-bootstrap>
-  ],
+  imports: [CommonModule],
 })
 export class PedidosDetalleComponent {}

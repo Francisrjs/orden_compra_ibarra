@@ -34,7 +34,7 @@
         { text: 'SI', value: 'true', iconClass: 'check' },
         { text: 'NO', value: 'false', iconClass: 'x' }
       ]"
-      formControlName="esUrgente"
+      formControlName="urgente"
     ></app-input-options>
 
     <!-- Descripcion input box - NOTA: cambié [required]="false" -->
@@ -77,6 +77,7 @@
         text="Guardar Pedido"
         type="submit"
         [disabled]="pedidoForm.invalid"
+        (click)="onSubmit()"
       >
         ></app-custom-button
       >

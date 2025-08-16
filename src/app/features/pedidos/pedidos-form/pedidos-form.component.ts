@@ -28,7 +28,6 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
     InputOptionsComponent,
     InputDateComponent,
     ButtonElegantComponent,
-    ButtonWithIconComponent,
   ],
 })
 // ¡YA NO HAY @NgModule AQUÍ!
@@ -41,7 +40,7 @@ export class PedidosFormComponent implements OnInit {
   ngOnInit(): void {
     this.pedidoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
-      esUrgente: [false, Validators.required],
+      urgente: [false, Validators.required],
       descripcion: [''],
       plazo_entrega: ['', [Validators.required, futureDateValidator]],
     });
@@ -55,10 +54,10 @@ export class PedidosFormComponent implements OnInit {
     const formValue = {
       ...this.pedidoForm.value,
       urgente:
-        this.pedidoForm.value.esUrgente === 'true' ||
-        this.pedidoForm.value.esUrgente === true,
+        this.pedidoForm.value.urgente === 'true' ||
+        this.pedidoForm.value.urgente === true,
     };
-    delete formValue.esUrgente;
+    delete formValue.urgente;
     const { data, error } = await this._pedidoService.addPedido(formValue);
     if (error) {
       alert('Error al guardar el pedido: ' + error.message);
