@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   Input,
@@ -5,11 +6,14 @@ import {
   ContentChild,
   AfterContentInit,
 } from '@angular/core';
+import { FormsModule, NgModel } from '@angular/forms';
 
 @Component({
   selector: 'app-table-bootstrap',
   templateUrl: './table-bootstrap.component.html',
   styleUrls: ['./table-bootstrap.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class TableBootstrapComponent {
   @Input() data: any[] = [];

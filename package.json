@@ -17,7 +17,7 @@
     "@angular/forms": "^16.2.0",
     "@angular/platform-browser": "^16.2.0",
     "@angular/platform-browser-dynamic": "^16.2.0",
-    "@angular/router": "^16.2.0",
+    "@angular/router": "^16.2.12",
     "@supabase/supabase-js": "^2.55.0",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",

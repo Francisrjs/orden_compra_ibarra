@@ -1,0 +1,34 @@
+.input_box label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.input_box input,
+.input_box textarea {
+  width: 100%;
+  border: 1px solid #dadaf2;
+  border-radius: 5px;
+  outline: none;
+  background: #f8f8fb;
+  font-size: 17px;
+  padding: 10px 20px; /* Ajustado el padding para el textarea */
+  margin-bottom: 25px;
+  transition: 0.2s ease;
+  box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+}
+
+.input_box input {
+  height: 57px;
+}
+
+/* Estilos específicos para el textarea */
+.input_box textarea {
+  height: 150px; /* Altura inicial para el textarea */
+  resize: vertical; /* Permite al usuario ajustar la altura verticalmente */
+}
+
+.input_box input:focus,
+.input_box textarea:focus {
+  border-color: #e8240e;
+}

@@ -1,0 +1,22 @@
+<ng-container *ngIf="href; else buttonTemplate">
+  <a
+    [href]="href"
+    [class]="'btn-' + styleType"
+    target="_blank"
+    rel="noopener noreferrer"
+    [class.disabled]="disabled"
+  >
+    {{ text }}
+  </a>
+</ng-container>
+
+<ng-template #buttonTemplate>
+  <button
+    type="button"
+    [class]="'btn-' + styleType"
+    (click)="onClick()"
+    [disabled]="disabled"
+  >
+    {{ text }}
+  </button>
+</ng-template>

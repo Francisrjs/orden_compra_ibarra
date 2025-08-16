@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.option-btn {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #f8f8fb;
+  border: 1px solid #dadaf2;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #171645;
+  font-weight: 500;
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* NUEVO: Estilo para el ícono <i> */
+.option-btn i {
+  font-size: 22px; /* Ajusta el tamaño del ícono */
+  line-height: 1; /* Mejora el alineamiento vertical */
+}
+/* Estilo para el estado de "hover" */
+.option-btn:hover {
+  background: #ededf5;
+  border-color: #cc4e0a;
+}
+
+/* Agrega este bloque de CSS. 
+  Esto se aplica cuando el componente tiene la clase 'active'
+*/
+.option-btn.active {
+  background: #e8240e; /* Fondo rojo para indicar que está seleccionado */
+  border-color: #cc4e0a; /* Borde rojo */
+  color: #ffffff; /* Color de texto blanco para contraste */
+}

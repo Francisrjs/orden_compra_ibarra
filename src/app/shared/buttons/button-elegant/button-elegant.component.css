@@ -1,0 +1,38 @@
+/* :host te permite aplicar estilos al propio componente contenedor */
+:host {
+  display: block; /* Asegura que el componente ocupe su propio espacio */
+}
+
+.btn-primary {
+  /* Dimensiones y borde */
+  width: 100%;
+  height: 56px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+
+  /* Colores */
+  background: #f3402c;
+  color: #fff;
+
+  /* Tipografía */
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  /* Comportamiento y transición */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  /* Para centrar el texto (funciona para <a> y <button>) */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #ff3402;
+  color: #fff;
+  text-decoration: none;
+}

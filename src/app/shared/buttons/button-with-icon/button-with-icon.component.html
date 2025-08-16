@@ -1,0 +1,23 @@
+<a
+  *ngIf="href; else buttonTpl"
+  [href]="href"
+  class="option-btn"
+  [ngClass]="{ active: active }"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <i *ngIf="iconClass" [ngClass]="'bi bi-' + iconClass"></i>
+  <span>{{ text }}</span>
+</a>
+
+<ng-template #buttonTpl>
+  <button
+    type="button"
+    class="option-btn"
+    [ngClass]="{ active: active }"
+    (click)="onClick()"
+  >
+    <i *ngIf="iconClass" [ngClass]="'bi bi-' + iconClass"></i>
+    <span>{{ text }}</span>
+  </button>
+</ng-template>

@@ -52,4 +52,30 @@ export class PedidoService {
       this._state.update((s) => ({ ...s, loading: false }));
     }
   }
+  async addPedido(
+    pedidoData: Partial<Pedido>
+  ): Promise<{ data: Pedido | null; error: any }> {
+    // Asignamos un responsable por defecto si no se provee.
+    // En una app real, esto vendría del servicio de autenticación.
+    const dataToInsert = {
+      ...pedidoData,
+      responsable_id: 'f4d9d3f8-487a-4665-89b2-dfa52cc36be7', // UUID que me proporcionaste
+    };
+
+    const { data, error } = await this._supabaseClient
+      .from('pedidos')
+      .insert(dataToInsert)
+      .select() // .select() devuelve la fila recién creada
+      .single(); // .single() para obtener un solo objeto en lugar de un array
+
+    if (!error && data) {
+      // Opcional: Actualizamos nuestro estado local para que la UI se refresque automáticamente
+      this._state.update((s) => ({
+        ...s,
+        solicitudes: [...s.solicitudes, data],
+      }));
+    }
+
+    return { data, error };
+  }
 }

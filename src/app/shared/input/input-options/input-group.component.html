@@ -1,0 +1,13 @@
+<div class="mb-3">
+  <label class="form-label">{{ label }}</label>
+  <div class="d-flex gap-2">
+    <app-button-with-icon
+      *ngFor="let option of options"
+      [text]="option.text"
+      [iconClass]="option.iconClass"
+      [active]="selected === option.value"
+      (buttonClick)="selectOption(option.value)"
+    >
+    </app-button-with-icon>
+  </div>
+</div>

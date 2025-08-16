@@ -1,1 +1,85 @@
-<p>pedidos-form works!</p>
+<!-- pedidos-form.component.html -->
+<div class="container mx-auto my-auto login_form">
+  <!-- Conectamos el formulario al FormGroup y al método onSubmit -->
+  <form [formGroup]="pedidoForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <h3 class="my-2">Agregar un pedido</h3>
+
+    <!-- Titulo input box -->
+    <app-input-box
+      label="Titulo del pedido"
+      type="text"
+      id="title"
+      placeholder="Ingresa un titulo del pedido"
+      formControlName="titulo"
+    ></app-input-box>
+    <!-- Mensaje de error para el título -->
+    <div
+      *ngIf="
+        pedidoForm.get('titulo')?.invalid && pedidoForm.get('titulo')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <small *ngIf="pedidoForm.get('titulo')?.errors?.['required']"
+        >El título es requerido.</small
+      >
+      <small *ngIf="pedidoForm.get('titulo')?.errors?.['minlength']"
+        >El título debe tener al menos 5 caracteres.</small
+      >
+    </div>
+
+    <!-- Urgente input box -->
+    <app-input-options
+      label="¿Es urgente?"
+      [options]="[
+        { text: 'SI', value: 'true', iconClass: 'check' },
+        { text: 'NO', value: 'false', iconClass: 'x' }
+      ]"
+      formControlName="esUrgente"
+    ></app-input-options>
+
+    <!-- Descripcion input box - NOTA: cambié [required]="false" -->
+    <app-input-box
+      label="Descripcion del pedido"
+      type="text"
+      id="description"
+      placeholder="Ingresa una descripcion del pedido (opcional)"
+      [required]="false"
+      [isTextarea]="true"
+      formControlName="descripcion"
+    ></app-input-box>
+
+    <!-- Plazo de entrega input box -->
+    <app-input-date
+      label="Plazo de entrega"
+      id="plazo"
+      formControlName="plazo_entrega"
+    >
+    </app-input-date>
+    <!-- Mensaje de error para la fecha -->
+    <div
+      *ngIf="
+        pedidoForm.get('plazo_entrega')?.invalid &&
+        pedidoForm.get('plazo_entrega')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <small *ngIf="pedidoForm.get('plazo_entrega')?.errors?.['required']"
+        >El plazo de entrega es requerido.</small
+      >
+      <small *ngIf="pedidoForm.get('plazo_entrega')?.errors?.['futureDate']"
+        >La fecha debe ser posterior a hoy.</small
+      >
+    </div>
+
+    <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
+      <!-- Cambiamos el botón para que sea de tipo 'submit' -->
+      <app-custom-button
+        text="Guardar Pedido"
+        type="submit"
+        [disabled]="pedidoForm.invalid"
+      >
+        ></app-custom-button
+      >
+    </div>
+  </form>
+</div>

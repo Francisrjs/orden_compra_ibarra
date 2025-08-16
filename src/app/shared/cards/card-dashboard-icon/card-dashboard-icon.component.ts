@@ -1,9 +1,12 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges } from '@angular/core';
 
 @Component({
   selector: 'app-card-dashboard-icon',
   templateUrl: './card-dashboard-icon.component.html',
   styleUrls: ['./card-dashboard-icon.component.css'],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class CardDashboardIconComponent implements OnChanges {
   @Input() title: string = 'titulo';

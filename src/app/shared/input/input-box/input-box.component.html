@@ -1,0 +1,28 @@
+<div class="input_box">
+  <label [for]="id">{{ label }}</label>
+
+  <!-- Textarea -->
+  <textarea
+    *ngIf="isTextarea"
+    [id]="id"
+    [placeholder]="placeholder"
+    [required]="required"
+    [value]="value"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    [disabled]="isDisabled"
+  ></textarea>
+
+  <!-- Input normal -->
+  <input
+    *ngIf="!isTextarea"
+    [type]="type"
+    [id]="id"
+    [placeholder]="placeholder"
+    [required]="required"
+    [value]="value"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    [disabled]="isDisabled"
+  />
+</div>
