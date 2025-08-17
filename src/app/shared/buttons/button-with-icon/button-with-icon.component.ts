@@ -15,12 +15,31 @@ export class ButtonWithIconComponent {
 
   // NUEVO: Input para controlar si el botón está activo
   @Input() active: boolean = false;
-
+  @Input() hoverIconColorClass: string = 'text-warning';
   @Output() buttonClick = new EventEmitter<void>();
 
   onClick(): void {
     if (!this.href) {
       this.buttonClick.emit();
     }
+  }
+
+  isHovered: boolean = false;
+
+  // Maneja el evento cuando el mouse entra en el botón
+  onMouseEnter(): void {
+    this.isHovered = true;
+  }
+
+  // Maneja el evento cuando el mouse sale del botón
+  onMouseLeave(): void {
+    this.isHovered = false;
+  }
+  get iconNgClass() {
+    return {
+      ['bi bi-' + this.iconClass]: true, // icono base
+      'text-warning': this.isHovered, // amarillo cuando hover
+      'text-white': !this.isHovered, // blanco por defecto
+    };
   }
 }

@@ -1,0 +1,82 @@
+/* estilos base (copiados y adaptados del CSS que compartiste) */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 80px;
+  /* usamos la variable --btn-bg con fallback al color original */
+  background: var(--btn-bg, #141414);
+  color: var(--btn-fg, #fff);
+  font-family: "Roboto", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: 0.3s ease all;
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* el span centrado */
+.boton span {
+  position: relative;
+  z-index: 2;
+  transition: 0.3s ease all;
+}
+
+/* variante "cinco" con la animación que querías */
+.boton.cinco span {
+  transition: 0.4s ease-in-out all;
+  position: absolute;
+  left: 40%;
+}
+
+/* contenedor del icono a la izquierda (sale al hacer hover) */
+.boton.cinco .icono {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  z-index: 2;
+  left: -40px;
+  transition: 0.3s ease-in-out all;
+  opacity: 0;
+}
+
+/* icono (bootstrap icon) usa color actual (currentColor) y tamaño similar al svg */
+.boton.cinco i {
+  color: currentColor;
+  font-size: 35px; /* para que ocupe tamaño parecido al svg */
+  width: 35px;
+  height: 35px;
+  line-height: 1;
+}
+
+/* hover: usamos la variable --btn-hover-bg (fallback al verde que tenías) */
+.boton.cinco:hover {
+  background: var(--btn-hover-bg, #2f9b05);
+}
+
+/* movemos el icono y mostramos el mismo */
+.boton.cinco:hover .icono {
+  left: calc(100% - 50px);
+  opacity: 1;
+}
+
+/* ajustamos el texto al hacer hover */
+.boton.cinco:hover span {
+  left: 20px;
+}
+
+/* accesibilidad: focus visual */
+.boton:focus {
+  outline: 3px solid rgba(0, 0, 0, 0.12);
+  outline-offset: 2px;
+}

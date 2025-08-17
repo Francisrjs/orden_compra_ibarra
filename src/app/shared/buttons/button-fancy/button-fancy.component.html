@@ -1,0 +1,14 @@
+<button
+  type="button"
+  class="boton cinco"
+  (click)="onClick()"
+  [style.--btn-bg]="bgColor"
+  [style.--btn-hover-bg]="hoverBgColor"
+  [style.--btn-fg]="fgColor"
+  [attr.aria-label]="text"
+>
+  <div class="icono">
+    <i [ngClass]="icon"></i>
+  </div>
+  <span>{{ text }}</span>
+</button>

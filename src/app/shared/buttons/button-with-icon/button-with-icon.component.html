@@ -5,6 +5,8 @@
   [ngClass]="{ active: active }"
   target="_blank"
   rel="noopener noreferrer"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
 >
   <i *ngIf="iconClass" [ngClass]="'bi bi-' + iconClass"></i>
   <span>{{ text }}</span>
@@ -16,8 +18,13 @@
     class="btn option-btn"
     [ngClass]="{ active: active }"
     (click)="onClick()"
+    [class.hovered]="isHovered"
   >
-    <i *ngIf="iconClass" [ngClass]="'bi bi-' + iconClass"></i>
-    <span>{{ text }}</span>
+    <i
+      *ngIf="iconClass"
+      [class.hovered]="isHovered"
+      [ngClass]="'bi bi-' + iconClass"
+    ></i>
+    <span *ngIf="!iconOnly" [class.hovered]="isHovered">{{ text }}</span>
   </button>
 </ng-template>

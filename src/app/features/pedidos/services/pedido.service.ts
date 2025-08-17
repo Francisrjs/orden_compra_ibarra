@@ -75,4 +75,22 @@ export class PedidoService {
 
     return { data, error };
   }
+  async getPedido(
+    pedidoid: number
+  ): Promise<{ data: Pedido | null; error: any }> {
+    const { data, error } = await this._supabaseClient
+      .from('pedidos')
+      .select('*')
+      .eq('id', pedidoid)
+      .single();
+
+    if (!error && data) {
+      this._state.update((s) => ({
+        ...s,
+        solicitudes: [...s.solicitudes, data],
+      }));
+    }
+
+    return { data, error };
+  }
 }

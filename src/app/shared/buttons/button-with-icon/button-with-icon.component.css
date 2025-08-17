@@ -1,3 +1,5 @@
+/* src/app/shared/buttons/button-with-icon/button-with-icon.component.css */
+
 :host {
   display: block;
   width: 100%;
@@ -10,34 +12,118 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  background: #f8f8fb;
-  border: 1px solid #dadaf2;
+  border: 1px solid;
   border-radius: 5px;
   text-decoration: none;
-  color: #171645;
   font-weight: 500;
   font-family: "Montserrat", sans-serif;
   font-size: 16px;
   cursor: pointer;
   transition: 0.2s ease;
+
+  /* Estilos para la animación */
+  position: relative;
+  overflow: hidden;
 }
 
-/* NUEVO: Estilo para el ícono <i> */
-.option-btn i {
-  font-size: 22px; /* Ajusta el tamaño del ícono */
-  line-height: 1; /* Mejora el alineamiento vertical */
-}
-/* Estilo para el estado de "hover" */
-.option-btn:hover {
-  background: #ededf5;
-  border-color: #cc4e0a;
+/* NUEVO: Estilos para el span contenedor */
+.option-btn span {
+  position: relative;
+  z-index: 2; /* Asegura que el contenido quede por encima de la animación */
+  transition: 0.3s ease all;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Agrega este bloque de CSS. 
-  Esto se aplica cuando el componente tiene la clase 'active'
-*/
+/* --- pseudo-elemento para la animación de la ola --- */
+.option-btn::after {
+  content: "";
+  width: 100%;
+  height: 300px;
+  background: #18a362; /* Color de la ola (verde) */
+  position: absolute;
+  z-index: 1;
+  top: -300px; /* Inicia por encima del botón */
+  left: 0;
+  transition: 0.4s ease-in-out all;
+  border-radius: 0px 0px 300px 300px;
+}
+
+.option-btn:hover::after {
+  top: 0; /* Desliza la ola hacia abajo en el hover */
+}
+
+/* Estilos para el estado por defecto (blanco) */
+.btn-default {
+  background: #f8f8fb;
+  border-color: #dadaf2;
+  color: #171645;
+}
+
+.btn-default:hover {
+  /* La animación de la ola se encarga del color de fondo */
+  border-color: #dadaf2;
+}
+
+/* Estilos para el estado "active" (rojo) */
 .option-btn.active {
-  background: #e8240e; /* Fondo rojo para indicar que está seleccionado */
-  border-color: #cc4e0a; /* Borde rojo */
-  color: #ffffff; /* Color de texto blanco para contraste */
+  background: #e8240e;
+  border-color: #cc4e0a;
+  color: #ffffff;
+}
+
+/* Estilos para el ícono */
+.option-btn > span {
+  position: relative;
+  z-index: 2; /* El contenido (ícono y texto) debe estar por encima de la animación */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Transición para el color */
+  transition: color 0.3s ease;
+}
+
+/* ... (código para el pseudo-elemento ::after) ... */
+
+/* Estilos de hover que ya tenías */
+.option-btn:hover {
+  /* No se necesita color de fondo aquí, la animación lo maneja */
+  border-color: #dadaf2; /* Mantén el borde */
+}
+
+/* --- Esto es lo que necesitas para que el ícono cambie de color --- */
+.option-btn:hover span {
+  /* Al hacer hover, el color de todo el contenido del span cambia a blanco */
+  color: #ffffff;
+}
+
+/* También debes asegurarte de que el ícono tenga el color por defecto */
+/* Si usas clases de color, asegúrate de que el hover las sobreescriba */
+.option-btn i {
+  font-size: 22px;
+  line-height: 1;
+  position: relative;
+  z-index: 2; /* 👈 Esto asegura que el ícono esté siempre por arriba */
+  transition: color 0.3s ease;
+}
+
+.option-btn i.hovered,
+.option-btn span.hovered {
+  color: #ffffff !important; /* El !important es aún necesario para sobreescribir Bootstrap */
+}
+
+/* Y para la animación de la ola, seguimos usando el hover del CSS */
+.option-btn::after {
+  /* ... (tu código actual) ... */
+}
+
+.option-btn:hover::after {
+  top: 0;
+}
+/* Forzamos que al hacer hover el ícono respete nuestras reglas */
+
+/* Si NO tiene ninguna clase de color de bootstrap, se vuelve blanco al hover */
+.option-btn:hover i:not([class*="text-"]) {
+  color: #ffffff !important;
 }
