@@ -1,28 +1,29 @@
+<h1 class="text-center my-auto mx-auto mb-5">Mis pedidos</h1>
 <div id="indicadores" class="d-flex justify-content-center">
   <div class="col-md-4 col-lg-3 mx-2">
     <app-card-dashboard-icon
-      borderColor="secondary"
+      borderColor="success"
       title="Pedidos totales"
       value="10"
-      icon="bi-airplane-fill"
+      icon="bi bi-bag"
     ></app-card-dashboard-icon>
   </div>
   <div class="col-md-4 col-lg-3 mx-2">
     <app-card-dashboard-icon
-      borderColor="warning"
+      borderColor="secondary"
       title="Mis pedidos pendientes"
       value="value"
-      icon="bi-airplane-fill"
+      icon="bi bi-bag-heart"
       [hasCustomIconColor]="true"
     ></app-card-dashboard-icon>
   </div>
 </div>
-
-<app-table-bootstrap
-  [data]="pedidos"
-  [pageSize]="10"
->
+<h2 class="text-center my-auto mx-auto mb-3 mt-3 bg-gray">
+  Historial de mis pedidos
+</h2>
+<app-table-bootstrap [data]="pedidos" [pageSize]="10">
   <!-- Plantilla personalizada para el encabezado -->
+
   <ng-template #headerTemplate>
     <th>Id</th>
     <th>Titulo</th>
@@ -48,17 +49,18 @@
     </td>
     <td>{{ item.numero_pedido }}</td>
     <td>
-
+      <span class="badge" [ngClass]="getBadgeClass(item.estado)">
         {{ item.estado }}
-      
+      </span>
     </td>
-    <td>{{ item.plazo_entrega | date:'medium'}}</td>
+    <td>{{ item.plazo_entrega | date : "medium" }}</td>
     <td>{{ item.fecha_creacion | date }}</td>
     <td>
-      <button type="button" class="btn btn-outline-primary">
-        Ver productos cargados
-      </button>
+      <div class="d-flex align-items-center justify-content-center">
+        <button class="btn btn-outline-danger">
+          <i class="bi bi-eye text-center"></i>
+        </button>
+      </div>
     </td>
   </ng-template>
 </app-table-bootstrap>
-

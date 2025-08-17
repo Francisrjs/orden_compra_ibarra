@@ -4,6 +4,7 @@ import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/t
 import { PedidoService } from './services/pedido.service';
 import { Pedido } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
+import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 
 @Component({
   selector: 'app-pedidos',
@@ -13,7 +14,8 @@ import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-
   imports: [
     CommonModule, // Para el pipe 'date' y *ngIf/*ngFor si los usas
     CardDashboardIconComponent, // Para poder usar <app-card-dashboard-icon>
-    TableBootstrapComponent, // Para poder usar <app-table-bootstrap>
+    TableBootstrapComponent,
+    ButtonWithIconComponent,
   ],
 })
 export class PedidosComponent implements OnInit {
@@ -35,6 +37,24 @@ export class PedidosComponent implements OnInit {
       console.error(error);
     } finally {
       this.loading = false;
+    }
+  }
+  getBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'En Creacion':
+        return 'text-bg-secondary';
+      case 'En Proceso de Aprobacion':
+        return 'text-bg-secondary';
+      case 'Aprobado':
+        return 'text-bg-primary';
+      case 'Aprobado Parcialmente':
+        return 'text-bg-warning';
+      case 'Cerrado':
+        return 'text-bg-success';
+      case 'Rechazado':
+        return 'text-bg-danger';
+      default:
+        return 'text-bg-secondary';
     }
   }
 }

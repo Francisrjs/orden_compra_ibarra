@@ -1,20 +1,22 @@
 <div class="card shadow-sm">
   <div class="card-body">
     <!-- Search Input -->
-    <div class="mb-3">
-      <div class="d-flex justify-between">
-<input
-        type="text"
-        class="form-control"
-        placeholder="Buscar..."
-        [(ngModel)]="searchText"
-        (input)="currentPage = 1"
-      />
-      <div class="d-flex">
-        
-        <button type="button" class="btn btn-outline-primary"> <i class="bi bi-plus-circle-fill"></i>Añadir Pedidos</button>
-      </div>
-      
+    <div class="mb-3 d-flex justify-between">
+      <div class="d-flex h-100 w-100">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar..."
+          [(ngModel)]="searchText"
+          (input)="currentPage = 1"
+        />
+        <div class=>
+          <app-button-with-icon
+            class="px-1 h-100 w-100 px-2"
+            text="Añadir pedido"
+            iconClass="bi bi-cart-plus"
+          ></app-button-with-icon>
+        </div>
       </div>
     </div>
 

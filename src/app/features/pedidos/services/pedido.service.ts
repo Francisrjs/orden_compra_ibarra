@@ -55,11 +55,9 @@ export class PedidoService {
   async addPedido(
     pedidoData: Partial<Pedido>
   ): Promise<{ data: Pedido | null; error: any }> {
-    // Asignamos un responsable por defecto si no se provee.
-    // En una app real, esto vendría del servicio de autenticación.
     const dataToInsert = {
       ...pedidoData,
-      responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12', // UUID que me proporcionaste
+      responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12', // UUID por defecto
     };
 
     const { data, error } = await this._supabaseClient
@@ -69,7 +67,6 @@ export class PedidoService {
       .single(); // .single() para obtener un solo objeto en lugar de un array
 
     if (!error && data) {
-      // Opcional: Actualizamos nuestro estado local para que la UI se refresque automáticamente
       this._state.update((s) => ({
         ...s,
         solicitudes: [...s.solicitudes, data],

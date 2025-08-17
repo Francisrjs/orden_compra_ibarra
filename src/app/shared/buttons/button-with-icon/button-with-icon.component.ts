@@ -11,6 +11,7 @@ export class ButtonWithIconComponent {
   @Input() text: string = 'Click me';
   @Input() href?: string;
   @Input() iconClass?: string;
+  @Input() iconOnly: boolean = false;
 
   // NUEVO: Input para controlar si el botón está activo
   @Input() active: boolean = false;

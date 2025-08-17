@@ -7,13 +7,15 @@ import {
   AfterContentInit,
 } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
+import { ButtonElegantComponent } from '../../buttons/button-elegant/button-elegant.component';
+import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-with-icon.component';
 
 @Component({
   selector: 'app-table-bootstrap',
   templateUrl: './table-bootstrap.component.html',
   styleUrls: ['./table-bootstrap.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonWithIconComponent],
 })
 export class TableBootstrapComponent {
   @Input() data: any[] = [];
