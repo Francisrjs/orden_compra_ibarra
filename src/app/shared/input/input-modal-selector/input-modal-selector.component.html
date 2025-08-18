@@ -1,0 +1,88 @@
+<div class="input_box">
+  <!-- Etiqueta del campo -->
+  <label [for]="id" *ngIf="label">{{ label }}</label>
+
+  <!-- El elemento visible que simula ser un input -->
+  <div
+    [id]="id"
+    class="selector-input"
+    (click)="openModal()"
+    [class.disabled]="isDisabled"
+    [class.active]="false"
+    tabindex="0"
+    (blur)="onTouched()"
+  >
+    <!-- Muestra el nombre seleccionado o el placeholder -->
+    <span
+      *ngIf="displayedValueName; else placeholderTemplate"
+      class="selected-value"
+    >
+      {{ displayedValueName }}
+    </span>
+    <ng-template #placeholderTemplate>
+      <span class="selector-placeholder">{{ placeholder }}</span>
+    </ng-template>
+
+    <!-- Icono de flecha -->
+    <i class="bi bi-chevron-down"></i>
+  </div>
+</div>
+
+<!-- Modal de Bootstrap para la selección -->
+<div
+  class="modal fade"
+  #selectorModal
+  [id]="id + '-modal'"
+  tabindex="-1"
+  [attr.aria-labelledby]="id + '-modalLabel'"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" [id]="id + '-modalLabel'">{{ modalTitle }}</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <!-- Buscador dentro del modal -->
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar..."
+            [(ngModel)]="searchTerm"
+            (input)="filterItems()"
+          />
+        </div>
+
+        <!-- Lista de opciones -->
+        <ul class="list-group list-group-flush">
+          <li
+            *ngFor="let item of filteredData"
+            class="list-group-item list-group-item-action"
+            (click)="onItemSelect(item)"
+            data-bs-dismiss="modal"
+          >
+            <div class="d-flex flex-column">
+              <span class="item-name">{{ item.name }}</span>
+              <small class="item-id text-muted">ID: {{ item.id }}</small>
+            </div>
+          </li>
+          <!-- Mensaje si no hay resultados -->
+          <li
+            *ngIf="filteredData.length === 0"
+            class="list-group-item text-center text-muted"
+          >
+            No se encontraron resultados.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

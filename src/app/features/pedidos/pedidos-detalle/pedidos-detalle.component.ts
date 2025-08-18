@@ -6,6 +6,7 @@ import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-
 import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/table-bootstrap.component';
 import { PedidoService } from '../services/pedido.service';
 import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
+import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFuntions';
 
 @Component({
   selector: 'app-pedidos-detalle',
@@ -40,6 +41,40 @@ export class PedidosDetalleComponent implements OnInit {
       return;
     }
 
-    // console.log(this._PedidoService.getPedido(id));
+    this.loadPedido(id);
+  }
+  async loadPedido(id: number) {
+    this.loading = true;
+    this.error = false;
+    try {
+      const { data, error } = await this._PedidoService.getPedidoById(id);
+
+      if (error) {
+        console.error('Error cargando pedido:', error);
+        this.error = true;
+        return;
+      }
+
+      if (!data) {
+        console.warn('No se encontró la solicitud con id', id);
+        this.pedido = null;
+        this.error = true;
+        return;
+      }
+
+      this.pedido = data;
+    } catch (err) {
+      console.error('Error general del try/catch:', err);
+      this.error = true;
+    } finally {
+      this.loading = false;
+    }
+  }
+  getBadgeClass(estado?: string): string {
+    if (estado) {
+      return getBadgeClassByEstadoPedido(estado);
+    } else {
+      return '';
+    }
   }
 }

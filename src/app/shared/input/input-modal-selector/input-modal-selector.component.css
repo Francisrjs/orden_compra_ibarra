@@ -1,0 +1,116 @@
+/* Estilo del contenedor principal */
+.input_box label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Estilo para el "falso input" que abre el modal */
+.selector-input {
+  width: 100%;
+  min-height: 48px; /* altura flexible pero más compacta */
+  border: 1px solid #dadaf2;
+  border-radius: 6px;
+  outline: none;
+  background: #ffffff; /* usar blanco para evitar rectángulos grises heradados */
+  font-size: 16px;
+  padding: 8px 14px; /* padding interno */
+  margin-bottom: 20px;
+  transition: border-color 0.2s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+  display: flex;
+  gap: 12px; /* separación entre texto y chevron */
+  align-items: center;
+  cursor: pointer;
+  /* evita que algún estilo global convierta el contenedor en 'block' con fondo */
+  background-image: none !important;
+  box-shadow: none;
+}
+
+/* Hover / focus */
+.selector-input:hover {
+  border-color: #a0a0c8;
+}
+
+.selector-input:focus,
+.selector-input.active {
+  border-color: #e8240e;
+  box-shadow: 0 0 0 3px rgba(232, 36, 14, 0.06);
+}
+
+/* Disabled */
+.selector-input.disabled {
+  background-color: #f1f2f4;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+/* Placeholder (cuando no hay valor) */
+.selector-input .placeholder {
+  color: #6c757d;
+  user-select: none;
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.selector-input .selector-placeholder {
+  background: transparent !important; /* quita el fondo gris de Bootstrap */
+  color: #6c757d;
+  opacity: 1 !important; /* evita el efecto “apagado” de Bootstrap */
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0 !important; /* anula min-height del utility */
+  border-radius: 0 !important;
+  pointer-events: none; /* el click lo maneja el contenedor */
+}
+
+/* Asegurá fondo blanco del “input” visual */
+.selector-input {
+  background: #fff; /* evita cualquier gris heredado */
+}
+
+/* --- CORRECCIÓN CLAVE: selected-value no debe tener background ni bloque extra --- */
+/* Aseguramos que el texto seleccionado sea inline, ocupe el espacio disponible y no dibuje fondo */
+.selector-input .selected-value {
+  color: #212529;
+  display: inline-block; /* evita que herede display:block */
+  width: 100%; /* ocupa todo el espacio disponible restante */
+  padding: 0; /* quitar padding extra */
+  margin: 0; /* quitar márgenes inesperados */
+  background: transparent !important; /* fuerza fondo transparente si hay heredado */
+  white-space: nowrap; /* una línea */
+  overflow: hidden; /* recorta texto largo */
+  text-overflow: ellipsis; /* muestra "..." si es muy largo */
+}
+
+/* Chevron (flecha) alineada a la derecha */
+.selector-input .bi-chevron-down {
+  color: #6c757d;
+  flex: 0 0 auto; /* no crecer, no reducirse */
+}
+
+/* Estilos para la lista en el modal */
+.modal-body .list-group-item {
+  cursor: pointer;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.modal-body .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.modal-body .item-name {
+  font-weight: 500;
+}
+
+.modal-body .item-id {
+  font-size: 0.8rem;
+  color: #6c757d;
+}

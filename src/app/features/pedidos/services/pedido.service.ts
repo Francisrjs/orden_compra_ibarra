@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Pedido } from 'src/app/core/models/database.type';
+import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 interface SolicitudState {
   solicitudes: Pedido[];
@@ -9,19 +10,13 @@ interface SolicitudState {
 @Injectable({
   providedIn: 'root',
 })
-export class PedidoService {
+export class PedidoService extends StateService<Pedido> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
-  private _state = signal<SolicitudState>({
-    solicitudes: [],
-    loading: false,
-    error: false,
-  });
-  solicitudes = computed(() => this._state().solicitudes);
-  loading = computed(() => this._state().loading);
-  error = computed(() => this._state().error);
+
   async getAllPedidos(): Promise<Pedido[] | null> {
     try {
-      this._state.update((s) => ({ ...s, loading: true, error: false }));
+      this.setLoading(true);
+      this.setError(false);
 
       const { data, error } = await this._supabaseClient
         .from('pedidos')
@@ -33,49 +28,38 @@ export class PedidoService {
         .returns<Pedido[]>();
 
       if (error) {
-        console.error('Supabase error:', error);
-        this._state.update((s) => ({ ...s, error: true }));
+        console.error(error);
+        this.setError(true);
         return null;
       }
 
-      if (data) {
-        // actualizo la propiedad correcta
-        this._state.update((s) => ({ ...s, solicitudes: data }));
-      }
-
-      return data ?? null;
+      if (data) this.setItems(data);
+      return data;
     } catch (err) {
-      console.error('getAllPedidos catch:', err);
-      this._state.update((s) => ({ ...s, error: true }));
+      console.error(err);
+      this.setError(true);
       return null;
     } finally {
-      this._state.update((s) => ({ ...s, loading: false }));
+      this.setLoading(false);
     }
   }
   async addPedido(
     pedidoData: Partial<Pedido>
   ): Promise<{ data: Pedido | null; error: any }> {
-    const dataToInsert = {
-      ...pedidoData,
-      responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12', // UUID por defecto
-    };
-
     const { data, error } = await this._supabaseClient
       .from('pedidos')
-      .insert(dataToInsert)
-      .select() // .select() devuelve la fila recién creada
-      .single(); // .single() para obtener un solo objeto en lugar de un array
+      .insert({
+        ...pedidoData,
+        responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12',
+      })
+      .select()
+      .single();
 
-    if (!error && data) {
-      this._state.update((s) => ({
-        ...s,
-        solicitudes: [...s.solicitudes, data],
-      }));
-    }
-
+    if (!error && data) this.addItem(data);
     return { data, error };
   }
-  async getPedido(
+
+  async getPedidoById(
     pedidoid: number
   ): Promise<{ data: Pedido | null; error: any }> {
     const { data, error } = await this._supabaseClient
@@ -84,13 +68,7 @@ export class PedidoService {
       .eq('id', pedidoid)
       .single();
 
-    if (!error && data) {
-      this._state.update((s) => ({
-        ...s,
-        solicitudes: [...s.solicitudes, data],
-      }));
-    }
-
+    if (!error && data) this.addItem(data);
     return { data, error };
   }
 }

@@ -5,7 +5,7 @@ import { PedidoService } from './services/pedido.service';
 import { Pedido } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
-
+import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFuntions';
 @Component({
   selector: 'app-pedidos',
   templateUrl: './pedidos.component.html',
@@ -40,21 +40,6 @@ export class PedidosComponent implements OnInit {
     }
   }
   getBadgeClass(estado: string): string {
-    switch (estado) {
-      case 'En Creacion':
-        return 'text-bg-secondary';
-      case 'En Proceso de Aprobacion':
-        return 'text-bg-secondary';
-      case 'Aprobado':
-        return 'text-bg-primary';
-      case 'Aprobado Parcialmente':
-        return 'text-bg-warning';
-      case 'Cerrado':
-        return 'text-bg-success';
-      case 'Rechazado':
-        return 'text-bg-danger';
-      default:
-        return 'text-bg-secondary';
-    }
+    return getBadgeClassByEstadoPedido(estado);
   }
 }
