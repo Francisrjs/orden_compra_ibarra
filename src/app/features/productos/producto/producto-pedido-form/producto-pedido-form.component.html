@@ -1,0 +1,61 @@
+<div class="container mx-auto my-auto form">
+  <h3 class="my-4">Agregar un Producto a tu Pedido</h3>
+  <!-- <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()"> -->
+  <app-input-box
+    label="ID del Pedido"
+    type="text"
+    id="pedido_id"
+    placeholder="Ingresa un nombre del producto"
+    formControlName="pedido_id"
+    (disabled)="(true)"
+  ></app-input-box>
+  <!-- Mensaje de error para el título -->
+  <!-- <app-input-modal-selector
+      label="Selecciona un Producto"
+      id="producto_id"
+      [data]="productoData"
+      placeholder="Seleccione un producto"
+      formControlName="producto_id"
+    ></app-input-modal-selector> -->
+  <!-- <div class="card flex justify-center">
+    <p-autocomplete [(ngModel)]="value" [dropdown]="true" [suggestions]="items" (completeMethod)="search($event)" />
+</div>
+    <app-input-box
+      label="producto"
+      type="text"
+      id="description"
+      placeholder="Ingresa una descripcion del producto creado"
+      [required]="true"
+      [isTextarea]="false"
+      formControlName="descripcion"
+    ></app-input-box>
+    <div class="card flex justify-center">
+      <p-autocomplete
+        [(ngModel)]="value"
+        [dropdown]="true"
+        [suggestions]="unidad_medidas"
+        (completeMethod)="search($event)"
+      />
+    </div> -->
+
+  <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
+    <!-- Cambiamos el botón para que sea de tipo 'submit' -->
+    <!-- <app-custom-button
+        text="Guardar Pedido"
+        type="submit"
+        [disabled]="productoForm.invalid"
+        (click)="onSubmit()"
+      >
+        ></app-custom-button -->
+    >
+  </div>
+  <!-- </form> -->
+  <!-- <h3>Debug Info:</h3>
+  <pre>Form Touched: {{ productoForm.touched }}</pre>
+  <pre>Form Dirty: {{ productoForm.dirty }}</pre>
+  <pre>Form Status: {{ productoForm.status }}</pre>
+  <pre>Form Value: {{ productoForm.value | json }}</pre>
+
+  <h4>Errores del control 'categoria':</h4>
+  <pre>{{ productoForm.get("categoria")?.errors | json }}</pre> -->
+</div>

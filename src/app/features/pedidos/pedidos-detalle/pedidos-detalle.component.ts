@@ -7,25 +7,80 @@ import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/t
 import { PedidoService } from '../services/pedido.service';
 import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
 import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFuntions';
+import { SplitButton, SplitButtonModule } from 'primeng/splitbutton';
+import { MenuItem, MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-pedidos-detalle',
   templateUrl: './pedidos-detalle.component.html',
   styleUrls: ['./pedidos-detalle.component.css'],
   standalone: true,
-  imports: [CommonModule, ButtonFancyComponent],
+  imports: [
+    CommonModule,
+    ButtonFancyComponent,
+    // 👈 Añade SplitButtonModule aquí
+    SplitButtonModule,
+    // 👈 Y ToastModule si vas a usar p-toast para mostrar los mensajes
+    ToastModule,
+    CardDashboardIconComponent, // Agregado, ya que lo tienes en imports comentados en tu código original
+  ],
+  providers: [MessageService],
 })
 export class PedidosDetalleComponent implements OnInit {
   pedido: Pedido | null = null;
   loading = false;
   error = false;
-
+  items: MenuItem[];
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private _PedidoService: PedidoService
-  ) {}
+    private _PedidoService: PedidoService,
+    private messageService: MessageService
+  ) {
+    this.items = [
+      {
+        label: 'Update',
+        icon: 'pi pi-refresh',
+        command: () => {
+          this.update();
+        },
+      },
+      {
+        label: 'Delete',
+        icon: 'pi pi-times',
+        command: () => {
+          this.delete();
+        },
+      },
+      { label: 'Angular.io', icon: 'pi pi-info', url: 'http://angular.io' },
+      { separator: true },
+      { label: 'Setup', icon: 'pi pi-cog', routerLink: ['/setup'] },
+    ];
+  }
+  save(severity: string) {
+    this.messageService.add({
+      severity: severity,
+      summary: 'Success',
+      detail: 'Data Saved',
+    });
+  }
 
+  update() {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Data Updated',
+    });
+  }
+
+  delete() {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Data Deleted',
+    });
+  }
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {

@@ -12,7 +12,7 @@ const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
   { path: 'pedidos', component: PedidosComponent },
   { path: 'pedidos/add', component: PedidosFormComponent },
-  { path: 'pedidos/:id', component: PedidosDetalleComponent },
+  { path: 'pedido/:id', component: PedidosDetalleComponent },
   { path: 'producto/add', component: ProductoFormComponent },
   { path: '**', redirectTo: 'pedidos' },
 ];

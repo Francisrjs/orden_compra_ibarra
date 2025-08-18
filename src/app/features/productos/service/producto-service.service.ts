@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Producto } from 'src/app/core/models/database.type';
+import { Producto, UnidadMedida } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 

@@ -4,6 +4,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -15,6 +16,9 @@ import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.c
 import { InputOptionsComponent } from 'src/app/shared/input/input-options/input-group.component';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
+import { MenuItem, MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { InputSwitchModule } from 'primeng/inputswitch';
 
 @Component({
   selector: 'app-pedidos-form',
@@ -28,15 +32,16 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
     InputOptionsComponent,
     InputDateComponent,
     ButtonElegantComponent,
+    ToastModule,
   ],
+  providers: [],
 })
 // ¡YA NO HAY @NgModule AQUÍ!
 export class PedidosFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private _pedidoService = inject(PedidoService);
-
   pedidoForm!: FormGroup;
-
+  value: string | undefined;
   ngOnInit(): void {
     this.pedidoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],

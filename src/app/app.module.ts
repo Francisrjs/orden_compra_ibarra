@@ -20,7 +20,7 @@ import { InputOptionsComponent } from './shared/input/input-options/input-group.
 import { InputDateComponent } from './shared/input/input-date/input-date.component';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -32,6 +32,8 @@ import { CommonModule } from '@angular/common';
     CommonModule,
     PedidosFormComponent,
     TableBootstrapComponent,
+    BrowserModule,
+    BrowserAnimationsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
