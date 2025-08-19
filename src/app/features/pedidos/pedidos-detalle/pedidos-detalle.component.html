@@ -1,6 +1,12 @@
-<h1 class="text-center my-2 mx-2">Informacion del pedido</h1>
+<app-sidebar [(isVisible)]="sidebarVisible" [title]="sidebarTitle">
+  <!-- Proyecta el contenedor que renderizará el componente dinámico -->
+  <ng-container *ngIf="componentToLoad">
+    <ng-container *ngComponentOutlet="componentToLoad"></ng-container>
+  </ng-container>
+</app-sidebar>
+<h1 class="text-center my-5 mx-5">Informacion del pedido</h1>
 <p class="separator"></p>
-<div class="container mx-5 shadow-inner">
+<div class="container mx-8 shadow-inner">
   <h2 class="">Detalle del pedido:</h2>
 
   <p>
@@ -59,6 +65,7 @@
         text="Agregar"
         iconClass="bi bi-plus"
         class="w-2 h-1"
+        (buttonClick)="openProductForm()"
       ></app-button-with-icon>
     </div>
   </div>

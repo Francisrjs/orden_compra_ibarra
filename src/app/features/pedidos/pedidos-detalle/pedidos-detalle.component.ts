@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Type } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
@@ -11,6 +11,9 @@ import { SplitButton, SplitButtonModule } from 'primeng/splitbutton';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
+import { ProductoFormComponent } from '../../productos/producto/producto-form/producto-form.component';
+import { SidebarService } from 'src/app/shared/sidebar/sidebar/services/sidebar.service';
+import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-pedidos-detalle',
@@ -25,6 +28,8 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
     // 👈 Y ToastModule si vas a usar p-toast para mostrar los mensajes
     ToastModule,
     ButtonWithIconComponent,
+    SidebarComponent,
+    ProductoFormComponent,
   ],
   providers: [MessageService],
 })
@@ -34,11 +39,17 @@ export class PedidosDetalleComponent implements OnInit {
   loading = false;
   error = false;
   items: MenuItem[];
+
+  sidebarVisible = false;
+  sidebarTitle = '';
+  componentToLoad: Type<any> | null = null; // Correcto
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private _PedidoService: PedidoService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private _sidebarService: SidebarService
   ) {
     this.items = [
       {
@@ -84,6 +95,7 @@ export class PedidosDetalleComponent implements OnInit {
       detail: 'Data Deleted',
     });
   }
+
   async ngOnInit(): Promise<void> {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {
@@ -136,5 +148,12 @@ export class PedidosDetalleComponent implements OnInit {
     } else {
       return '';
     }
+  }
+  openProductForm(): void {
+    console.log('abriendo');
+    this.sidebarTitle = 'Agregar Nuevo Producto';
+    // 2. Asegúrate de que el nombre de la clase aquí es exactamente el mismo que importaste
+    this.componentToLoad = ProductoFormComponent;
+    this.sidebarVisible = true;
   }
 }

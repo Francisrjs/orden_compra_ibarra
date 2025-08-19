@@ -21,6 +21,9 @@ import { InputDateComponent } from './shared/input/input-date/input-date.compone
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { SidebarModule } from 'primeng/sidebar';
+import { SidebarComponent } from './shared/sidebar/sidebar/sidebar.component';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -34,6 +37,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     TableBootstrapComponent,
     BrowserModule,
     BrowserAnimationsModule,
+    SidebarComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

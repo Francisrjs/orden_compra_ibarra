@@ -1,0 +1,23 @@
+/* styles.scss */
+
+/* Estilo para el contenedor del sidebar */
+.custom-sidebar {
+  /*
+   * Usamos 'min-width' para que sea al menos 1/4, pero pueda crecer si el contenido lo requiere.
+   * 'vw' significa 'viewport width', por lo que 25vw es el 25% del ancho de la pantalla.
+   */
+  min-width: 75vw;
+  height: 100vh; /* Ocupa todo el alto de la pantalla */
+  box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.15); /* Sombra suave para un look moderno */
+}
+
+/* * PrimeNG crea una máscara (overlay) detrás del sidebar con la clase 'p-sidebar-mask'.
+ * Le aplicamos el filtro de desenfoque a esta máscara.
+ */
+.p-sidebar-mask.p-component-overlay {
+  /* El efecto de desenfoque */
+  backdrop-filter: blur(5px);
+
+  /* Opcional: Un color de fondo semitransparente para mejorar el efecto */
+  background-color: rgba(0, 0, 0, 0.2);
+}

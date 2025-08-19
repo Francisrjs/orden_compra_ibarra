@@ -1,0 +1,16 @@
+<div></div>
+<p-sidebar
+  [(visible)]="isVisible"
+  position="right"
+  styleClass="custom-sidebar h-100 w-50"
+  (onHide)="hideSidebar()"
+>
+  <!-- <ng-template pTemplate="header">
+    <h3 class="mb-0 text-align-center">{{ title }}</h3>
+  </ng-template> -->
+
+  <ng-template pTemplate="content">
+    <!-- Aquí es donde el contenido del padre será "proyectado" -->
+    <ng-content></ng-content>
+  </ng-template>
+</p-sidebar>
