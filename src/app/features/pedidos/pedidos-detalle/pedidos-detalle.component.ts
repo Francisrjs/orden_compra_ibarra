@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Pedido } from 'src/app/core/models/database.type';
+import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
 import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/table-bootstrap.component';
 import { PedidoService } from '../services/pedido.service';
@@ -10,6 +10,7 @@ import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFunt
 import { SplitButton, SplitButtonModule } from 'primeng/splitbutton';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 
 @Component({
   selector: 'app-pedidos-detalle',
@@ -23,12 +24,13 @@ import { ToastModule } from 'primeng/toast';
     SplitButtonModule,
     // 👈 Y ToastModule si vas a usar p-toast para mostrar los mensajes
     ToastModule,
-    CardDashboardIconComponent, // Agregado, ya que lo tienes en imports comentados en tu código original
+    ButtonWithIconComponent,
   ],
   providers: [MessageService],
 })
 export class PedidosDetalleComponent implements OnInit {
   pedido: Pedido | null = null;
+  pedidoItems: PedidoItem[] = [];
   loading = false;
   error = false;
   items: MenuItem[];
@@ -58,6 +60,7 @@ export class PedidosDetalleComponent implements OnInit {
       { label: 'Setup', icon: 'pi pi-cog', routerLink: ['/setup'] },
     ];
   }
+
   save(severity: string) {
     this.messageService.add({
       severity: severity,
@@ -81,7 +84,7 @@ export class PedidosDetalleComponent implements OnInit {
       detail: 'Data Deleted',
     });
   }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {
       console.warn('No se recibió id en la ruta');
@@ -96,14 +99,16 @@ export class PedidosDetalleComponent implements OnInit {
       return;
     }
 
-    this.loadPedido(id);
+    await this.loadPedido(id);
+    this.pedidoItems = this.pedido?.pedido_items ?? []; // o .productos si ese es el campo correcto
+    console.log(this.pedidoItems);
   }
   async loadPedido(id: number) {
     this.loading = true;
     this.error = false;
     try {
       const { data, error } = await this._PedidoService.getPedidoById(id);
-
+      console.log(data);
       if (error) {
         console.error('Error cargando pedido:', error);
         this.error = true;

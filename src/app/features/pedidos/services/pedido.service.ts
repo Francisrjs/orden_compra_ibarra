@@ -64,13 +64,24 @@ export class PedidoService extends StateService<Pedido> {
   ): Promise<{ data: Pedido | null; error: any }> {
     const { data, error } = await this._supabaseClient
       .from('pedidos')
-      .select('*')
+      .select(
+        `
+        *,
+        pedido_items (
+          id,
+          cantidad,
+          unidad_medida:unidad_medida_id (id, nombre),
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
+        )
+      `
+      )
       .eq('id', pedidoid)
       .single();
 
     if (!error && data) this.addItem(data);
     return { data, error };
   }
+
   async addPedidoProducto(
     pedidoId: number,
     itemData: Partial<PedidoItem>

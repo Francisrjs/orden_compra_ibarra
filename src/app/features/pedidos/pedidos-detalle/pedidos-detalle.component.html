@@ -42,7 +42,7 @@
 </div>
 <div class="product-container shadow-sm">
   <!-- Encabezado con el título, buscador y botón de agregar -->
-  <div class="container-header">
+  <div class="container-header min-vh-25" style="min-width: 350px">
     <h5 class="fw-bold">Productos/Servicios Agregados</h5>
     <div class="d-flex align-items-center mt-3 gap-2">
       <div class="input-group flex-grow-1">
@@ -55,10 +55,11 @@
           placeholder="Buscar producto..."
         />
       </div>
-      <button class="btn btn-primary d-flex align-items-center">
-        <i class="bi bi-plus-lg me-2"></i>
-        <span>Agregar</span>
-      </button>
+      <app-button-with-icon
+        text="Agregar"
+        iconClass="bi bi-plus"
+        class="w-2 h-1"
+      ></app-button-with-icon>
     </div>
   </div>
 
@@ -66,61 +67,43 @@
   <div class="container-body">
     <!-- ***** VISTA 1: Con productos ***** -->
     <div>
-      <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush" *ngFor="let item of pedidoItems">
         <!-- Producto 1 -->
         <li
           class="list-group-item d-flex justify-content-between align-items-center product-card"
         >
           <div class="d-flex align-items-center">
             <div class="product-icon me-3">
-              <i class="bi bi-pencil-fill"></i>
+              <i
+                class="{{ item.producto?.categoria?.icon_text }} text-success"
+              ></i>
             </div>
             <div class="product-info">
-              <h6 class="product-title mb-1">Lapicera azul/negra</h6>
-              <p class="product-description mb-1">Trazo grueso y duradero</p>
-              <small class="product-quantity text-muted">2 Caja(s)</small>
-            </div>
-          </div>
-          <div class="product-actions">
-            <button
-              class="btn btn-sm btn-light border me-1"
-              title="Editar producto"
-            >
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button
-              class="btn btn-sm btn-light border"
-              title="Eliminar producto"
-            >
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-        </li>
-        <!-- Producto 2 -->
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center product-card"
-        >
-          <div class="d-flex align-items-center">
-            <div class="product-icon me-3">
-              <i class="bi bi-tools"></i>
-            </div>
-            <div class="product-info">
-              <h6 class="product-title mb-1">Zapato</h6>
-              <p class="product-description mb-1">
-                Calzado de seguridad industrial
+              <h6 class="product-title mb-1">{{ item.producto?.nombre }}</h6>
+              <p
+                class="product-description mb-1"
+                *ngIf="item.producto?.descripcion"
+              >
+                Descripcion: {{ item.producto?.descripcion }}
               </p>
-              <small class="product-quantity text-muted">2 Unidad(es)</small>
+              <p class="product-description mb-1" *ngIf="item.razon_pedido">
+                Razon del pedido:{{ item.razon_pedido }}
+              </p>
+              <small class="product-quantity text-muted"
+                ><b>Cantidad:</b> {{ item.cantidad }},
+                {{ item.unidad_medida.nombre }}</small
+              >
             </div>
           </div>
-          <div class="product-actions">
+          <div class="product-actions d-flex gap-1">
             <button
-              class="btn btn-sm btn-light border me-1"
+              class="btn btn-sm btn-light border rounded-circle text-center text-warning gap-5"
               title="Editar producto"
             >
               <i class="bi bi-pencil"></i>
             </button>
             <button
-              class="btn btn-sm btn-light border"
+              class="btn btn-sm btn-light border rounded-circle text-center text-danger"
               title="Eliminar producto"
             >
               <i class="bi bi-trash"></i>
@@ -132,57 +115,17 @@
 
     <!-- ***** VISTA 2: Sin productos (Comentada por defecto) ***** -->
 
-    <div class="no-products-placeholder">
+    <div class="no-products-placeholder" *ngIf="!items">
       <div class="add-icon-circle">
         <i class="bi bi-plus-lg"></i>
       </div>
       <p class="mt-3 text-muted">Agregar productos relacionados</p>
     </div>
+    <div class="no-products-placeholder" *ngIf="items.length > 0">
+      <div class="add-icon-circle">
+        <i class="bi bi-check text-success"></i>
+      </div>
+      <p class="mt-3 text-muted">Terminar pedido</p>
+    </div>
   </div>
-</div>
-
-<div class="card flex justify-content-center flex-wrap gap-3">
-  <p-toast></p-toast>
-  <p-splitButton
-    label="Primary"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Secondary"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-secondary mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Success"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-success mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Info"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-info mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Warning"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-warning mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Help"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-help mr-2 mb-2"
-  ></p-splitButton>
-  <p-splitButton
-    label="Danger"
-    [model]="items"
-    (onClick)="save('info')"
-    styleClass="p-button-raised p-button-danger mr-2 mb-2"
-  ></p-splitButton>
 </div>

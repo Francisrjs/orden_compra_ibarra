@@ -59,7 +59,9 @@ body {
   box-shadow: none;
   border-color: #ced4da;
 }
-
+.container-header .d-flex > * {
+  height: 58px; /* mismo alto que el input de bootstrap */
+}
 .container-header .input-group-text {
   background-color: #f8f9fa;
 }

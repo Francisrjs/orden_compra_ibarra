@@ -24,6 +24,7 @@ export interface Categoria {
   id: number;
   nombre: string;
   descripcion?: string;
+  icon_text?: string;
 }
 
 export interface Proveedor {
@@ -42,7 +43,7 @@ export interface Producto {
   unidad_medida_id: number;
 
   // Opcional: para mostrar datos relacionados en el frontend
-  categorias?: Categoria;
+  categoria?: Categoria;
   unidades_medida?: UnidadMedida;
 }
 
@@ -55,6 +56,9 @@ export interface Pedido {
   plazo_entrega?: string; // Formato 'YYYY-MM-DD'
   estado: EstadoPedido;
   fecha_creacion: string; // Formato ISO 8601
+
+  //relaciones opcionales
+  pedido_items?: PedidoItem[];
 }
 
 export interface PedidoItem {
@@ -66,7 +70,10 @@ export interface PedidoItem {
   justificacion_rechazo?: string;
   razon_pedido: string;
   unidad_medida_id: number;
-  productos?: Producto;
+
+  unidad_medida: UnidadMedida;
+  //Relacion opcional
+  producto?: Producto;
 }
 
 export interface OrdenCompra {
