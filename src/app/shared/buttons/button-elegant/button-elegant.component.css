@@ -1,19 +1,17 @@
-/* :host te permite aplicar estilos al propio componente contenedor */
+/* button-elegant.component.css */
+
 :host {
-  display: block; /* Asegura que el componente ocupe su propio espacio */
+  display: block;
 }
 
-.btn-primary {
+/* 1. CLASE BASE: Estilos comunes para todos los botones */
+.btn {
   /* Dimensiones y borde */
   width: 100%;
   height: 56px;
   border-radius: 5px;
   border: none;
   outline: none;
-
-  /* Colores */
-  background: #f3402c;
-  color: #fff;
 
   /* Tipografía */
   font-size: 18px;
@@ -24,11 +22,51 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 
-  /* Para centrar el texto (funciona para <a> y <button>) */
+  /* Para centrar el texto */
   display: inline-flex;
   justify-content: center;
   align-items: center;
   text-decoration: none;
+}
+
+/* 2. ESTADO DESHABILITADO: Común a todos los tipos de botón */
+.btn[disabled],
+.btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 3. CLASES MODIFICADORAS: Estilos de color para cada tipo */
+.btn-primary {
+  background: #f3402c;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #ff3402;
+}
+
+.btn-success {
+  background: #449e48;
+  color: #fff;
+}
+.btn-success:hover {
+  background: #218838;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: #fff;
+}
+.btn-info:hover {
+  background: #138496;
 }
 
 .btn-primary:hover {

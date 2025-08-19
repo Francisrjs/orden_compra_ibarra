@@ -24,7 +24,7 @@
 }
 
 .input_box input:focus {
-  border-color: #e8240e;
+  border-color: #449e48;
 }
 
 .input_box input[type="date"]::-webkit-calendar-picker-indicator {

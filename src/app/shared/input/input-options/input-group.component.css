@@ -2,11 +2,11 @@
   display: block;
 }
 
-app-button-with-icon.active {
+option.active {
   /* Cambia el color de fondo a un tono de rojo */
-  background-color: #dc3545;
+  background-color: #218838;
   /* Cambia el color del texto para que sea legible */
   color: white;
   /* (Opcional) Agrega un borde para mayor distinción */
-  border-color: #dc3545;
+  border-color: #08701e;
 }

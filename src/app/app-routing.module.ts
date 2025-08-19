@@ -15,7 +15,10 @@ const routes: Routes = [
   { path: 'pedidos/add', component: PedidosFormComponent },
   { path: 'pedido/:id', component: PedidosDetalleComponent },
   { path: 'producto/add', component: ProductoFormComponent },
-  { path: 'pedido/add/producto', component: ProductoPedidoFormComponent },
+  {
+    path: 'pedido/:id/AgregarProducto',
+    component: ProductoPedidoFormComponent,
+  },
   { path: '**', redirectTo: 'pedidos' },
 ];
 

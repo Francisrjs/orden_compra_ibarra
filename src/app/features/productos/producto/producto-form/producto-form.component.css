@@ -14,7 +14,10 @@
   --input-border-radius: 6px;
   --primary-color: #3b82f6; /* Un azul como color primario */
 }
-
+label {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
 body {
   width: 100%;
   min-height: 100vh;

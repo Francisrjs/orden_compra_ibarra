@@ -10,7 +10,8 @@
     [value]="value"
     (input)="onInput($event)"
     (blur)="onBlur()"
-    [disabled]="isDisabled"
+    [disabled]="disabled"
+    [readOnly]="readOnly"
   ></textarea>
 
   <!-- Input normal -->
@@ -23,6 +24,7 @@
     [value]="value"
     (input)="onInput($event)"
     (blur)="onBlur()"
-    [disabled]="isDisabled"
+    [disabled]="disabled"
+    [readOnly]="readOnly"
   />
 </div>

@@ -23,8 +23,9 @@ export class InputBoxComponent implements ControlValueAccessor {
   @Input() required: boolean = false;
   @Input() id: string = '';
   @Input() isTextarea: boolean = false;
-
-  value: any = '';
+  @Input() disabled = false; // <--- ahora se puede usar [disabled]
+  @Input() readOnly = false; // <--- opcional, por si lo querés
+  @Input() value: any = '';
   isDisabled = false;
 
   // Callbacks que Angular inyecta

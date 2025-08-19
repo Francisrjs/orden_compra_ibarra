@@ -1,4 +1,5 @@
-<div class="container mx-auto my-auto form">
+<p-toast position="top-right"></p-toast>
+<div class="container mx-auto my-auto form" style="min-width: 350px">
   <h3 class="my-4">Agregar un Producto</h3>
   <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
     <app-input-box
@@ -14,7 +15,7 @@
         productoForm.get('nombre')?.invalid &&
         productoForm.get('nombre')?.touched
       "
-      class="text-red-500 text-sm mt-1"
+      class="text-danger text-sm mt-1"
     >
       <small *ngIf="productoForm.get('nombre')?.errors?.['required']"
         >El título es requerido.</small
@@ -23,6 +24,27 @@
         >El título debe tener al menos 3 caracteres.</small
       >
     </div>
+    <!-- <div class="mb-2">
+      <label for="id">Seleccione si es:</label>
+      <div class="d-flex justify-content-center w-100 h-100">
+        <p-selectButton
+          [options]="stateOptions"
+          formControlName="tipo"
+          optionLabel="label"
+          optionValue="value"
+          formControlName="tipo"
+          styleClass="w-100 h-100"
+        ></p-selectButton>
+      </div>
+    </div> -->
+    <app-input-options
+      label="Seleccione si es:"
+      [options]="[
+        { text: 'PRODUCTO', value: 'producto', iconClass: 'box' },
+        { text: 'SERVICIO', value: 'servicio', iconClass: 'tools' }
+      ]"
+      formControlName="tipo"
+    ></app-input-options>
 
     <app-input-box
       label="Descripcion del producto"
@@ -32,6 +54,7 @@
       [required]="true"
       [isTextarea]="false"
       formControlName="descripcion"
+      style="justify-content: center; align-items: center"
     ></app-input-box>
 
     <app-input-modal-selector
@@ -46,6 +69,7 @@
       <app-custom-button
         text="Guardar Pedido"
         type="submit"
+        styleType="success"
         [disabled]="productoForm.invalid"
         (click)="onSubmit()"
       >
@@ -53,12 +77,4 @@
       >
     </div>
   </form>
-  <!-- <h3>Debug Info:</h3>
-  <pre>Form Touched: {{ productoForm.touched }}</pre>
-  <pre>Form Dirty: {{ productoForm.dirty }}</pre>
-  <pre>Form Status: {{ productoForm.status }}</pre>
-  <pre>Form Value: {{ productoForm.value | json }}</pre>
-
-  <h4>Errores del control 'categoria':</h4>
-  <pre>{{ productoForm.get("categoria")?.errors | json }}</pre> -->
 </div>

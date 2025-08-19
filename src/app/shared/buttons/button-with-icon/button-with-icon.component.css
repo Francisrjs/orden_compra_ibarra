@@ -68,8 +68,8 @@
 
 /* Estilos para el estado "active" (rojo) */
 .option-btn.active {
-  background: #e8240e;
-  border-color: #cc4e0a;
+  background: #449e48;
+  border-color: #08701e;
   color: #ffffff;
 }
 

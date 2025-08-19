@@ -32,7 +32,7 @@ export class ButtonElegantComponent {
    * @Input(): Permite definir el tipo de botón para aplicar diferentes estilos.
    * Por ahora solo 'primary', pero podrías añadir 'secondary', 'danger', etc.
    */
-  @Input() styleType: 'primary' = 'primary';
+  @Input() styleType: 'primary' | 'success' | 'danger' | 'info' = 'primary';
 
   /**
    * @Output(): Emite un evento cuando se hace clic en el botón (solo si no es un link).

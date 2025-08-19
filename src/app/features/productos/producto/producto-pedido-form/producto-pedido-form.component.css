@@ -1,0 +1,12 @@
+.p-inputnumber,
+.p-autocomplete {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Ajuste específico para el input interno */
+.p-inputnumber input,
+.p-autocomplete input {
+  width: 100% !important;
+}

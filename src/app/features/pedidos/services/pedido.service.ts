@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Pedido } from 'src/app/core/models/database.type';
+import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 interface SolicitudState {
@@ -69,6 +69,32 @@ export class PedidoService extends StateService<Pedido> {
       .single();
 
     if (!error && data) this.addItem(data);
+    return { data, error };
+  }
+  async addPedidoProducto(
+    pedidoId: number,
+    itemData: Partial<PedidoItem>
+  ): Promise<{ data: PedidoItem | null; error: any }> {
+    // Preparamos el objeto a insertar, asegurando que incluya el pedido_id
+    // y un estado inicial por defecto.
+    const dataToInsert = {
+      ...itemData,
+      pedido_id: pedidoId,
+      estado: 'Pendiente', // Todo nuevo item entra en estado 'Pendiente' por defecto
+    };
+
+    const { data, error } = await this._supabaseClient
+      .from('pedido_items') // La tabla correcta es 'pedido_items'
+      .insert(dataToInsert)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error al agregar producto al pedido:', error);
+    }
+
+    // Nota: Aquí no actualizamos el estado general de pedidos,
+    // ya que esto es un detalle de un pedido específico.
     return { data, error };
   }
 }

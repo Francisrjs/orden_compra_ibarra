@@ -64,8 +64,8 @@ export interface PedidoItem {
   cantidad: number;
   estado: EstadoItemPedido;
   justificacion_rechazo?: string;
-
-  // Opcional: para mostrar datos relacionados
+  razon_pedido: string;
+  unidad_medida_id: number;
   productos?: Producto;
 }
 

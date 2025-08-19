@@ -17,7 +17,9 @@ import {
 } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
 import { ProductoService } from '../../service/producto-service.service';
 import { CategoriaService } from '../../service/categoria-service.service';
-
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-producto-form',
   standalone: true,
@@ -28,23 +30,29 @@ import { CategoriaService } from '../../service/categoria-service.service';
     InputBoxComponent,
     InputModalSelectorComponent,
     ButtonElegantComponent,
+    InputOptionsComponent,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './producto-form.component.html',
   styleUrls: ['./producto-form.component.css'],
 })
 export class ProductoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private _messageService = inject(MessageService);
   private _productoService = inject(ProductoService);
   private _categoriaService = inject(CategoriaService);
   categoriaData: SelectorData[] = [];
   productoForm!: FormGroup;
 
+  value: string = 'PRODUCTO';
   async ngOnInit(): Promise<void> {
     this.loadCategorias();
     this.productoForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: ['', [Validators.required, Validators.minLength(3)]],
       categoria_id: [null, [Validators.required]],
+      tipo: [null],
     });
   }
 
@@ -66,15 +74,35 @@ export class ProductoFormComponent implements OnInit {
   async onSubmit() {
     this.productoForm.markAllAsTouched();
     console.log('click onSubmit disparado');
-    if (this.productoForm.invalid) return;
+    if (this.productoForm.invalid) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Formulario inválido',
+      });
+      return;
+    }
     const formValue = {
       ...this.productoForm.value,
     };
+    this._messageService.add({
+      severity: 'info',
+      summary: 'Guardando...',
+      detail: 'Enviando producto al pedido.',
+    });
+
     const { data, error } = await this._productoService.addProducto(formValue);
     if (error) {
-      alert('Error al guardar el pedido: ' + error.message);
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo guardar el producto. ' + error.message,
+      });
     } else {
-      alert('¡Pedido guardado con éxito!');
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'El producto fue agregado correctamente ✅',
+      });
       this.productoForm.reset();
     }
   }
