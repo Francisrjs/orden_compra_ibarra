@@ -17,39 +17,54 @@
       placeholder="Seleccione un producto"
       formControlName="producto_id"
     ></app-input-modal-selector>
+    
+      <div class="row mb-5 row-gap-2  align-items-center align-mid-row">
+  <!-- Cantidad pedida -->
+  <div class="col-md-3 d-flex flex-column justify-content-center ">
+    <label class="input_label">Cantidad pedida</label>
+    <p-inputNumber 
+      formControlName="cantidad" 
+      [min]="0" 
+      placeholder="0"
+      mode="decimal"
+      [showButtons]="true" 
+      inputId="stacked"
+      class="w-100 h-80 quantity-input"> 
+    </p-inputNumber>
+  </div>
 
+  <!-- Unidad de medida -->
+  <div class="col-md-6 d-flex flex-column justify-content-center">
     <label class="input_label">Selecciona una Unidad de Medida</label>
     <p-autoComplete
-      class="custom-autocomplete"
-      [style]="{ width: '100%' }"
-      styleClass="w-full ac"
-      inputStyleClass="w-full"
+      class="h-100 medida-input"
       formControlName="unidad_medida_id"
       [suggestions]="filteredMedidasData"
       (completeMethod)="filterData($event)"
       field="nombre"
       [dropdown]="true"
       placeholder="Selecciona una unidad de medida"
-      dropdownIcon="pi pi-chevron-down"
-    ></p-autoComplete>
+      dropdownIcon="pi pi-chevron-down">
+    </p-autoComplete>
+  </div>
+</div>
+    
 
+
+    
+    
     <app-input-box
-      label="producto"
+      label="Razon del pedido (opcional)"
       type="text"
-      id="description"
-      placeholder="Ingresa una descripcion del producto creado"
+      id="razon_pedido"
+      placeholder="Ej: Este pedido es urgente por.."
       [required]="true"
       [isTextarea]="false"
       formControlName="descripcion"
     ></app-input-box>
-    <!-- <div class="card flex justify-center">
-      <p-autocomplete
-        [(ngModel)]="value"
-        [dropdown]="true"
-        [suggestions]="unidad_medidas"
-        (completeMethod)="search($event)"
-      />
-    </div> -->
+
+
+
 
     <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
       <!-- Cambiamos el botón para que sea de tipo 'submit' -->

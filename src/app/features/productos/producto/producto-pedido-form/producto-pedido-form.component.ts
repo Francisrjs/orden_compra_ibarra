@@ -21,7 +21,7 @@ import { CategoriaService } from '../../service/categoria-service.service';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { UnidadesMedidaService } from '../../service/unidades-medida-service';
 import { UnidadMedida } from 'src/app/core/models/database.type';
-
+import { InputNumberModule } from 'primeng/inputnumber';
 interface AutoCompleteCompleteEvent {
   originalEvent: Event;
   query: string;
@@ -38,6 +38,7 @@ interface AutoCompleteCompleteEvent {
     ButtonElegantComponent,
     AutoCompleteModule,
     FormsModule,
+    InputNumberModule
   ],
   templateUrl: './producto-pedido-form.component.html',
   styleUrls: ['./producto-pedido-form.component.css'],
@@ -74,6 +75,7 @@ export class ProductoPedidoFormComponent implements OnInit {
         return {
           id: producto.id, // Asumimos que la propiedad del ID se llama 'id'
           name: producto.nombre, // ¡Aquí está la clave! Mapeamos 'nombre' a 'name'
+          descripcion: producto.descripcion
         };
       });
     }
