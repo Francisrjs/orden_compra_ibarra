@@ -1,25 +1,38 @@
 <div class="container mx-auto my-auto form">
   <h3 class="my-4">Agregar un Producto a tu Pedido</h3>
-  <!-- <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()"> -->
-  <app-input-box
-    label="ID del Pedido"
-    type="text"
-    id="pedido_id"
-    placeholder="Ingresa un nombre del producto"
-    formControlName="pedido_id"
-    (disabled)="(true)"
-  ></app-input-box>
-  <!-- Mensaje de error para el título -->
-  <!-- <app-input-modal-selector
+  <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()">
+    <app-input-box
+      label="ID del Pedido"
+      type="text"
+      id="pedido_id"
+      placeholder="Ingresa un nombre del producto"
+      formControlName="pedido_id"
+      (disabled)="(true)"
+    ></app-input-box>
+    <!-- Mensaje de error para el título -->
+    <app-input-modal-selector
       label="Selecciona un Producto"
       id="producto_id"
       [data]="productoData"
       placeholder="Seleccione un producto"
       formControlName="producto_id"
-    ></app-input-modal-selector> -->
-  <!-- <div class="card flex justify-center">
-    <p-autocomplete [(ngModel)]="value" [dropdown]="true" [suggestions]="items" (completeMethod)="search($event)" />
-</div>
+    ></app-input-modal-selector>
+
+    <label class="input_label">Selecciona una Unidad de Medida</label>
+    <p-autoComplete
+      class="custom-autocomplete"
+      [style]="{ width: '100%' }"
+      styleClass="w-full ac"
+      inputStyleClass="w-full"
+      formControlName="unidad_medida_id"
+      [suggestions]="filteredMedidasData"
+      (completeMethod)="filterData($event)"
+      field="nombre"
+      [dropdown]="true"
+      placeholder="Selecciona una unidad de medida"
+      dropdownIcon="pi pi-chevron-down"
+    ></p-autoComplete>
+
     <app-input-box
       label="producto"
       type="text"
@@ -29,7 +42,7 @@
       [isTextarea]="false"
       formControlName="descripcion"
     ></app-input-box>
-    <div class="card flex justify-center">
+    <!-- <div class="card flex justify-center">
       <p-autocomplete
         [(ngModel)]="value"
         [dropdown]="true"
@@ -38,24 +51,16 @@
       />
     </div> -->
 
-  <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
-    <!-- Cambiamos el botón para que sea de tipo 'submit' -->
-    <!-- <app-custom-button
+    <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
+      <!-- Cambiamos el botón para que sea de tipo 'submit' -->
+      <app-custom-button
         text="Guardar Pedido"
         type="submit"
-        [disabled]="productoForm.invalid"
+        [disabled]="productoPedidoForm.invalid"
         (click)="onSubmit()"
       >
-        ></app-custom-button -->
-    >
-  </div>
-  <!-- </form> -->
-  <!-- <h3>Debug Info:</h3>
-  <pre>Form Touched: {{ productoForm.touched }}</pre>
-  <pre>Form Dirty: {{ productoForm.dirty }}</pre>
-  <pre>Form Status: {{ productoForm.status }}</pre>
-  <pre>Form Value: {{ productoForm.value | json }}</pre>
-
-  <h4>Errores del control 'categoria':</h4>
-  <pre>{{ productoForm.get("categoria")?.errors | json }}</pre> -->
+        ></app-custom-button
+      >
+    </div>
+  </form>
 </div>

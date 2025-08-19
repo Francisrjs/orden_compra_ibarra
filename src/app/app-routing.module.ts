@@ -7,6 +7,7 @@ import { PedidosComponent } from './features/pedidos/pedidos.component';
 import { PedidosFormComponent } from './features/pedidos/pedidos-form/pedidos-form.component';
 import { PedidosDetalleComponent } from './features/pedidos/pedidos-detalle/pedidos-detalle.component';
 import { ProductoFormComponent } from './features/productos/producto/producto-form/producto-form.component';
+import { ProductoPedidoFormComponent } from './features/productos/producto/producto-pedido-form/producto-pedido-form.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: 'pedidos/add', component: PedidosFormComponent },
   { path: 'pedido/:id', component: PedidosDetalleComponent },
   { path: 'producto/add', component: ProductoFormComponent },
+  { path: 'pedido/add/producto', component: ProductoPedidoFormComponent },
   { path: '**', redirectTo: 'pedidos' },
 ];
 

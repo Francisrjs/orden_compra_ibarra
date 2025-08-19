@@ -9,7 +9,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 export class ProductoService extends StateService<Producto> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
 
-  async addPedido(
+  async addProducto(
     productoData: Partial<Producto>
   ): Promise<{ data: Producto | null; error: any }> {
     const { data, error } = await this._supabaseClient
@@ -23,5 +23,29 @@ export class ProductoService extends StateService<Producto> {
 
     if (!error && data) this.addItem(data);
     return { data, error };
+  }
+  async getAllProductos(): Promise<Producto[] | null> {
+    try {
+      this.setLoading(true);
+      this.setError(false);
+      const { data, error } = await this._supabaseClient
+        .from('productos')
+        .select(`*`)
+        .returns<Producto[]>();
+      if (error) {
+        console.error(error);
+        this.setError(true);
+        return null;
+      }
+
+      if (data) this.setItems(data);
+      return data;
+    } catch (err) {
+      console.error(err);
+      this.setError(true);
+      return null;
+    } finally {
+      this.setLoading(false);
+    }
   }
 }

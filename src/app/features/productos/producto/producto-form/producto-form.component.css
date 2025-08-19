@@ -8,6 +8,12 @@
   box-sizing: border-box;
   font-family: "Montserrat", sans-serif;
 }
+:root {
+  --input-border-color: #ced4da; /* Color de borde por defecto de PrimeNG */
+  --input-background: #ffffff;
+  --input-border-radius: 6px;
+  --primary-color: #3b82f6; /* Un azul como color primario */
+}
 
 body {
   width: 100%;

@@ -70,7 +70,7 @@ export class ProductoFormComponent implements OnInit {
     const formValue = {
       ...this.productoForm.value,
     };
-    const { data, error } = await this._productoService.addPedido(formValue);
+    const { data, error } = await this._productoService.addProducto(formValue);
     if (error) {
       alert('Error al guardar el pedido: ' + error.message);
     } else {

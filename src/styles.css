@@ -2,8 +2,11 @@
 @import "~bootstrap-icons/font/bootstrap-icons.css";
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
   font-family: "Montserrat", sans-serif;
+}
+:root {
+  --input-border-color: #ced4da; /* Color de borde por defecto de PrimeNG */
+  --input-background: #ffffff;
+  --input-border-radius: 6px;
+  --primary-color: #3b82f6; /* Un azul como color primario */
 }

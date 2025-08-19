@@ -36,7 +36,6 @@ import { InputSwitchModule } from 'primeng/inputswitch';
   ],
   providers: [],
 })
-// ¡YA NO HAY @NgModule AQUÍ!
 export class PedidosFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private _pedidoService = inject(PedidoService);
