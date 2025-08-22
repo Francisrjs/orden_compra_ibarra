@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Producto, UnidadMedida } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
@@ -9,6 +9,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 })
 export class UnidadesMedidaService extends StateService<UnidadMedida> {
   _supabaseClient = inject(SupabaseService).supabaseClient;
+  Unidadmedidas = signal<UnidadMedida[]>([]);
   async getAllMedidas(): Promise<UnidadMedida[] | null> {
     try {
       this.setLoading(true);
@@ -29,7 +30,10 @@ export class UnidadesMedidaService extends StateService<UnidadMedida> {
         return null;
       }
 
-      if (data) this.setItems(data);
+      if (data) {
+        this.setItems(data);
+        this.Unidadmedidas.set(data);
+      }
       return data;
     } catch (err) {
       console.error(err);

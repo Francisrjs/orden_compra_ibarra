@@ -3,6 +3,8 @@ import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { CategoriaService } from '../../productos/service/categoria-service.service';
+import { ProductoService } from '../../productos/service/producto-service.service';
+import { UnidadesMedidaService } from '../../productos/service/unidades-medida-service';
 interface SolicitudState {
   solicitudes: Pedido[];
   loading: boolean;
@@ -14,7 +16,8 @@ interface SolicitudState {
 export class PedidoService extends StateService<Pedido> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
   private _categoriaService = inject(CategoriaService);
-
+  private _unidadMedidaService = inject(UnidadesMedidaService);
+  private _productoService = inject(ProductoService);
   pedidos = signal<Pedido[]>([]);
   pedido = signal<Pedido | null>(null); //Pedido usuario
   async getAllPedidos(): Promise<Pedido[] | null> {
@@ -97,37 +100,82 @@ export class PedidoService extends StateService<Pedido> {
     pedidoId: number,
     itemData: Partial<PedidoItem>
   ): Promise<{ data: PedidoItem | null; error: any }> {
-    // Preparamos el objeto a insertar, asegurando que incluya el pedido_id
-    // y un estado inicial por defecto.
     const dataToInsert = {
       ...itemData,
       pedido_id: pedidoId,
-      estado: 'Pendiente', // Todo nuevo item entra en estado 'Pendiente' por defecto
+      estado: 'Pendiente',
     };
 
-    const { data, error } = await this._supabaseClient
-      .from('pedido_items') // La tabla correcta es 'pedido_items'
+    // 1. INSERTAMOS EL DATO "PLANO". AHORA PEDIMOS TODA LA FILA DE VUELTA
+    const { data: newItem, error } = await this._supabaseClient
+      .from('pedido_items')
       .insert(dataToInsert)
-      .select()
+      .select() // Obtenemos la fila recién insertada con sus IDs
       .single();
 
-    if (error) {
+    if (error || !newItem) {
       console.error('Error al agregar producto al pedido:', error);
-      return { data, error };
+      return { data: null, error };
     }
 
+    // --- LÓGICA DE HIDRATACIÓN MEJORADA ---
+
+    //Logica de verificación si las señales estan cargadas
+    if (this._categoriaService.categorias().length === 0) {
+      console.log('La señal de categorías está vacía. Cargando datos...');
+      await this._categoriaService.getAllCategorias();
+    }
+    // 1. Buscamos el producto "plano" en nuestra señal de productos.
+    const productoPlano = this._productoService
+      .productos()
+      .find((p) => p.id === newItem.producto_id);
+
+    // Si no encontramos el producto, algo está muy mal. Devolvemos un error.
+    if (!productoPlano) {
+      const err = {
+        message: `Producto con ID ${newItem.producto_id} no encontrado en el estado local.`,
+      };
+      console.error(err.message);
+      return { data: null, error: err };
+    }
+
+    // 2. Buscamos la categoría correspondiente a ese producto.
+    const categoriaCompleta = this._categoriaService
+      .categorias()
+      .find((c) => c.id === productoPlano.categoria_id);
+    console.log(categoriaCompleta);
+    console.log(this._categoriaService.categorias());
+    // 3. CONSTRUIMOS EL OBJETO 'producto' COMPLETO, AÑADIÉNDOLE LA CATEGORÍA.
+    const productoCompleto = {
+      ...productoPlano,
+      categoria: categoriaCompleta, // <-- ¡Añadimos la categoría aquí!
+    };
+
+    // 4. Buscamos la unidad de medida completa.
+    const unidadMedidaCompleta = this._unidadMedidaService
+      .Unidadmedidas()
+      .find((u) => u.id === newItem.unidad_medida_id);
+
+    // 5. CONSTRUIMOS EL OBJETO FINAL 'itemDetallado' usando las piezas que ya preparamos.
+    const itemDetallado: PedidoItem = {
+      ...newItem,
+      producto: productoCompleto, // Usamos el producto ya hidratado
+      unidad_medida: unidadMedidaCompleta,
+    } as PedidoItem;
+
+    // 6. ACTUALIZAMOS LA SEÑAL con el objeto completamente detallado.
     this.pedido.update((currentPedido) => {
-      //Si existe el pedido y la info
-      if (currentPedido && data) {
-        return {
-          ...currentPedido,
-          pedido_items: [...(currentPedido?.pedido_items ?? []), data],
-        } as Pedido;
+      if (currentPedido) {
+        const updatedItems = [
+          ...(currentPedido.pedido_items || []),
+          itemDetallado,
+        ];
+        return { ...currentPedido, pedido_items: updatedItems } as Pedido;
       }
-      // Si no hay pedido actual
       return currentPedido;
     });
-    return { data, error };
+
+    return { data: itemDetallado, error: null };
   }
   async deleteProductoPedido(
     idProductoPedido: number

@@ -53,8 +53,12 @@ export class PedidosDetalleComponent implements OnInit {
     private _sidebarService: SidebarService
   ) {
     effect(() => {
-      const currentPedido = this.pedido(); // leemos la señal
+      const currentPedido = this.pedido();
       this.pedidoItems = currentPedido?.pedido_items ?? [];
+
+      // Debug: ver qué datos llegan
+      console.log('Pedido actual:', currentPedido);
+      console.log('Items del pedido:', this.pedidoItems);
     });
   }
 

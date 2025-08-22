@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Producto, UnidadMedida } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
@@ -8,6 +8,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 })
 export class ProductoService extends StateService<Producto> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+  productos = signal<Producto[]>([]);
 
   async addProducto(
     productoData: Partial<Producto>
@@ -38,7 +39,10 @@ export class ProductoService extends StateService<Producto> {
         return null;
       }
 
-      if (data) this.setItems(data);
+      if (data) {
+        this.setItems(data);
+        this.productos.set(data);
+      }
       return data;
     } catch (err) {
       console.error(err);
