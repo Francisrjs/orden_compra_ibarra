@@ -19,9 +19,9 @@
       formControlName="producto_id"
     ></app-input-modal-selector>
 
-    <div class="row mb-3 g-3">
-      <div class="col-12 col-md-5 d-flex flex-column">
-        <label class="input_label">Cantidad pedida</label>
+    <div class="row g-2">
+      <div class="col-12 col-md-6 d-flex flex-column">
+        <label class="input_label">Cantidad</label>
         <p-inputNumber
           formControlName="cantidad"
           [min]="0"
@@ -30,26 +30,23 @@
           [showButtons]="true"
           buttonLayout="stacked"
           inputId="cantidad"
-          class="w-100"
-          inputStyle="w-2"
+          class="w-100 h-30 wid"
+          inputStyleClass="w-100 h-30 responsive-input"
         ></p-inputNumber>
       </div>
 
       <div class="col-12 col-md-6 d-flex flex-column">
-        <label class="input_label mb-xl-2"
-          >Selecciona una Unidad de Medida</label
-        >
+        <label class="input_label mb-1">Unidad de Medida</label>
         <p-autoComplete
           formControlName="unidad_medida_id"
           [suggestions]="filteredMedidasData"
           (completeMethod)="filterData($event)"
-          field="nombre"
           [dropdown]="true"
           optionLabel="nombre"
           placeholder="Selecciona una unidad de medida"
           dropdownIcon="pi pi-chevron-down"
-          styleClass="p-button-raised p-button-danger mr-2 mb-2"
-          class="w-100"
+          class="w-100 responsive-input"
+          inputStyleClass="w-100"
         ></p-autoComplete>
       </div>
     </div>
@@ -59,9 +56,9 @@
       type="text"
       id="razon_pedido"
       placeholder="Ej: Este pedido es urgente por.."
-      [required]="true"
+      [required]="false"
       [isTextarea]="false"
-      formControlName="descripcion"
+      formControlName="razon_pedido"
     ></app-input-box>
 
     <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">

@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { CategoriaService } from '../../productos/service/categoria-service.service';
 interface SolicitudState {
   solicitudes: Pedido[];
   loading: boolean;
@@ -12,7 +13,10 @@ interface SolicitudState {
 })
 export class PedidoService extends StateService<Pedido> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+  private _categoriaService = inject(CategoriaService);
 
+  pedidos = signal<Pedido[]>([]);
+  pedido = signal<Pedido | null>(null); //Pedido usuario
   async getAllPedidos(): Promise<Pedido[] | null> {
     try {
       this.setLoading(true);
@@ -34,6 +38,8 @@ export class PedidoService extends StateService<Pedido> {
       }
 
       if (data) this.setItems(data);
+      this.pedidos.set(data);
+      this._categoriaService.getAllCategorias();
       return data;
     } catch (err) {
       console.error(err);
@@ -55,7 +61,9 @@ export class PedidoService extends StateService<Pedido> {
       .select()
       .single();
 
-    if (!error && data) this.addItem(data);
+    if (!error && data) {
+      this.addItem(data);
+    }
     return { data, error };
   }
 
@@ -78,7 +86,10 @@ export class PedidoService extends StateService<Pedido> {
       .eq('id', pedidoid)
       .single();
 
-    if (!error && data) this.addItem(data);
+    if (!error && data) {
+      this.addItem(data);
+      this.pedido.set(data);
+    }
     return { data, error };
   }
 
@@ -102,10 +113,47 @@ export class PedidoService extends StateService<Pedido> {
 
     if (error) {
       console.error('Error al agregar producto al pedido:', error);
+      return { data, error };
     }
 
-    // Nota: Aquí no actualizamos el estado general de pedidos,
-    // ya que esto es un detalle de un pedido específico.
+    this.pedido.update((currentPedido) => {
+      //Si existe el pedido y la info
+      if (currentPedido && data) {
+        return {
+          ...currentPedido,
+          pedido_items: [...(currentPedido?.pedido_items ?? []), data],
+        } as Pedido;
+      }
+      // Si no hay pedido actual
+      return currentPedido;
+    });
     return { data, error };
+  }
+  async deleteProductoPedido(
+    idProductoPedido: number
+  ): Promise<{ error: any }> {
+    const { error } = await this._supabaseClient
+      .from('pedido_items')
+      .delete()
+      .eq('id', idProductoPedido);
+    this.pedido.update((currentPedido) => {
+      // Si no hay un pedido actual o el array de items está vacío, no hacemos nada
+      if (!currentPedido || !currentPedido.pedido_items) {
+        return currentPedido;
+      }
+
+      // Filtra el array para excluir el ítem eliminado
+      const updatedItems = currentPedido.pedido_items.filter(
+        (item) => item.id !== idProductoPedido
+      );
+
+      // Retorna el nuevo objeto Pedido con el array de items actualizado
+      return {
+        ...currentPedido,
+        pedido_items: updatedItems,
+      } as Pedido;
+    });
+
+    return { error: null };
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Type } from '@angular/core';
+import { Component, effect, OnInit, Type } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
@@ -14,6 +14,7 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
 import { ProductoFormComponent } from '../../productos/producto/producto-form/producto-form.component';
 import { SidebarService } from 'src/app/shared/sidebar/sidebar/services/sidebar.service';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
+import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
 
 @Component({
   selector: 'app-pedidos-detalle',
@@ -34,11 +35,11 @@ import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.compone
   providers: [MessageService],
 })
 export class PedidosDetalleComponent implements OnInit {
-  pedido: Pedido | null = null;
+  // im
+  pedido = this._PedidoService.pedido;
   pedidoItems: PedidoItem[] = [];
   loading = false;
   error = false;
-  items: MenuItem[];
 
   sidebarVisible = false;
   sidebarTitle = '';
@@ -51,25 +52,10 @@ export class PedidosDetalleComponent implements OnInit {
     private messageService: MessageService,
     private _sidebarService: SidebarService
   ) {
-    this.items = [
-      {
-        label: 'Update',
-        icon: 'pi pi-refresh',
-        command: () => {
-          this.update();
-        },
-      },
-      {
-        label: 'Delete',
-        icon: 'pi pi-times',
-        command: () => {
-          this.delete();
-        },
-      },
-      { label: 'Angular.io', icon: 'pi pi-info', url: 'http://angular.io' },
-      { separator: true },
-      { label: 'Setup', icon: 'pi pi-cog', routerLink: ['/setup'] },
-    ];
+    effect(() => {
+      const currentPedido = this.pedido(); // leemos la señal
+      this.pedidoItems = currentPedido?.pedido_items ?? [];
+    });
   }
 
   save(severity: string) {
@@ -112,33 +98,32 @@ export class PedidosDetalleComponent implements OnInit {
     }
 
     await this.loadPedido(id);
-    this.pedidoItems = this.pedido?.pedido_items ?? []; // o .productos si ese es el campo correcto
-    console.log(this.pedidoItems);
   }
   async loadPedido(id: number) {
     this.loading = true;
     this.error = false;
     try {
       const { data, error } = await this._PedidoService.getPedidoById(id);
-      console.log(data);
+
+      // 1. Si la API devuelve un error o no hay datos, lanzamos una excepción.
       if (error) {
-        console.error('Error cargando pedido:', error);
-        this.error = true;
-        return;
+        throw new Error(
+          error.message || 'Error al cargar el pedido desde la API.'
+        );
       }
-
       if (!data) {
-        console.warn('No se encontró la solicitud con id', id);
-        this.pedido = null;
-        this.error = true;
-        return;
+        throw new Error(`No se encontró un pedido con el id ${id}.`);
       }
 
-      this.pedido = data;
-    } catch (err) {
-      console.error('Error general del try/catch:', err);
+      // 2. Si todo va bien (el "happy path"), actualizamos la señal.
+      this.pedido.set(data);
+    } catch (err: any) {
+      // 3. ÚNICO lugar para manejar CUALQUIER tipo de error.
+      console.error(err.message); // Logueamos el mensaje de error específico.
       this.error = true;
+      this.pedido.set(null);
     } finally {
+      // 4. Esto se ejecuta siempre, asegurando que el loading se desactive.
       this.loading = false;
     }
   }
@@ -153,7 +138,10 @@ export class PedidosDetalleComponent implements OnInit {
     console.log('abriendo');
     this.sidebarTitle = 'Agregar Nuevo Producto';
     // 2. Asegúrate de que el nombre de la clase aquí es exactamente el mismo que importaste
-    this.componentToLoad = ProductoFormComponent;
+    this.componentToLoad = ProductoPedidoFormComponent;
     this.sidebarVisible = true;
+  }
+  deleteItemPedido(idProductoPedido: number) {
+    this._PedidoService.deleteProductoPedido(idProductoPedido);
   }
 }

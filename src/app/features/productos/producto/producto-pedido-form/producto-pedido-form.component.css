@@ -1,12 +1,16 @@
-.p-inputnumber,
-.p-autocomplete {
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
+@media (max-width: 650px) {
+  .row.g-3 {
+    display: block !important;
+    width: 100vw !important;
+  }
 
-/* Ajuste específico para el input interno */
-.p-inputnumber input,
-.p-autocomplete input {
-  width: 100% !important;
+  .row.g-3 > [class*="col-"] {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+.small-input ~ .p-inputnumber-button-up,
+.small-input ~ .p-inputnumber-button-down {
+  height: 1rem !important;
 }

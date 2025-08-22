@@ -1,4 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -51,10 +58,19 @@ interface AutoCompleteCompleteEvent {
   styleUrls: ['./producto-pedido-form.component.css'],
   providers: [MessageService],
 })
-export class ProductoPedidoFormComponent implements OnInit {
+export class ProductoPedidoFormComponent implements OnInit, OnChanges {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idProducto']) {
+      //hacer el patch
+      //lamado de api de servicio
+    }
+
+    //
+  }
   private _messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
+  @Input() idProduct: number = 0;
 
   //Servicios
   private _productoService = inject(ProductoService);
@@ -88,7 +104,7 @@ export class ProductoPedidoFormComponent implements OnInit {
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(1)]],
       unidad_medida_id: [null, Validators.required],
-      razon_pedido: ['', [Validators.maxLength(255)]], // Mapeado a 'razon_pedido' de la BBDD
+      razon_pedido: [null, [Validators.maxLength(10)]],
     });
   }
 

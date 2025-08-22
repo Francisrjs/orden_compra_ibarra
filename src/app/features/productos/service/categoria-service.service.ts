@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, OnInit, signal } from '@angular/core';
 import { Categoria } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
@@ -8,6 +8,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 })
 export class CategoriaService extends StateService<Categoria> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+  categorias = signal<Categoria[]>([]);
 
   async getAllCategorias(): Promise<Categoria[] | null> {
     try {
@@ -15,7 +16,7 @@ export class CategoriaService extends StateService<Categoria> {
       this.setError(false);
 
       const { data, error } = await this._supabaseClient
-        .from('categorias')
+        .from('categoria')
         .select('*')
         .returns<Categoria[]>();
 
@@ -25,7 +26,10 @@ export class CategoriaService extends StateService<Categoria> {
         return null;
       }
 
-      if (data) this.setItems(data);
+      if (data) {
+        this.setItems(data);
+        this.categorias.set(data);
+      }
       return data;
     } catch (err) {
       console.error(err);
