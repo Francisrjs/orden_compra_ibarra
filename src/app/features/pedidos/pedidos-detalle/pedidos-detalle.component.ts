@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, OnInit, Type } from '@angular/core';
+import {
+  Component,
+  effect,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  Type,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
@@ -24,32 +32,34 @@ import { ProductoPedidoFormComponent } from '../../productos/producto/producto-p
   imports: [
     CommonModule,
     ButtonFancyComponent,
-    // 👈 Añade SplitButtonModule aquí
     SplitButtonModule,
-    // 👈 Y ToastModule si vas a usar p-toast para mostrar los mensajes
     ToastModule,
     ButtonWithIconComponent,
     SidebarComponent,
     ProductoFormComponent,
+    ProductoPedidoFormComponent, // <-- FIX: Añadir el componente aquí
+    ToastModule,
   ],
   providers: [MessageService],
 })
 export class PedidosDetalleComponent implements OnInit {
-  // im
+  // Sidebar
+  sidebarVisible = false;
+  sidebarTitle = '';
+  componentToLoad: Type<any> | null = null;
+  sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
+  @Input() onSaveSuccess?: () => void;
+  //
   pedido = this._PedidoService.pedido;
   pedidoItems: PedidoItem[] = [];
   loading = false;
   error = false;
 
-  sidebarVisible = false;
-  sidebarTitle = '';
-  componentToLoad: Type<any> | null = null; // Correcto
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private _PedidoService: PedidoService,
-    private messageService: MessageService,
+    private _messageService: MessageService,
     private _sidebarService: SidebarService
   ) {
     effect(() => {
@@ -59,30 +69,6 @@ export class PedidosDetalleComponent implements OnInit {
       // Debug: ver qué datos llegan
       console.log('Pedido actual:', currentPedido);
       console.log('Items del pedido:', this.pedidoItems);
-    });
-  }
-
-  save(severity: string) {
-    this.messageService.add({
-      severity: severity,
-      summary: 'Success',
-      detail: 'Data Saved',
-    });
-  }
-
-  update() {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Data Updated',
-    });
-  }
-
-  delete() {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Data Deleted',
     });
   }
 
@@ -109,7 +95,6 @@ export class PedidosDetalleComponent implements OnInit {
     try {
       const { data, error } = await this._PedidoService.getPedidoById(id);
 
-      // 1. Si la API devuelve un error o no hay datos, lanzamos una excepción.
       if (error) {
         throw new Error(
           error.message || 'Error al cargar el pedido desde la API.'
@@ -119,15 +104,12 @@ export class PedidosDetalleComponent implements OnInit {
         throw new Error(`No se encontró un pedido con el id ${id}.`);
       }
 
-      // 2. Si todo va bien (el "happy path"), actualizamos la señal.
       this.pedido.set(data);
     } catch (err: any) {
-      // 3. ÚNICO lugar para manejar CUALQUIER tipo de error.
-      console.error(err.message); // Logueamos el mensaje de error específico.
+      console.error(err.message);
       this.error = true;
       this.pedido.set(null);
     } finally {
-      // 4. Esto se ejecuta siempre, asegurando que el loading se desactive.
       this.loading = false;
     }
   }
@@ -138,14 +120,66 @@ export class PedidosDetalleComponent implements OnInit {
       return '';
     }
   }
-  openProductForm(): void {
+  openPedidoProducto(): void {
     console.log('abriendo');
-    this.sidebarTitle = 'Agregar Nuevo Producto';
-    // 2. Asegúrate de que el nombre de la clase aquí es exactamente el mismo que importaste
+    this.sidebarTitle = 'Agregar nuevo producto a tu Pedido';
     this.componentToLoad = ProductoPedidoFormComponent;
+    this.sidebarInputs = {
+      onNavigateToCreateProduct: () => this.openProductoForm(),
+      onSaveSuccess: () => this.handleCloseSidebar(),
+      formResult: (result: {
+        severity?: string;
+        success: boolean;
+        message: string;
+      }) => this.handleFormResult(result),
+    };
+
     this.sidebarVisible = true;
+  }
+  handleFormResult(result: {
+    severity?: string;
+    success?: boolean;
+    message: string;
+  }): void {
+    if (!result.severity) {
+      this._messageService.add({
+        severity: result.success ? 'success' : 'error',
+        summary: result.success ? 'Éxito' : 'Error',
+        detail: result.message,
+      });
+    } else {
+      this._messageService.add({
+        severity: result.severity,
+        summary: 'Info',
+        detail: result.message,
+      });
+    }
   }
   deleteItemPedido(idProductoPedido: number) {
     this._PedidoService.deleteProductoPedido(idProductoPedido);
+  }
+  saveProducto() {
+    if (this.onSaveSuccess) {
+      this.onSaveSuccess();
+    }
+  }
+  handleCloseSidebar() {
+    console.log('Producto guardado, cerrando sidebar...');
+    this.sidebarVisible = false;
+  }
+  openProductoForm(): void {
+    this.sidebarTitle = 'Crear Nuevo Producto';
+    this.componentToLoad = ProductoFormComponent; // <-- Cambias el componente aquí
+    this.sidebarInputs = {
+      // Opcional: Cuando este formulario se guarde, puedes volver al anterior o cerrar todo
+      onSaveSuccess: () => {
+        console.log('Producto nuevo creado! Volviendo...');
+        // Vuelve a abrir el formulario para agregar el producto recién creado al pedido
+        this.openPedidoProducto();
+      },
+      formResult: (result: { success: boolean; message: string }) =>
+        this.handleFormResult(result),
+    };
+    // No es necesario cambiar 'sidebarVisible', porque el sidebar ya está abierto.
   }
 }

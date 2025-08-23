@@ -5,6 +5,7 @@ import {
   OnChanges,
   OnInit,
   SimpleChanges,
+  WritableSignal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -30,7 +31,11 @@ import {
   AutoCompleteOnSelectEvent,
 } from 'primeng/autocomplete';
 import { UnidadesMedidaService } from '../../service/unidades-medida-service';
-import { PedidoItem, UnidadMedida } from 'src/app/core/models/database.type';
+import {
+  PedidoItem,
+  Producto,
+  UnidadMedida,
+} from 'src/app/core/models/database.type';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -56,9 +61,17 @@ interface AutoCompleteCompleteEvent {
   ],
   templateUrl: './producto-pedido-form.component.html',
   styleUrls: ['./producto-pedido-form.component.css'],
-  providers: [MessageService],
+  providers: [],
 })
 export class ProductoPedidoFormComponent implements OnInit, OnChanges {
+  @Input() onSaveSuccess?: () => void;
+  @Input() idProduct: number = 0;
+  @Input() onNavigateToCreateProduct: () => void = () => {};
+  @Input() formResult?: (result: {
+    severity?: string;
+    success: boolean;
+    message: string;
+  }) => void;
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['idProducto']) {
       //hacer el patch
@@ -67,22 +80,22 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
 
     //
   }
-  private _messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
-  @Input() idProduct: number = 0;
 
   //Servicios
   private _productoService = inject(ProductoService);
   private _unididadMedidas = inject(UnidadesMedidaService);
   private _pedidoService = inject(PedidoService);
-
+  constructor() {}
   productoPedidoForm!: FormGroup;
   pedidoId!: number;
-
   productoData: SelectorData[] = [];
-  medidasData: UnidadMedida[] = [];
   filteredMedidasData: any[] = [];
+  //señales
+  productos: WritableSignal<Producto[]> = this._productoService.productos;
+  medidasData: WritableSignal<UnidadMedida[]> =
+    this._unididadMedidas.Unidadmedidas;
 
   selectedMedida: any[] | undefined;
 
@@ -95,8 +108,9 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       }
     });
 
-    this.loadProductos();
+    // Cargar datos si las señales están vacías
     this.loadMedidas();
+    this.loadProductos();
 
     this.productoPedidoForm = this.fb.group({
       // El 'pedido_id' ya no es un campo del formulario, lo tenemos de la ruta.
@@ -108,54 +122,56 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     });
   }
 
-  async loadProductos() {
-    const data = await this._productoService.getAllProductos();
-    console.log(data);
-    if (data) {
-      // Transformamos el array 'data' para que coincida con la interfaz 'SelectorData'
-      this.productoData = data.map((producto) => {
-        return {
-          id: producto.id, // Asumimos que la propiedad del ID se llama 'id'
-          name: producto.nombre, // ¡Aquí está la clave! Mapeamos 'nombre' a 'name'
-          descripcion: producto.descripcion,
-        };
-      });
-    }
-    console.log(this.productoData);
-  }
   async loadMedidas() {
-    const data = await this._unididadMedidas.getAllMedidas();
-    if (data) {
-      this.medidasData = data;
+    if (this.medidasData().length === 0) {
+      const data = await this._unididadMedidas.getAllMedidas();
+      // FIX: Asegurarse de no pasar null a la señal
+      this.medidasData.set(data || []);
     }
   }
+
+  async loadProductos() {
+    if (this.productos().length === 0) {
+      const data = await this._productoService.getAllProductos();
+      // FIX: Asegurarse de no pasar null a la señal
+      this.productos.set(data || []);
+    }
+
+    // FIX: Acceder al valor de la señal con ()
+    const productosActuales = this.productos();
+    if (productosActuales) {
+      this.productoData = productosActuales.map((producto) => ({
+        id: producto.id,
+        name: producto.nombre,
+        descripcion: producto.descripcion,
+      }));
+    }
+  }
+
   filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
-    this.filteredMedidasData = this.medidasData.filter((medida) => {
-      return medida.nombre.toLowerCase().startsWith(query);
-    });
+    // FIX: Acceder al valor de la señal con () y tipar el parámetro 'medida'
+    this.filteredMedidasData = this.medidasData().filter(
+      (medida: UnidadMedida) => {
+        return medida.nombre.toLowerCase().includes(query);
+      }
+    );
   }
   async onSubmit() {
     this.productoPedidoForm.markAllAsTouched();
 
     if (this.productoPedidoForm.invalid || !this.pedidoId) {
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Formulario inválido',
-        detail: !this.pedidoId
-          ? 'No se pudo identificar el pedido.'
-          : 'Revisá los campos obligatorios ❌',
-      });
+      const msg = !this.pedidoId
+        ? 'No se pudo identificar el pedido.'
+        : 'Revisá los campos obligatorios ❌';
+
+      // ✅ Correcto: Notificas al padre usando el callback
+      this.formResult?.({ success: false, message: msg });
       return;
     }
 
-    // --- ¡AQUÍ ESTÁ LA MAGIA! ---
+    const formValues = { ...this.productoPedidoForm.value };
 
-    const formValues = {
-      ...this.productoPedidoForm.value,
-    };
-
-    //Obtengo ID de unidad_medida_Id
     if (
       formValues.unidad_medida_id &&
       typeof formValues.unidad_medida_id === 'object'
@@ -163,13 +179,13 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       formValues.unidad_medida_id = formValues.unidad_medida_id.id;
     }
 
-    const payload: Partial<PedidoItem> = formValues;
-
-    this._messageService.add({
+    this.formResult?.({
       severity: 'info',
-      summary: 'Guardando...',
-      detail: 'Enviando producto al pedido.',
+      success: true,
+      message: 'Guardando, por favor espera...',
     });
+
+    const payload: Partial<PedidoItem> = formValues;
 
     const { data, error } = await this._pedidoService.addPedidoProducto(
       this.pedidoId,
@@ -177,17 +193,21 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     );
 
     if (error) {
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se pudo guardar el producto. ' + error.message,
+      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
+      this.formResult?.({
+        success: false,
+        message: 'No se pudo guardar el producto. ' + error.message,
       });
     } else {
-      this._messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'El producto fue agregado correctamente ✅',
+      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
+      this.formResult?.({
+        success: true,
+        message: 'El producto fue agregado correctamente ✅',
       });
+
+      if (this.onSaveSuccess) {
+        this.onSaveSuccess(); // Esto cierra el sidebar
+      }
       this.productoPedidoForm.reset();
     }
   }

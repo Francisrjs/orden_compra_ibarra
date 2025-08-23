@@ -22,7 +22,10 @@ export class ProductoService extends StateService<Producto> {
       .select()
       .single();
 
-    if (!error && data) this.addItem(data);
+    if (!error && data) {
+      this.addItem(data);
+      this.productos.update((newProducto) => [...newProducto, data]);
+    }
     return { data, error };
   }
   async getAllProductos(): Promise<Producto[] | null> {

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, forwardRef, Input } from '@angular/core';
 import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-with-icon.component';
+// ⬇️ ¡IMPORTANTE! Importa NG_VALUE_ACCESSOR
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-input-options',
@@ -8,16 +10,47 @@ import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-w
   styleUrls: ['./input-group.component.css'],
   standalone: true,
   imports: [CommonModule, ButtonWithIconComponent],
+  // ⬇️ ¡AQUÍ ESTÁ LA MAGIA! Agrega este array de providers
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => InputOptionsComponent),
+      multi: true,
+    },
+  ],
 })
-export class InputOptionsComponent {
-  @Input() label: string = ''; // Texto de la pregunta, ej: "¿Es urgente?"
+export class InputOptionsComponent implements ControlValueAccessor {
+  @Input() label: string = '';
   @Input() options: { text: string; value: string; iconClass?: string }[] = [];
-  @Input() selected?: string; // valor seleccionado
 
-  @Output() selectedChange = new EventEmitter<string>(); // emite cuando cambia selección
+  value: string | null = null;
+  disabled = false; // Añadido para manejar el estado disabled
+
+  // El resto de tu código se mantiene igual
+  private onChange = (value: string | null) => {};
+  private onTouched = () => {};
 
   selectOption(value: string) {
-    this.selected = value;
-    this.selectedChange.emit(value);
+    if (this.disabled) return; // No hacer nada si está deshabilitado
+    this.value = value;
+    this.onChange(value);
+    this.onTouched();
+  }
+
+  writeValue(value: string | null): void {
+    this.value = value;
+  }
+
+  registerOnChange(fn: (value: string | null) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+    // Manejar el estado deshabilitado
+    this.disabled = isDisabled;
   }
 }

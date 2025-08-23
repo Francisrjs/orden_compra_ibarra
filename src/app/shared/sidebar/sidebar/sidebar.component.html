@@ -1,16 +1,47 @@
-<div></div>
+<!-- 
+  Este es el componente de PrimeNG que maneja la lógica de mostrar/ocultar.
+  - [(visible)] está enlazado a nuestra propiedad 'isVisible' para el two-way binding.
+  - (onHide) llama a nuestra función para notificar al componente padre cuando se cierra.
+-->
 <p-sidebar
   [(visible)]="isVisible"
   position="right"
   styleClass="custom-sidebar h-100 w-50"
   (onHide)="hideSidebar()"
 >
-  <!-- <ng-template pTemplate="header">
-    <h3 class="mb-0 text-align-center">{{ title }}</h3>
-  </ng-template> -->
-
+  <!-- 
+    Usamos la plantilla 'content' para definir toda la estructura interna,
+    inspirada en el ejemplo que proporcionaste.
+  -->
   <ng-template pTemplate="content">
-    <!-- Aquí es donde el contenido del padre será "proyectado" -->
-    <ng-content></ng-content>
+    <div class="d-flex flex-column h-100 w-95">
+      <!-- 1. CABECERA (Header) -->
+      <div class="modal-header">
+        <h4 class="strong m-0">{{ title | uppercase }}</h4>
+        <!-- El botón 'x' para cerrar manualmente el sidebar -->
+        <!-- <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="hideSidebar()"
+        ></button> -->
+      </div>
+
+      <!-- 2. CUERPO (Body) -->
+      <div class="modal-body flex-grow-1" style="overflow-y: auto">
+        <!-- 
+          ¡Esta es la parte mágica!
+          - *ngIf="componentToLoad" asegura que solo intentemos renderizar si se ha proporcionado un componente.
+          - ngComponentOutlet toma la clase del componente y lo crea en este lugar.
+          - [inputs]="componentInputs" es la clave para pasarle datos. Angular mapeará automáticamente
+            las claves del objeto 'componentInputs' a los @Input del componente creado.
+        -->
+        <ng-container *ngIf="componentToLoad">
+          <ng-container
+            *ngComponentOutlet="componentToLoad; inputs: componentInputs"
+          ></ng-container>
+        </ng-container>
+      </div>
+    </div>
   </ng-template>
 </p-sidebar>

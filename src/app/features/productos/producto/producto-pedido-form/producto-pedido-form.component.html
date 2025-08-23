@@ -1,6 +1,5 @@
-<div class="container mx-auto my-auto form">
+<div class="container mx-auto my-auto form mb-2">
   <p-toast position="top-right"></p-toast>
-  <h3 class="my-4">Agregar un Producto a tu Pedido</h3>
   <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()">
     <app-input-box
       label="ID del Pedido"
@@ -11,14 +10,23 @@
     ></app-input-box>
 
     <!-- Mensaje de error para el título -->
-    <app-input-modal-selector
-      label="Selecciona un Producto"
-      id="producto_id"
-      [data]="productoData"
-      placeholder="Seleccione un producto"
-      formControlName="producto_id"
-    ></app-input-modal-selector>
-
+    <div>
+      <app-input-modal-selector
+        label="Selecciona un Producto"
+        id="producto_id"
+        [data]="productoData"
+        placeholder="Seleccione un producto"
+        formControlName="producto_id"
+      ></app-input-modal-selector>
+      <p class="mt-0 mb-2 text-secondary fs-6">
+        ¿no te aparece el producto que buscas ?
+        <a
+          (click)="onNavigateToCreateProduct()"
+          style="cursor: pointer; color: #0d6efd"
+          >Agregá un producto</a
+        >
+      </p>
+    </div>
     <div class="row g-2">
       <div class="col-12 col-md-6 d-flex flex-column">
         <label class="input_label">Cantidad</label>

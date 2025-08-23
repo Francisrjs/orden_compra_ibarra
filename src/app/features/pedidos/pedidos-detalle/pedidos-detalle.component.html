@@ -1,22 +1,11 @@
-<!-- <div class="d-flex flex-column h-100 mh-95vh">
-  <div class="modal-header" [ngClass]="titleClass">
-    <h4 class="strong">{{ title | uppercase }}</h4>
-    <button class="close" (click)="cancel()">×</button>
-  </div>
-  <div class="modal-body flex-grow-1 scrollable">
-    <ng-container ngComponentOutlet="component; inputs: inputs"></ng-container>
-  </div>
-  <div class="modal-footer"ngIf="onConfirm || onCancel">
-    <button class="btn btn-primary" ngIf="onConfirm" (click)="confirm()">Confirmar</button>
-    <button class="btn btn-secondary"ngIf="onCancel" (click)="cancel()">Cancelar</button>
-  </div>
-</div> -->
-<app-sidebar [(isVisible)]="sidebarVisible" [title]="sidebarTitle">
-  <!-- Proyecta el contenedor que renderizará el componente dinámico -->
-  <ng-container *ngIf="componentToLoad">
-    <ng-container *ngComponentOutlet="componentToLoad"></ng-container>
-  </ng-container>
-</app-sidebar>
+<p-toast></p-toast>
+<app-sidebar
+  [(isVisible)]="sidebarVisible"
+  [title]="sidebarTitle"
+  [componentToLoad]="componentToLoad"
+  [componentInputs]="sidebarInputs"
+></app-sidebar>
+
 <h1 class="text-center my-2 mx-2">Informacion del pedido</h1>
 <p class="separator text-success"></p>
 <div class="container mx-8 shadow-inner">
@@ -78,7 +67,7 @@
         text="Agregar"
         iconClass="bi bi-plus"
         class="w-2 h-1"
-        (buttonClick)="openProductForm()"
+        (buttonClick)="openPedidoProducto()"
       ></app-button-with-icon>
     </div>
   </div>

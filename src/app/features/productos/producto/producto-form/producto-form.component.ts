@@ -1,4 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -31,15 +38,16 @@ import { MessageService } from 'primeng/api';
     InputModalSelectorComponent,
     ButtonElegantComponent,
     InputOptionsComponent,
-    ToastModule,
   ],
-  providers: [MessageService],
+  providers: [],
   templateUrl: './producto-form.component.html',
   styleUrls: ['./producto-form.component.css'],
 })
 export class ProductoFormComponent implements OnInit {
+  @Input() onNavigateToCreate: () => void = () => {};
+  @Input() onSaveSuccess?: () => void;
+  @Input() formResult?: (result: { success: boolean; message: string }) => void;
   private fb = inject(FormBuilder);
-  private _messageService = inject(MessageService);
   private _productoService = inject(ProductoService);
   private _categoriaService = inject(CategoriaService);
   categoriaData: SelectorData[] = [];
@@ -73,36 +81,43 @@ export class ProductoFormComponent implements OnInit {
 
   async onSubmit() {
     this.productoForm.markAllAsTouched();
-    console.log('click onSubmit disparado');
     if (this.productoForm.invalid) {
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Formulario inválido',
+      this.formResult?.({
+        success: false,
+        message: 'Formulario inválido. Por favor verifica los datos.',
       });
       return;
     }
+
     const formValue = {
       ...this.productoForm.value,
     };
-    this._messageService.add({
-      severity: 'info',
-      summary: 'Guardando...',
-      detail: 'Enviando producto al pedido.',
+
+    // Avisar al padre que estamos guardando (opcional si querés mostrar "cargando...")
+    this.formResult?.({
+      success: true,
+      message: 'Guardando producto en el pedido...',
     });
 
     const { data, error } = await this._productoService.addProducto(formValue);
+
     if (error) {
-      this._messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se pudo guardar el producto. ' + error.message,
+      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
+      this.formResult?.({
+        success: false,
+        message: 'No se pudo guardar el producto. ' + error.message,
       });
     } else {
-      this._messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'El producto fue agregado correctamente ✅',
+      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
+      this.formResult?.({
+        success: true,
+        message: 'El producto fue agregado correctamente ✅',
       });
+
+      if (this.onSaveSuccess) {
+        this.onSaveSuccess(); // Esto cierra el sidebar
+      }
+
       this.productoForm.reset();
     }
   }

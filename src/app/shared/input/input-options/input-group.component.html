@@ -5,7 +5,7 @@
       *ngFor="let option of options"
       [text]="option.text"
       [iconClass]="option.iconClass"
-      [active]="selected === option.value"
+      [active]="value === option.value"
       (buttonClick)="selectOption(option.value)"
       class="option"
     >
