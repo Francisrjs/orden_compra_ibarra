@@ -65,21 +65,18 @@ interface AutoCompleteCompleteEvent {
 })
 export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   @Input() onSaveSuccess?: () => void;
-  @Input() idProduct: number = 0;
+  @Input() idProduct?: number = 0;
+  @Input() cantidad?: number = 1;
+  @Input() idMedida?: UnidadMedida | null = null;
+  @Input() razonPedido?: string = '';
+  @Input() idPedidoItem?: number | undefined; 
   @Input() onNavigateToCreateProduct: () => void = () => {};
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
     message: string;
   }) => void;
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['idProducto']) {
-      //hacer el patch
-      //lamado de api de servicio
-    }
 
-    //
-  }
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
 
@@ -99,27 +96,41 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
 
   selectedMedida: any[] | undefined;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idProduct'] && this.idProduct && this.productoPedidoForm) {
+      this.productoPedidoForm.patchValue({
+        producto_id: this.idProduct,
+        cantidad: this.cantidad,
+        unidad_medida_id: this.idMedida,
+        razon_pedido: this.razonPedido,
+      });
+    }
+  }
+
   async ngOnInit(): Promise<void> {
-    // Obtenemos el ID del pedido desde los parámetros de la ruta
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id'); // Asume que tu ruta es 'pedidos/:id/agregar-producto'
-      if (id) {
-        this.pedidoId = +id; // El '+' convierte el string a número
-      }
-    });
-
-    // Cargar datos si las señales están vacías
-    this.loadMedidas();
-    this.loadProductos();
-
     this.productoPedidoForm = this.fb.group({
-      // El 'pedido_id' ya no es un campo del formulario, lo tenemos de la ruta.
-
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(1)]],
       unidad_medida_id: [null, Validators.required],
       razon_pedido: [null, [Validators.maxLength(10)]],
     });
+
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id) this.pedidoId = +id;
+
+      if (this.idProduct && this.cantidad && this.idMedida) {
+        this.productoPedidoForm.patchValue({
+          producto_id: this.idProduct,
+          cantidad: this.cantidad,
+          unidad_medida_id: this.idMedida,
+        });
+      }
+    });
+
+    await this.loadMedidas();
+    await this.loadProductos();
+    this.patchFormValues();
   }
 
   async loadMedidas() {
@@ -147,7 +158,14 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       }));
     }
   }
-
+  private patchFormValues(): void {
+    this.productoPedidoForm.patchValue({
+      producto_id: this.idProduct ?? null,
+      cantidad: this.cantidad ?? null,
+      unidad_medida_id: this.idMedida ?? null,
+      razon_pedido: this.razonPedido ?? '',
+    });
+  }
   filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
     // FIX: Acceder al valor de la señal con () y tipar el parámetro 'medida'
@@ -165,7 +183,6 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
         ? 'No se pudo identificar el pedido.'
         : 'Revisá los campos obligatorios ❌';
 
-      // ✅ Correcto: Notificas al padre usando el callback
       this.formResult?.({ success: false, message: msg });
       return;
     }
@@ -184,13 +201,31 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       success: true,
       message: 'Guardando, por favor espera...',
     });
+    let result;
+    if (this.idProduct) {
+      // Modo edición
+      if (typeof this.idPedidoItem === 'number') {
+        result = await this._pedidoService.updatePedidoProducto(
+          this.idPedidoItem,
+          formValues
+        );
+      } else {
+        this.formResult?.({
+          success: false,
+          message: 'No se pudo identificar el item a editar.'
+        });
+        return;
+      }
+    } else {
+      // Modo creación
+      result = await this._pedidoService.addPedidoProducto(
+        this.pedidoId,
+        formValues
+      );
+    }
 
+    const { data, error } = result;
     const payload: Partial<PedidoItem> = formValues;
-
-    const { data, error } = await this._pedidoService.addPedidoProducto(
-      this.pedidoId,
-      payload
-    );
 
     if (error) {
       // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService

@@ -204,4 +204,67 @@ export class PedidoService extends StateService<Pedido> {
 
     return { error: null };
   }
+  async updatePedidoProducto(
+    idProductoPedido: number,
+    itemData: Partial<PedidoItem>
+  ): Promise<{ data: PedidoItem | null; error: any }> {
+    // Actualizamos en Supabase
+    const { data: updatedItemPlano, error } = await this._supabaseClient
+      .from('pedido_items')
+      .update(itemData)
+      .eq('id', idProductoPedido)
+      .select()
+      .maybeSingle(); // <-- Usamos maybeSingle() para evitar error si no hay filas
+
+    if (error || !updatedItemPlano) {
+      console.error('Error al actualizar el producto del pedido:', error);
+      return {
+        data: null,
+        error: error ?? { message: 'No se encontró el item para actualizar' },
+      };
+    }
+
+    // Buscamos el producto asociado
+    const productoPlano = this._productoService
+      .productos()
+      .find((p) => p.id === updatedItemPlano.producto_id);
+
+    const categoriaCompleta = productoPlano
+      ? this._categoriaService
+          .categorias()
+          .find((c) => c.id === productoPlano.categoria_id)
+      : null;
+
+    const productoCompleto = productoPlano
+      ? { ...productoPlano, categoria: categoriaCompleta }
+      : null;
+
+    // Buscamos la unidad de medida
+    const unidadMedidaCompleta = this._unidadMedidaService
+      .Unidadmedidas()
+      .find((u) => u.id === updatedItemPlano.unidad_medida_id);
+
+    // Construimos el objeto detallado
+    const itemDetallado: PedidoItem = {
+      ...updatedItemPlano,
+      producto: productoCompleto,
+      unidad_medida: unidadMedidaCompleta,
+    } as PedidoItem;
+
+    // Actualizamos la señal
+    this.pedido.update((currentPedido) => {
+      if (!currentPedido || !currentPedido.pedido_items) return currentPedido;
+
+      const updatedItems = currentPedido.pedido_items.map((item) =>
+        item.id === idProductoPedido ? itemDetallado : item
+      );
+
+      return {
+        ...currentPedido,
+        pedido_items: updatedItems,
+      } as Pedido;
+    });
+
+    return { data: itemDetallado, error: null };
+  }
 }

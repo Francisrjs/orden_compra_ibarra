@@ -157,6 +157,32 @@ export class PedidosDetalleComponent implements OnInit {
   }
   deleteItemPedido(idProductoPedido: number) {
     this._PedidoService.deleteProductoPedido(idProductoPedido);
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'El producto fue eliminado del pedido correctamente ✅',
+    });
+  }
+  editProductItem(idItemProduct: PedidoItem) {
+    console.log('Editando item de producto:', idItemProduct);
+    this.sidebarTitle = 'Editar Producto del Pedido';
+    this.componentToLoad = ProductoPedidoFormComponent;
+    this.sidebarInputs = {
+      idPedidoItem: idItemProduct.id,
+      idProduct: idItemProduct.producto?.id,
+      cantidad: idItemProduct.cantidad,
+      idMedida: idItemProduct.unidad_medida,
+      razonPedido: idItemProduct.razon_pedido,
+      onNavigateToCreateProduct: () => this.openProductoForm(),
+      onSaveSuccess: () => this.handleCloseSidebar(),
+      formResult: (result: {
+        severity?: string;
+        success: boolean;
+        message: string;
+      }) => this.handleFormResult(result),
+    };
+
+    this.sidebarVisible = true;
   }
   saveProducto() {
     if (this.onSaveSuccess) {
