@@ -158,3 +158,13 @@ body {
     margin-right: 0 !important; /* Elimina el margen del icono */
   }
 }
+:host ::ng-deep .mi-speed-dial {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+}
+:host ::ng-deep .p-speeddial .p-speeddial-action {
+  color: green !important;
+  background: rgb(206, 235, 206);
+}

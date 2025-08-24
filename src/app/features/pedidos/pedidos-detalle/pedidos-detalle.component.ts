@@ -10,12 +10,13 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
-import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
-import { TableBootstrapComponent } from 'src/app/shared/tables/table-bootstrap/table-bootstrap.component';
 import { PedidoService } from '../services/pedido.service';
 import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
-import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFuntions';
-import { SplitButton, SplitButtonModule } from 'primeng/splitbutton';
+import {
+  getBadgeClassByEstadoPedido,
+  getBadgeClassByPedidoItem,
+} from 'src/app/shared/funtions/pedidosFuntions';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
@@ -23,7 +24,15 @@ import { ProductoFormComponent } from '../../productos/producto/producto-form/pr
 import { SidebarService } from 'src/app/shared/sidebar/sidebar/services/sidebar.service';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
-
+import { TimelineModule } from 'primeng/timeline';
+import { SpeedDialModule } from 'primeng/speeddial';
+import { TooltipModule } from 'primeng/tooltip';
+interface EventItem {
+  status?: string;
+  color?: string;
+  value?: string;
+  showNumeroPedido?: boolean;
+}
 @Component({
   selector: 'app-pedidos-detalle',
   templateUrl: './pedidos-detalle.component.html',
@@ -39,6 +48,9 @@ import { ProductoPedidoFormComponent } from '../../productos/producto/producto-p
     ProductoFormComponent,
     ProductoPedidoFormComponent, // <-- FIX: Añadir el componente aquí
     ToastModule,
+    TimelineModule,
+    SpeedDialModule,
+    TooltipModule,
   ],
   providers: [MessageService],
 })
@@ -54,6 +66,8 @@ export class PedidosDetalleComponent implements OnInit {
   pedidoItems: PedidoItem[] = [];
   loading = false;
   error = false;
+  items: MenuItem[] | null = null;
+  events: EventItem[];
 
   constructor(
     private route: ActivatedRoute,
@@ -70,6 +84,35 @@ export class PedidosDetalleComponent implements OnInit {
       console.log('Pedido actual:', currentPedido);
       console.log('Items del pedido:', this.pedidoItems);
     });
+    this.events = [
+      {
+        status: 'Pedido en Creación',
+        value: 'En Creacion',
+        color: 'text-secondary',
+      },
+      {
+        status: 'En Proceso de Aprobacion',
+        value: 'En Proceso de Aprobacion',
+        showNumeroPedido: true,
+        color: 'text-warning',
+      },
+
+      {
+        status: 'Rechazado',
+        value: 'Rechazado',
+        color: 'text-danger',
+      },
+      {
+        status: 'En Proceso de Entrega',
+        value: 'En Proceso de Entrega',
+        color: 'text-info',
+      },
+      {
+        status: 'Pedido Cerrado',
+        value: 'Cerrado',
+        color: 'text-dark',
+      },
+    ];
   }
 
   async ngOnInit(): Promise<void> {
@@ -88,6 +131,29 @@ export class PedidosDetalleComponent implements OnInit {
     }
 
     await this.loadPedido(id);
+    this.items = [
+      {
+        icon: 'pi pi-pencil',
+        tooltip: 'Editar pedido',
+        command: () => {
+          this._messageService.add({
+            severity: 'info',
+            summary: 'Add',
+            detail: 'Data Added',
+          });
+        },
+      },
+      {
+        icon: 'pi pi-trash',
+        command: () => {
+          this._messageService.add({
+            severity: 'error',
+            summary: 'Delete',
+            detail: 'Data Deleted',
+          });
+        },
+      },
+    ];
   }
   async loadPedido(id: number) {
     this.loading = true;
@@ -113,9 +179,11 @@ export class PedidosDetalleComponent implements OnInit {
       this.loading = false;
     }
   }
-  getBadgeClass(estado?: string): string {
+  getBadgeClass(estado?: string, itsItem?: boolean): string {
     if (estado) {
-      return getBadgeClassByEstadoPedido(estado);
+      return itsItem
+        ? getBadgeClassByPedidoItem(estado)
+        : getBadgeClassByEstadoPedido(estado);
     } else {
       return '';
     }
@@ -207,5 +275,36 @@ export class PedidosDetalleComponent implements OnInit {
         this.handleFormResult(result),
     };
     // No es necesario cambiar 'sidebarVisible', porque el sidebar ya está abierto.
+  }
+  isEventCompleted(eventValue: string): boolean {
+    const estadoActual = this.pedido()?.estado;
+    if (!estadoActual) return false;
+
+    const indexActual = this.events.findIndex((e) => e.value === estadoActual);
+    const indexEvento = this.events.findIndex((e) => e.value === eventValue);
+
+    // Retorna true si el índice del evento es menor o igual al del estado actual
+    return indexEvento <= indexActual;
+  }
+  showConfirm() {
+    this._messageService.clear('confirm');
+    this._messageService.add({
+      key: 'confirm',
+      sticky: true,
+      severity: 'warn',
+      summary: 'Estas seguro?',
+      detail: 'Si haces esta acción no vas a poder editarlo',
+    });
+  }
+
+  onConfirm() {
+    this._messageService.clear('confirm');
+    if (this.pedido()) {
+      this._PedidoService.finalizarPedido(this.pedido()!.id);
+    }
+  }
+
+  onReject() {
+    this._messageService.clear('confirm');
   }
 }

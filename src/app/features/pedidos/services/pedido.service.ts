@@ -81,6 +81,7 @@ export class PedidoService extends StateService<Pedido> {
         pedido_items (
           id,
           cantidad,
+          estado,
           unidad_medida:unidad_medida_id (id, nombre),
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
         )
@@ -266,5 +267,31 @@ export class PedidoService extends StateService<Pedido> {
     });
 
     return { data: itemDetallado, error: null };
+  }
+  async finalizarPedido(
+    pedido_id: number
+  ): Promise<{ data: string | null; error: any }> {
+    const { data: nuevoNumero, error } = await this._supabaseClient.rpc(
+      'finalizar_pedido_en_creacion',
+      {
+        pedido_id_a_finalizar: pedido_id,
+      }
+    );
+    if (error) {
+      console.error('Error al finalizar el pedido:', error);
+    } else if (nuevoNumero) {
+      this.pedido.update((currentPedido) => {
+        if (currentPedido && currentPedido.id === pedido_id) {
+          return {
+            ...currentPedido,
+            numero_pedido: nuevoNumero,
+            estado: 'En Proceso de Aprobacion',
+          };
+        }
+        return currentPedido;
+      });
+    }
+
+    return { data: nuevoNumero, error };
   }
 }
