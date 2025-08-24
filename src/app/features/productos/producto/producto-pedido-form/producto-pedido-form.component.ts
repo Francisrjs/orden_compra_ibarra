@@ -69,7 +69,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   @Input() cantidad?: number = 1;
   @Input() idMedida?: UnidadMedida | null = null;
   @Input() razonPedido?: string = '';
-  @Input() idPedidoItem?: number | undefined; 
+  @Input() idPedidoItem?: number | undefined;
   @Input() onNavigateToCreateProduct: () => void = () => {};
   @Input() formResult?: (result: {
     severity?: string;
@@ -212,7 +212,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       } else {
         this.formResult?.({
           success: false,
-          message: 'No se pudo identificar el item a editar.'
+          message: 'No se pudo identificar el item a editar.',
         });
         return;
       }

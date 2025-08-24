@@ -2,12 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Producto, UnidadMedida } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { CategoriaService } from './categoria-service.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductoService extends StateService<Producto> {
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+  private _categoriaService = inject(CategoriaService);
   productos = signal<Producto[]>([]);
 
   async addProducto(
@@ -45,6 +47,7 @@ export class ProductoService extends StateService<Producto> {
       if (data) {
         this.setItems(data);
         this.productos.set(data);
+        this._categoriaService.getAllCategorias();
       }
       return data;
     } catch (err) {
