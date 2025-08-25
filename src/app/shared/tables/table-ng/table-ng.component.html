@@ -1,0 +1,257 @@
+<div class="">
+  <p-table
+    #ptable
+    [value]="pedidos"
+    dataKey="id"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    [globalFilterFields]="['name', 'category', 'inventoryStatus']"
+  >
+    <ng-template pTemplate="caption">
+      <div
+        class="flex col m-0 justify-content-between align-items-center gap-3 gap-xs-1"
+      >
+        <span class="p-input-icon-left flex-grow-1">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="applyGlobalFilter($event, ptable)"
+            placeholder="Buscador"
+            style="width: 100%"
+            StyleClass="p-inputtext-lg"
+          />
+        </span>
+        <div class="d-flex">
+          <button
+            pButton
+            label="Limpiar"
+            class="p-button-outlined w-75"
+            icon="pi pi-filter-slash"
+            (click)="clear(ptable)"
+          ></button>
+          <app-button-with-icon
+            class="px-1 w-100 px-2"
+            text="Añadir pedido"
+            iconClass="bi bi-cart-plus"
+            hoverIconColorClass="text-success"
+            (click)="requestAddPedido()"
+            variant="secondary"
+          ></app-button-with-icon>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 5rem"></th>
+        <th pSortableColumn="numero_pedido" style="min-width: 15rem">
+          <div class="flex align-items-center">
+            Numero de Pedido
+            <p-sortIcon field="numero_pedido"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="numero_pedido"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th pSortableColumn="titulo" style="min-width: 15rem">
+          <div class="flex align-items-center">
+            Titulo Pedido
+            <p-sortIcon field="titulo"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="titulo"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th pSortableColumn="area" style="min-width: 3rem">
+          <div class="flex align-items-center">
+            Area
+            <p-sortIcon field="area"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="area"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th pSortableColumn="plazo_entrega">
+          <div class="flex align-items-center">
+            Plazo entrega
+            <p-sortIcon field="plazo_entrega"></p-sortIcon>
+            <p-columnFilter
+              type="date"
+              field="plazo_entrega"
+              display="menu"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <!-- <th pSortableColumn="fecha_creacion">
+          <div class="flex align-items-center">
+            Fecha
+            <p-sortIcon field="fecha_crecion"></p-sortIcon>
+            <p-columnFilter
+              type="date"
+              field="fecha_crecion"
+              display="menu"
+            ></p-columnFilter>
+          </div>
+        </th> -->
+        <th pSortableColumn="urgente">
+          <div class="flex align-items-center">
+            ¿Es Urgente?
+            <p-sortIcon field="urgente"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="urgente"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th pSortableColumn="estado" style="max-width: 2rem; min-width: 1rem">
+          <div class="flex align-items-center" style="max-width: 1rem">
+            Estado
+            <p-sortIcon field="estado"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="estado"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th pSortableColumn="nombre_responsable">
+          <div class="flex align-items-center">
+            Responsable
+            <p-sortIcon field="nombre_responsable"></p-sortIcon>
+            <p-columnFilter
+              type="text"
+              field="nombre_responsable"
+              display="menu"
+              class="ml-auto"
+            ></p-columnFilter>
+          </div>
+        </th>
+        <th style="min-width: 5rem"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-expanded="expanded" let-pedido>
+      <tr>
+        <td>
+          <button
+            type="button"
+            pButton
+            pRipple
+            [pRowToggler]="pedido"
+            class="p-button-text p-button-rounded p-button-plain"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          ></button>
+        </td>
+        <td>{{ pedido.numero_pedido }}</td>
+        <td>{{ pedido.titulo }}</td>
+
+        <td>
+          <span
+            class="mx-2 bi"
+            [ngClass]="getIconByAreaWrapper(pedido?.area)"
+          ></span
+          >{{ pedido.area }}
+        </td>
+
+        <td>{{ pedido.plazo_entrega }}</td>
+        <td>{{ pedido.urgente ? "SI" : "NO" }}</td>
+
+        <td>
+          <!-- <p-tag
+           [value]="pedido.estado"
+           ></p-tag> -->
+          <span
+            class="mx-2 badge"
+            [ngClass]="getBadgeClass(pedido?.estado, false)"
+            >{{ pedido?.estado | uppercase }}</span
+          >
+        </td>
+        <td>{{ pedido.nombre_responsable }}</td>
+        <td>
+          <p-button
+            icon="pi pi-eye"
+            [rounded]="true"
+            [text]="true"
+            severity="danger"
+            [routerLink]="['/pedido', pedido.id]"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template
+      pTemplate="rowexpansion"
+      class="flex align-items-center justify-content-center"
+      let-pedidos
+    >
+      <tr>
+        <td colspan="6">
+          <div class="p-3 justify-content-center align-content-center">
+            <p-table [value]="pedidos.pedido_items" dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="id">
+                    Id <p-sortIcon field="id"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="producto.nombre">
+                    Producto <p-sortIcon field="producto.nombre"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="producto.unidad_medida.nombre">
+                    Medida
+                    <p-sortIcon
+                      field="producto.unidad_medida.nombre"
+                    ></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="cantidad">
+                    Cantidad <p-sortIcon field="cantidad"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="producto.estado">
+                    Estado <p-sortIcon field="producto.estado"></p-sortIcon>
+                  </th>
+                  <th style="width: 4rem"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-pedidoItem>
+                <tr>
+                  <td>{{ pedidoItem.id }}</td>
+
+                  <td>{{ pedidoItem.producto?.nombre }}</td>
+
+                  <td>{{ pedidoItem.unidad_medida?.nombre }}</td>
+
+                  <td>{{ pedidoItem.cantidad }}</td>
+                  <td>
+                    <p-tag
+                      [value]="pedidoItem?.estado"
+                      [severity]="getStatusSeverity(pedidoItem?.estado)"
+                    ></p-tag>
+                  </td>
+                  <td>
+                    <p-button type="button" icon="pi pi-plus"></p-button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="6">No hay productos cargados en esta orden.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

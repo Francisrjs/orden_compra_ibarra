@@ -47,7 +47,10 @@ export class ProductoService extends StateService<Producto> {
       if (data) {
         this.setItems(data);
         this.productos.set(data);
-        this._categoriaService.getAllCategorias();
+        if (this._categoriaService.categorias().length === 0) {
+          console.log('La señal de categorías está vacía. Cargando datos...');
+          await this._categoriaService.getAllCategorias();
+        }
       }
       return data;
     } catch (err) {

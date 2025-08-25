@@ -26,24 +26,40 @@ export class PedidoService extends StateService<Pedido> {
       this.setError(false);
 
       const { data, error } = await this._supabaseClient
-        .from('pedidos')
+        .from('pedidos_con_responsable') // <-- Vista
         .select(
           `
-          *
-        `
+        *,
+        pedido_items (
+          id,
+          cantidad,
+          estado,
+          unidad_medida:unidad_medida_id (id, nombre),
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
         )
-        .returns<Pedido[]>();
+      `
+        )
+        .order('id', { ascending: false }); // <-- Opcional: ordena los pedidos del más nuevo al más viejo
 
       if (error) {
-        console.error(error);
+        console.error('Error cargando pedidos:', error);
         this.setError(true);
         return null;
       }
 
-      if (data) this.setItems(data);
-      this.pedidos.set(data);
-      this._categoriaService.getAllCategorias();
-      return data;
+      if (data) {
+        this.setItems(data as Pedido[]); // Hacemos un cast porque la vista tiene campos extra
+        this.pedidos.set(data as Pedido[]);
+
+        // La lógica de cargar categorías si están vacías sigue siendo correcta
+        if (this._categoriaService.categorias().length === 0) {
+          console.log('Cargando datos maestros...');
+          await this._categoriaService.getAllCategorias();
+          await this._unidadMedidaService.getAllMedidas();
+        }
+      }
+
+      return data as Pedido[] | null;
     } catch (err) {
       console.error(err);
       this.setError(true);
@@ -145,7 +161,7 @@ export class PedidoService extends StateService<Pedido> {
       .categorias()
       .find((c) => c.id === productoPlano.categoria_id);
     console.log(categoriaCompleta);
-    console.log(this._categoriaService.categorias());
+
     // 3. CONSTRUIMOS EL OBJETO 'producto' COMPLETO, AÑADIÉNDOLE LA CATEGORÍA.
     const productoCompleto = {
       ...productoPlano,

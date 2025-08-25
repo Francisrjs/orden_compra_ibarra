@@ -1,17 +1,27 @@
 export type EstadoPedido =
   | 'En Creacion'
   | 'En Proceso de Aprobacion'
-  | 'Aprobado'
-  | 'Aprobado Parcialmente'
+  | 'En Proceso de Entrega'
   | 'Cerrado'
   | 'Rechazado';
-export type EstadoItemPedido = 'Pendiente' | 'Aprobado para OC' | 'Rechazado';
+export type EstadoItemPedido =
+  | 'Pendiente'
+  | 'Aprobado'
+  | 'Rechazado'
+  | 'Aprobado parcial';
 export type EstadoOC =
   | 'Borrador'
   | 'Enviada a Proveedor'
   | 'Recibida Parcialmente'
   | 'Recibida Completa'
   | 'Cancelada';
+export type Areas =
+  | 'LOGISTICA'
+  | 'ADMINISTRACION'
+  | 'OBRAS'
+  | 'SISTEMAS'
+  | 'TALLER'
+  | 'PREDIO';
 
 // Ahora, las interfaces para cada tabla de la base de datos
 export interface UnidadMedida {
@@ -51,14 +61,17 @@ export interface Pedido {
   id: number;
   numero_pedido: string;
   titulo?: string;
+  area?: string;
   responsable_id: string; // Corresponde al UUID del usuario en Supabase Auth
   urgente: boolean;
   plazo_entrega?: string; // Formato 'YYYY-MM-DD'
   estado: EstadoPedido;
   fecha_creacion: string; // Formato ISO 8601
-
+  usuario: string;
   //relaciones opcionales
   pedido_items?: PedidoItem[];
+  nombre_responsable?: string; // Campo opcional que viene de la vista
+  email_responsable?: string; // Campo opcional que viene de la vista
 }
 
 export interface PedidoItem {

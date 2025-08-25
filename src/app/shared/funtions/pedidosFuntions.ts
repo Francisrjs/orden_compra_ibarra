@@ -1,3 +1,5 @@
+import { Areas } from 'src/app/core/models/database.type';
+
 export function getBadgeClassByEstadoPedido(estado: string): string {
   switch (estado) {
     case 'En Creacion':
@@ -28,5 +30,23 @@ export function getBadgeClassByPedidoItem(estado: string) {
       return 'text-bg-danger';
     default:
       return 'text-bg-secondary';
+  }
+}
+export function getIconByArea(area: Areas): string {
+  switch (area) {
+    case 'LOGISTICA':
+      return 'bi-truck';
+    case 'ADMINISTRACION':
+      return 'bi-briefcase';
+    case 'OBRAS':
+      return 'bi-tools';
+    case 'SISTEMAS':
+      return 'bi-laptop';
+    case 'TALLER':
+      return 'bi-gear';
+    case 'PREDIO':
+      return 'bi-building';
+    default:
+      return 'bi-question-circle'; // Un ícono por defecto si el área no coincide
   }
 }
