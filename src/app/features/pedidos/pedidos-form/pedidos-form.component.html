@@ -15,16 +15,42 @@
       *ngIf="
         pedidoForm.get('titulo')?.invalid && pedidoForm.get('titulo')?.touched
       "
-      class="text-red-500 text-sm mt-1"
+      class="text-red-500 text-sm"
     >
-      <small *ngIf="pedidoForm.get('titulo')?.errors?.['required']"
+      <small
+        *ngIf="pedidoForm.get('titulo')?.errors?.['required']"
+        class="text-danger"
         >El título es requerido.</small
       >
-      <small *ngIf="pedidoForm.get('titulo')?.errors?.['minlength']"
+      <small
+        class="text-danger"
+        *ngIf="pedidoForm.get('titulo')?.errors?.['minlength']"
         >El título debe tener al menos 5 caracteres.</small
       >
     </div>
-
+    <div class="card flex border-0 mb-2">
+      <label for="area">Área:</label>
+      <p-dropdown
+        [options]="areasData"
+        optionLabel="name"
+        formControlName="area"
+        placeholder="Selecciona un área"
+        [style]="{ minWidth: '14rem' }"
+        styleClass="w-100"
+      >
+        <ng-template let-item pTemplate="item">
+          <div class="flex gap-2">
+            <i class="bi" [ngClass]="getIcon(item.name)"></i>
+            <div>{{ item.name }}</div>
+          </div>
+        </ng-template>
+      </p-dropdown>
+      <small
+        *ngIf="pedidoForm.get('area')?.errors?.['required'] &&  pedidoForm.get('area')?.touched"
+        class="text-danger"
+        >el campo Area es requerido.</small
+      >
+    </div>
     <!-- Urgente input box -->
     <app-input-options
       label="¿Es urgente?"
@@ -34,8 +60,6 @@
       ]"
       formControlName="urgente"
     ></app-input-options>
-
-    <!-- Descripcion input box - NOTA: cambié [required]="false" -->
     <app-input-box
       label="Descripcion del pedido"
       type="text"
@@ -45,7 +69,6 @@
       [isTextarea]="true"
       formControlName="descripcion"
     ></app-input-box>
-
     <!-- Plazo de entrega input box -->
     <app-input-date
       label="Plazo de entrega"
@@ -59,7 +82,7 @@
         pedidoForm.get('plazo_entrega')?.invalid &&
         pedidoForm.get('plazo_entrega')?.touched
       "
-      class="text-red-500 text-sm mt-1"
+      class="text-danger text-sm mt-1"
     >
       <small *ngIf="pedidoForm.get('plazo_entrega')?.errors?.['required']"
         >El plazo de entrega es requerido.</small

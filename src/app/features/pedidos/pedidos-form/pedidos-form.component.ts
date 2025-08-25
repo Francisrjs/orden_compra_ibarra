@@ -1,6 +1,6 @@
 // src/app/features/pedidos/pedidos-form/pedidos-form.component.ts
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -18,7 +18,14 @@ import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/bu
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { InputSwitchModule } from 'primeng/inputswitch';
+import { CascadeSelect, CascadeSelectModule } from 'primeng/cascadeselect';
+import { Areas } from 'src/app/core/models/database.type';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteModule,
+} from 'primeng/autocomplete';
+import { getIconByArea } from 'src/app/shared/funtions/pedidosFuntions';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-pedidos-form',
@@ -33,10 +40,13 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     InputDateComponent,
     ButtonElegantComponent,
     ToastModule,
+    DropdownModule,
   ],
   providers: [],
 })
 export class PedidosFormComponent implements OnInit {
+  @Input() formResult: any;
+  areasData: any[] = [];
   private fb = inject(FormBuilder);
   private _pedidoService = inject(PedidoService);
   pedidoForm!: FormGroup;
@@ -45,9 +55,19 @@ export class PedidosFormComponent implements OnInit {
     this.pedidoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
       urgente: [false, Validators.required],
+      area: ['', Validators.required],
       descripcion: [''],
       plazo_entrega: ['', [Validators.required, futureDateValidator]],
     });
+
+    this.areasData = [
+      { name: 'ADMINISTRACION' },
+      { name: 'LOGISTICA' },
+      { name: 'OBRAS' },
+      { name: 'PREDIO' },
+      { name: 'SISTEMAS' },
+      { name: 'TALLER' },
+    ];
   }
 
   async onSubmit() {
@@ -60,6 +80,7 @@ export class PedidosFormComponent implements OnInit {
       urgente:
         this.pedidoForm.value.urgente === 'true' ||
         this.pedidoForm.value.urgente === true,
+      area: this.pedidoForm.value.area.name,
     };
     delete formValue.urgente;
     const { data, error } = await this._pedidoService.addPedido(formValue);
@@ -69,5 +90,8 @@ export class PedidosFormComponent implements OnInit {
       alert('¡Pedido guardado con éxito!');
       this.pedidoForm.reset();
     }
+  }
+  getIcon(area: Areas) {
+    return getIconByArea(area);
   }
 }
