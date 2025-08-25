@@ -1,0 +1,101 @@
+/* src/app/app.component.css */
+
+/* --- Estructura del Layout General --- */
+.layout-wrapper {
+  display: flex;
+  height: 100vh;
+  background-color: #f8f9fa; /* Un color de fondo suave */
+}
+
+.sidebar-container {
+  width: 280px; /* Ancho fijo para el sidebar */
+  background-color: #ffffff;
+  border-right: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex-grow: 1; /* El contenido principal ocupa el resto del espacio */
+  padding: 2rem;
+  overflow-y: auto; /* Permite scroll si el contenido es largo */
+}
+
+/* --- Estilos para p-menu --- */
+/* Hacemos que el menú ocupe todo el alto y sea flexible */
+:host ::ng-deep .p-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* --- Plantilla #start: Logo --- */
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* --- Plantilla #submenuheader: Títulos --- */
+.submenu-header {
+  display: block;
+  padding: 1rem 1.25rem 0.5rem 1.25rem;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+}
+
+/* --- Plantilla #item: Enlaces del Menú --- */
+.menu-item-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  color: #495057;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  border-radius: 6px;
+  margin: 0 0.5rem;
+}
+
+.menu-item-link:hover {
+  background-color: #f1f3f5;
+}
+
+.menu-item-link .menu-item-label {
+  margin-left: 0.5rem;
+  flex-grow: 1; /* Empuja el badge/shortcut a la derecha */
+}
+
+/* --- Atajo de teclado y Badge --- */
+.shortcut {
+  background-color: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+:host ::ng-deep .p-badge {
+  margin-left: auto;
+}
+
+/* --- Plantilla #end: Perfil de Usuario --- */
+.user-profile {
+  margin-top: auto; /* ¡Importante! Empuja el perfil al final del sidebar */
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}

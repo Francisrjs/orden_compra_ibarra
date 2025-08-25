@@ -239,7 +239,9 @@
                     ></p-tag>
                   </td>
                   <td>
-                    <p-button type="button" icon="pi pi-plus"></p-button>
+                    <ng-template *ngif="modoOC">
+                      <p-button type="button" icon="pi pi-plus"></p-button>
+                    </ng-template>
                   </td>
                 </tr>
               </ng-template>

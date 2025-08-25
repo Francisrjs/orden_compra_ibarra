@@ -6,7 +6,7 @@ import { Pedido } from 'src/app/core/models/database.type';
 import { CardDashboardIconComponent } from 'src/app/shared/cards/card-dashboard-icon/card-dashboard-icon.component';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 import { getBadgeClassByEstadoPedido } from 'src/app/shared/funtions/pedidosFuntions';
-import { TableNG } from 'src/app/shared/tables/table-ng/table-ng.component';
+import { TableNGPedidos } from 'src/app/shared/tables/table-ng/table-ng.component';
 import { ToastModule } from 'primeng/toast';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 import { PedidosFormComponent } from './pedidos-form/pedidos-form.component';
@@ -22,7 +22,7 @@ import { MessageService } from 'primeng/api';
     CardDashboardIconComponent, // Para poder usar <app-card-dashboard-icon>
     TableBootstrapComponent,
     ButtonWithIconComponent,
-    TableNG,
+    TableNGPedidos,
     ToastModule,
     SidebarComponent,
   ],
@@ -65,6 +65,7 @@ export class PedidosComponent implements OnInit {
       // Opcional: Cuando este formulario se guarde, puedes volver al anterior o cerrar todo
       formResult: (result: { success: boolean; message: string }) =>
         this.handleFormResult(result),
+      onSaveSuccess: () => this.handleCloseSidebar(),
     };
     this.sidebarVisible = true;
   }
@@ -86,5 +87,9 @@ export class PedidosComponent implements OnInit {
         detail: result.message,
       });
     }
+  }
+  handleCloseSidebar() {
+    console.log('Producto guardado, cerrando sidebar...');
+    this.sidebarVisible = false;
   }
 }

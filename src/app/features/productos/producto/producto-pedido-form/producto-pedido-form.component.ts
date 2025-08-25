@@ -228,13 +228,11 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     const payload: Partial<PedidoItem> = formValues;
 
     if (error) {
-      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
       this.formResult?.({
         success: false,
         message: 'No se pudo guardar el producto. ' + error.message,
       });
     } else {
-      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
       this.formResult?.({
         success: true,
         message: 'El producto fue agregado correctamente ✅',

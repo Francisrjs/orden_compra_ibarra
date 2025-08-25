@@ -8,19 +8,23 @@ import { PedidosFormComponent } from './features/pedidos/pedidos-form/pedidos-fo
 import { PedidosDetalleComponent } from './features/pedidos/pedidos-detalle/pedidos-detalle.component';
 import { ProductoFormComponent } from './features/productos/producto/producto-form/producto-form.component';
 import { ProductoPedidoFormComponent } from './features/productos/producto/producto-pedido-form/producto-pedido-form.component';
-import { TableNG } from './shared/tables/table-ng/table-ng.component';
+import { TableNGPedidos } from './shared/tables/table-ng/table-ng.component';
+import { ConfirmacionPedidosComponent } from './features/orden-compra/confirmacion-pedidos/confirmacion-pedidos.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
+  //Pedidos
   { path: 'pedidos', component: PedidosComponent },
   { path: 'pedidos/add', component: PedidosFormComponent },
   { path: 'pedido/:id', component: PedidosDetalleComponent },
   { path: 'producto/add', component: ProductoFormComponent },
-  { path: 'tabla', component: TableNG },
+  { path: 'tabla', component: TableNGPedidos },
   {
     path: 'pedido/:id/AgregarProducto',
     component: ProductoPedidoFormComponent,
   },
+  //Orden de compra
+  { path: 'oc/pedidos', component: ConfirmacionPedidosComponent },
   { path: '**', redirectTo: 'pedidos' },
 ];
 

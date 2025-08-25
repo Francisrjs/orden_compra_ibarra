@@ -55,11 +55,17 @@
     <app-input-options
       label="¿Es urgente?"
       [options]="[
-        { text: 'SI', value: 'true', iconClass: 'check' },
-        { text: 'NO', value: 'false', iconClass: 'x' }
+        { text: 'SI', value: true, iconClass: 'check' },
+        { text: 'NO', value: false, iconClass: 'x' }
       ]"
       formControlName="urgente"
     ></app-input-options>
+    <small
+      *ngIf="pedidoForm.get('urgente')?.errors?.['required'] &&  pedidoForm.get('urgente')?.touched"
+      class="text-danger"
+      >el campo Area es requerido.</small
+    >
+
     <app-input-box
       label="Descripcion del pedido"
       type="text"

@@ -32,7 +32,7 @@ import {
   getBadgeClassByPedidoItem,
   getIconByArea,
 } from '../../funtions/pedidosFuntions';
-import { AppRoutingModule } from 'src/app/app-routing.module';
+
 import { Router, RouterLink } from '@angular/router';
 
 // Interfaz actualizada: sin 'rating' y con 'orders' para la expansión de fila
@@ -50,7 +50,7 @@ export interface Product {
 }
 
 @Component({
-  selector: 'app-table-ng',
+  selector: 'app-table-ng-pedidos',
   standalone: true,
   imports: [
     CommonModule,
@@ -68,10 +68,12 @@ export interface Product {
   styleUrls: ['./table-ng.component.css'],
   providers: [ProductService, PrimeNGConfig],
 })
-export class TableNG implements OnInit {
+export class TableNGPedidos implements OnInit {
   products!: Product[];
   @Output() openCreatePedido = new EventEmitter<void>();
   @Output() openEditPedido = new EventEmitter<Pedido>();
+  @Input() aceptarPedidos: boolean = false;
+  @Input() modoOC?: boolean = false;
   private primengConfig = inject(PrimeNGConfig);
   private _productoService = inject(ProductoService);
   private _PedidoService = inject(PedidoService);

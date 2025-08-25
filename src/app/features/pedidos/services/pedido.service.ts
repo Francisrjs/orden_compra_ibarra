@@ -77,10 +77,11 @@ export class PedidoService extends StateService<Pedido> {
         ...pedidoData,
         responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12',
       })
-      .select()
+      .select('*')
       .single();
 
     if (!error && data) {
+      this.pedidos.update((currentPedidos) => [...currentPedidos, data]);
       this.addItem(data);
     }
     return { data, error };

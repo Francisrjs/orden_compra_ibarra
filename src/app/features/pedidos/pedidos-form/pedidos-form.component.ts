@@ -26,6 +26,7 @@ import {
 } from 'primeng/autocomplete';
 import { getIconByArea } from 'src/app/shared/funtions/pedidosFuntions';
 import { DropdownModule } from 'primeng/dropdown';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-pedidos-form',
@@ -45,17 +46,23 @@ import { DropdownModule } from 'primeng/dropdown';
   providers: [],
 })
 export class PedidosFormComponent implements OnInit {
-  @Input() formResult: any;
+  @Input() formResult?: (result: {
+    severity?: string;
+    success: boolean;
+    message: string;
+  }) => void;
+  @Input() onSaveSuccess?: () => void;
   areasData: any[] = [];
   private fb = inject(FormBuilder);
   private _pedidoService = inject(PedidoService);
+  private router = inject(Router);
   pedidoForm!: FormGroup;
   value: string | undefined;
   ngOnInit(): void {
     this.pedidoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
-      urgente: [false, Validators.required],
-      area: ['', Validators.required],
+      urgente: ['', Validators.required],
+      area: [false, Validators.required],
       descripcion: [''],
       plazo_entrega: ['', [Validators.required, futureDateValidator]],
     });
@@ -73,22 +80,40 @@ export class PedidosFormComponent implements OnInit {
   async onSubmit() {
     this.pedidoForm.markAllAsTouched();
     if (this.pedidoForm.invalid) {
+      const msg = 'Revisá los campos obligatorios ❌';
+
+      this.formResult?.({ success: false, message: msg });
       return;
     }
     const formValue = {
       ...this.pedidoForm.value,
-      urgente:
-        this.pedidoForm.value.urgente === 'true' ||
-        this.pedidoForm.value.urgente === true,
       area: this.pedidoForm.value.area.name,
     };
-    delete formValue.urgente;
-    const { data, error } = await this._pedidoService.addPedido(formValue);
+
+    const { data: nuevoPedido, error } = await this._pedidoService.addPedido(
+      formValue
+    );
     if (error) {
-      alert('Error al guardar el pedido: ' + error.message);
+      this.formResult?.({
+        success: false,
+        message: 'No se pudo guardar el producto. ' + error.message,
+      });
     } else {
-      alert('¡Pedido guardado con éxito!');
+      this.formResult?.({
+        success: true,
+        message: 'El producto fue agregado correctamente ✅',
+      });
+
       this.pedidoForm.reset();
+      if (this.onSaveSuccess) {
+        this.onSaveSuccess(); // Esto cierra el sidebar
+      }
+      if (nuevoPedido) {
+        console.log(`Redirigiendo a /pedidos/${nuevoPedido.id}`);
+        setTimeout(() => {
+          this.router.navigate(['/pedido', nuevoPedido.id]);
+        }, 2000);
+      }
     }
   }
   getIcon(area: Areas) {

@@ -21,27 +21,29 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 })
 export class InputOptionsComponent implements ControlValueAccessor {
   @Input() label: string = '';
-  @Input() options: { text: string; value: string; iconClass?: string }[] = [];
+  @Input() options: { text: string; value: any; iconClass?: string }[] = []; // <-- AHORA PUEDE SER ANY
 
-  value: string | null = null;
-  disabled = false; // Añadido para manejar el estado disabled
+  value: string | boolean | number | null = null;
+  disabled = false;
 
-  // El resto de tu código se mantiene igual
-  private onChange = (value: string | null) => {};
+  private onChange = (value: any) => {}; // <-- PERMITE CUALQUIER TIPO
   private onTouched = () => {};
 
-  selectOption(value: string) {
-    if (this.disabled) return; // No hacer nada si está deshabilitado
+  selectOption(value: any) {
+    // <-- AHORA PUEDE SER BOOLEAN, STRING, ETC.
+    if (this.disabled) return;
     this.value = value;
     this.onChange(value);
     this.onTouched();
   }
 
-  writeValue(value: string | null): void {
+  writeValue(value: any): void {
+    // <-- TAMBIÉN CUALQUIER TIPO
     this.value = value;
   }
 
-  registerOnChange(fn: (value: string | null) => void): void {
+  registerOnChange(fn: (value: any) => void): void {
+    // <-- CUALQUIER TIPO
     this.onChange = fn;
   }
 
@@ -50,7 +52,6 @@ export class InputOptionsComponent implements ControlValueAccessor {
   }
 
   setDisabledState?(isDisabled: boolean): void {
-    // Manejar el estado deshabilitado
     this.disabled = isDisabled;
   }
 }
