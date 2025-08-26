@@ -30,7 +30,6 @@ import { SharedModule } from 'primeng/api';
     ButtonModule,
 
     // Importa el módulo compartido en lugar de los componentes
-    SharedModule,
   ],
   providers: [],
   bootstrap: [],

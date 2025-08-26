@@ -1,53 +1,37 @@
-<!-- src/app/app.component.html -->
 <div class="layout-wrapper">
   <!-- Sidebar -->
-  <aside class="sidebar-container">
+  <aside
+    class="sidebar-container"
+    [class.collapsed]="!expanded"
+    (mouseenter)="expanded = true"
+    (mouseleave)="expanded = false"
+  >
     <p-menu [model]="items">
-      <!-- #start Template: Logo y Nombre de la App -->
       <ng-template pTemplate="start">
         <div class="app-brand">
-          <!-- Puedes usar tu propio SVG o un icono de PrimeIcons -->
-          <i class="pi pi-prime text-3xl text-sucess"></i>
-          <span class="font-semibold text-xl text-center"
-            >TRANSPORTE <span class="text-success">IBARRA</span></span
-          >
+          <i class="pi pi-prime text-3xl"></i>
+          <span
+            class="font-semibold text-xl app-title row justify-content-center align-content-center"
+            >TRANSPORTE
+            <span class="text-success text-center">IBARRA</span>
+          </span>
         </div>
       </ng-template>
 
-      <!-- #submenuheader Template: Títulos de sección (ej. Documents, Profile) -->
       <ng-template pTemplate="submenuheader" let-item>
         <span class="submenu-header">{{ item.label }}</span>
       </ng-template>
 
-      <!-- #item Template: Cómo se ve cada enlace del menú -->
       <ng-template pTemplate="item" let-item>
         <a [routerLink]="item.routerLink" pRipple class="menu-item-link">
           <span [class]="item.icon"></span>
           <span class="menu-item-label">{{ item.label }}</span>
-
-          <!-- Badge para notificaciones -->
           <p-badge *ngIf="item.badge" [value]="item.badge"></p-badge>
-
-          <!-- Atajo de teclado -->
           <span *ngIf="item.shortcut" class="shortcut">{{
             item.shortcut
           }}</span>
         </a>
       </ng-template>
-
-      <!-- #end Template: Perfil del Usuario al final -->
-      <!-- <ng-template pTemplate="end">
-        <div class="user-profile">
-          <p-avatar
-            image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
-            shape="circle"
-          ></p-avatar>
-          <div class="user-info">
-            <span class="font-bold">Amy Elsner</span>
-            <span class="text-sm">Admin</span>
-          </div>
-        </div>
-      </ng-template> -->
     </p-menu>
   </aside>
 

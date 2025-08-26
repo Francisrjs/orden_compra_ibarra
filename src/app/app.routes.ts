@@ -24,7 +24,7 @@ export const routes: Routes = [
     component: ProductoPedidoFormComponent,
   },
   //Orden de compra
-  { path: 'oc/pedidos', component: ConfirmacionPedidosComponent },
+  { path: 'oc/pendientes', component: ConfirmacionPedidosComponent },
   { path: '**', redirectTo: 'pedidos' },
 ];
 

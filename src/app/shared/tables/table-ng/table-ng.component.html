@@ -1,3 +1,46 @@
+<p-toast></p-toast>
+
+<p-confirmDialog #cd [style]="{ width: '25vw' }">
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-exclamation-triangle text-3xl text-yellow-500"></i>
+      <h3 class="m-0">{{ messageHeader }}</h3>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="message">
+    <div class="flex flex-column gap-3">
+      <p class="m-0">{{ message }}</p>
+      <app-input-box
+        *ngIf="razonRechazo"
+        label="Introduce una razón de rechazo"
+        id="razon"
+        [isTextarea]="true"
+      ></app-input-box>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button
+        type="button"
+        pButton
+        icon="pi pi-times"
+        label="No"
+        class="p-button-secondary p-button-outlined"
+        (click)="cd.reject()"
+      ></button>
+      <button
+        type="button"
+        pButton
+        icon="pi pi-check"
+        label="Si"
+        class="p-button-success"
+        (click)="cd.accept()"
+      ></button>
+    </div>
+  </ng-template>
+</p-confirmDialog>
 <div class="">
   <p-table
     #ptable
@@ -29,14 +72,16 @@
             icon="pi pi-filter-slash"
             (click)="clear(ptable)"
           ></button>
-          <app-button-with-icon
-            class="px-1 w-100 px-2"
-            text="Añadir pedido"
-            iconClass="bi bi-cart-plus"
-            hoverIconColorClass="text-success"
-            (click)="requestAddPedido()"
-            variant="secondary"
-          ></app-button-with-icon>
+          <div *ngIf="modoUsuario">
+            <app-button-with-icon
+              class="px-1 w-100 px-2"
+              text="Añadir pedido"
+              iconClass="bi bi-cart-plus"
+              hoverIconColorClass="text-success"
+              (click)="requestAddPedido()"
+              variant="secondary"
+            ></app-button-with-icon>
+          </div>
         </div>
       </div>
     </ng-template>
@@ -126,7 +171,7 @@
             ></p-columnFilter>
           </div>
         </th>
-        <th pSortableColumn="nombre_responsable">
+        <th pSortableColumn="nombre_responsable" *ngIf="!modoUsuario">
           <div class="flex align-items-center">
             Responsable
             <p-sortIcon field="nombre_responsable"></p-sortIcon>
@@ -178,15 +223,46 @@
             >{{ pedido?.estado | uppercase }}</span
           >
         </td>
-        <td>{{ pedido.nombre_responsable }}</td>
+        <td *ngIf="!modoUsuario">{{ pedido.nombre_responsable }}</td>
         <td>
-          <p-button
-            icon="pi pi-eye"
-            [rounded]="true"
-            [text]="true"
-            severity="danger"
-            [routerLink]="['/pedido', pedido.id]"
-          />
+          <div class="d-flex">
+            <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              [routerLink]="['/pedido', pedido.id]"
+            />
+            <div class="flex justify-content-center gap-2" *ngIf="!modoUsuario">
+              <p-button
+                icon="pi pi-check"
+                (click)="
+                  confirmarMensaje(
+                    'Aceptar pedido',
+                    'Queres aceptar todo el pedido con todos sus items?'
+                  )
+                "
+                styleClass="p-button-rounded p-button-outlined"
+                [rounded]="true"
+                [text]="true"
+                severity="success"
+              ></p-button>
+              <p-button
+                icon="pi pi-times"
+                (click)="
+                  confirmarMensaje(
+                    'Rechazar pedido',
+                    'Queres rechazar todo el pedido con todos sus items?',
+                    true
+                  )
+                "
+                styleClass="p-button-rounded p-button-outlined"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+              ></p-button>
+            </div>
+          </div>
         </td>
       </tr>
     </ng-template>
@@ -208,18 +284,21 @@
                   <th pSortableColumn="producto.nombre">
                     Producto <p-sortIcon field="producto.nombre"></p-sortIcon>
                   </th>
+
+                  <th pSortableColumn="cantidad">
+                    Cantidad <p-sortIcon field="cantidad"></p-sortIcon>
+                  </th>
                   <th pSortableColumn="producto.unidad_medida.nombre">
                     Medida
                     <p-sortIcon
                       field="producto.unidad_medida.nombre"
                     ></p-sortIcon>
                   </th>
-                  <th pSortableColumn="cantidad">
-                    Cantidad <p-sortIcon field="cantidad"></p-sortIcon>
-                  </th>
                   <th pSortableColumn="producto.estado">
                     Estado <p-sortIcon field="producto.estado"></p-sortIcon>
                   </th>
+                  <th>Cambiar cantidad aceptada</th>
+                  <th>Acciones</th>
                   <th style="width: 4rem"></th>
                 </tr>
               </ng-template>
@@ -229,19 +308,42 @@
 
                   <td>{{ pedidoItem.producto?.nombre }}</td>
 
+                  <td>{{ pedidoItem.cantidad }}</td>
+
                   <td>{{ pedidoItem.unidad_medida?.nombre }}</td>
 
-                  <td>{{ pedidoItem.cantidad }}</td>
                   <td>
                     <p-tag
                       [value]="pedidoItem?.estado"
                       [severity]="getStatusSeverity(pedidoItem?.estado)"
                     ></p-tag>
                   </td>
-                  <td>
-                    <ng-template *ngif="modoOC">
-                      <p-button type="button" icon="pi pi-plus"></p-button>
-                    </ng-template>
+                  <td *ngIf="!modoUsuario" class="">
+                    <p-button
+                      icon="pi pi-pencil"
+                      styleClass="p-button-rounded p-button-outlined"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="warning"
+                      class="text-center"
+                    ></p-button>
+                  </td>
+                  <td *ngIf="!modoUsuario" class="d-flex">
+                    <p-button
+                      icon="pi pi-check"
+                      styleClass="p-button-rounded p-button-outlined"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="success"
+                    ></p-button>
+                    <p-button
+                      icon="pi pi-times"
+                      (click)="confirm2()"
+                      styleClass="p-button-rounded p-button-outlined"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="danger"
+                    ></p-button>
                   </td>
                 </tr>
               </ng-template>

@@ -24,7 +24,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 })
 export class AppComponent implements OnInit {
   items: MenuItem[] = []; // Inicializamos como array vacío
-
+  expanded = false;
   ngOnInit() {
     this.items = [
       {
@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
             label: 'Pedidos pendientes',
             icon: 'pi pi-cog',
             badge: '2',
-            routerLink: '/tabla',
+            routerLink: '/oc/pendientes',
           },
           {
             label: 'Orden de compras',
