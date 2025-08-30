@@ -89,8 +89,8 @@
 
     <ng-template pTemplate="header">
       <tr>
-        <th style="width: 5rem"></th>
-        <th pSortableColumn="numero_pedido" style="min-width: 15rem">
+        <th style="width: 2rem"></th>
+        <th pSortableColumn="numero_pedido" style="min-width: 10rem">
           <div class="flex align-items-center">
             Numero de Pedido
             <p-sortIcon field="numero_pedido"></p-sortIcon>
@@ -114,7 +114,7 @@
             ></p-columnFilter>
           </div>
         </th>
-        <th pSortableColumn="area" style="min-width: 3rem">
+        <th pSortableColumn="area" style="min-width: 4rem">
           <div class="flex align-items-center">
             Area
             <p-sortIcon field="area"></p-sortIcon>
@@ -148,7 +148,7 @@
             ></p-columnFilter>
           </div>
         </th> -->
-        <th pSortableColumn="urgente">
+        <!-- <th pSortableColumn="urgente">
           <div class="flex align-items-center">
             ¿Es Urgente?
             <p-sortIcon field="urgente"></p-sortIcon>
@@ -159,7 +159,7 @@
               class="ml-auto"
             ></p-columnFilter>
           </div>
-        </th>
+        </th> -->
         <th pSortableColumn="estado" style="max-width: 2rem; min-width: 1rem">
           <div class="flex align-items-center" style="max-width: 1rem">
             Estado
@@ -200,7 +200,21 @@
             [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
           ></button>
         </td>
-        <td>{{ pedido.numero_pedido }}</td>
+        <td>
+          <div
+            class="d-flex mx-2 gap-1 justify-content-center align-items-center"
+          >
+            <div class="">
+              <i
+                class="bi bi-dot text-danger fs-3 mt-auto mx-auto mt-auto"
+                *ngIf="pedido.urgente && pedido.numero_pedido"
+              ></i>
+            </div>
+            <div class="flex-shrink-1">
+              {{ pedido.numero_pedido }}
+            </div>
+          </div>
+        </td>
         <td>{{ pedido.titulo }}</td>
 
         <td>
@@ -212,7 +226,6 @@
         </td>
 
         <td>{{ pedido.plazo_entrega }}</td>
-        <td>{{ pedido.urgente ? "SI" : "NO" }}</td>
 
         <td>
           <!-- <p-tag
@@ -298,8 +311,8 @@
                   <th pSortableColumn="producto.estado">
                     Estado <p-sortIcon field="producto.estado"></p-sortIcon>
                   </th>
-                  <th>Cambiar cantidad aceptada</th>
-                  <th>Acciones</th>
+                  <th *ngIf="!modoUsuario">Cambiar cantidad aceptada</th>
+                  <th *ngIf="!modoUsuario">Acciones</th>
                   <th style="width: 4rem"></th>
                 </tr>
               </ng-template>
@@ -368,4 +381,21 @@
       </tr>
     </ng-template>
   </p-table>
+  <div>
+    <div class="w-25">
+      Detalle:
+      <div class="d-flex col GAP-3 align-items-center justify-content-center">
+        <div>
+          <i class="bi bi-dot text-danger fs-3" style="font-size: 2rem"></i>
+          <span class="text-sm font-semibold">PEDIDO URGENTE</span>
+        </div>
+      </div>
+      <div class="d-flex col align-items-center justify-content-center">
+        <div>
+          <i class="bi bi-dot text-white fs-3" style="font-size: 2rem"></i>
+          <span class="text-sm font-semibold">PEDIDO NO URGENTE</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

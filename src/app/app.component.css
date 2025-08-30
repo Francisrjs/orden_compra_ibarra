@@ -44,7 +44,7 @@
 /* --- Estado Colapsado del Sidebar --- */
 .sidebar-container.collapsed {
   width: 40px; /* Ancho fijo para los íconos */
-  min-width: 80px; /* Mínimo para el estado colapsado */
+  min-width: 85px; /* Mínimo para el estado colapsado */
   align-items: center;
   margin: 0;
 }

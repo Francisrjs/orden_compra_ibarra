@@ -37,6 +37,7 @@ export class AppComponent implements OnInit {
     this.expanded = window.innerWidth >= 768;
   }
   ngOnInit() {
+    this.expanded = false;
     this.items = [
       {
         label: 'Pedidos',
