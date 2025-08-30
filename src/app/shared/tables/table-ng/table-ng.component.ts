@@ -31,6 +31,7 @@ import {
   Areas,
   EstadoItemPedido,
   Pedido,
+  PedidoItem,
 } from 'src/app/core/models/database.type';
 import {
   getBadgeClassByEstadoPedido,
@@ -89,6 +90,7 @@ export class TableNGPedidos implements OnInit {
   @Output() openEditPedido = new EventEmitter<Pedido>();
   @Input() modoUsuario?: boolean = true;
   @Input() filtroPedidos: string = '';
+  @Output() openEditPedidoOC = new EventEmitter<PedidoItem>();
   private primengConfig = inject(PrimeNGConfig);
   private _PedidoService = inject(PedidoService);
   private _confirmationService = inject(ConfirmationService);
@@ -101,6 +103,7 @@ export class TableNGPedidos implements OnInit {
   messageHeader: string = '';
   message: string = '';
   razonRechazo: boolean = true;
+  justificacionRechazo: string = '';
   constructor() {
     // Usamos 'effect' para reaccionar a los cambios de la señal
     effect(() => {
@@ -191,6 +194,10 @@ export class TableNGPedidos implements OnInit {
   requestEditPedido(pedido: Pedido) {
     this.openEditPedido.emit(pedido);
   }
+  requestEditPedidoOC(pedidoItem: PedidoItem) {
+    console.log(pedidoItem);
+    this.openEditPedidoOC.emit(pedidoItem);
+  }
 
   configurarTraducciones() {
     this.primengConfig.setTranslation({
@@ -230,7 +237,12 @@ export class TableNGPedidos implements OnInit {
       // ...y muchas más
     });
   }
-  confirmarMensaje(newHeader: string, newMessage: string, razon?: boolean) {
+  confirmarMensaje(
+    newHeader: string,
+    newMessage: string,
+    razon?: boolean,
+    itemPedido?: PedidoItem
+  ) {
     this.messageHeader = newHeader;
     this.message = newMessage;
     if (razon) {
@@ -243,7 +255,9 @@ export class TableNGPedidos implements OnInit {
           summary: 'Confirmed',
           detail: 'You have accepted',
         });
-        this.razonRechazo = false;
+        if (this.razonRechazo && itemPedido) {
+          this.rechazarPedidoItem(itemPedido);
+        }
       },
       reject: (type: ConfirmEventType) => {
         switch (type) {
@@ -265,6 +279,68 @@ export class TableNGPedidos implements OnInit {
         this.razonRechazo = false;
       },
     });
+  }
+  async confirmarPedidoItem(pedidoItem: PedidoItem) {
+    try {
+      const { data, error } = await this._PedidoService.aceptarPedidoItem(
+        pedidoItem.id
+      );
+      if (error) throw error;
+
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Pedido aceptado',
+        detail: `El ítem #${pedidoItem.id} fue aceptado correctamente.`,
+      });
+    } catch (err: any) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error al aceptar',
+        detail: err.message ?? 'No se pudo aceptar el pedido.',
+      });
+    }
+  }
+
+  async rechazarPedidoItem(pedidoItem: PedidoItem) {
+    try {
+      const { data, error } = await this._PedidoService.rechazarPedidoItem(
+        pedidoItem.id,
+        this.justificacionRechazo
+      );
+      if (error) throw error;
+
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Pedido rechazado',
+        detail: `El ítem #${pedidoItem.id} fue rechazado.`,
+      });
+    } catch (err: any) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error al rechazar',
+        detail: err.message ?? 'No se pudo rechazar el pedido.',
+      });
+    }
+  }
+
+  async aceptarParcialPedidoItem(pedidoItem: PedidoItem) {
+    try {
+      const { data, error } =
+        await this._PedidoService.aceptarParcialPedidoItem(pedidoItem.id);
+      if (error) throw error;
+
+      this._messageService.add({
+        severity: 'info',
+        summary: 'Aceptación parcial',
+        detail: `El ítem #${pedidoItem.id} fue aceptado parcialmente.`,
+      });
+    } catch (err: any) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error al aceptar parcialmente',
+        detail: err.message ?? 'No se pudo aceptar parcialmente el pedido.',
+      });
+    }
   }
   confirm2() {
     this._confirmationService.confirm({

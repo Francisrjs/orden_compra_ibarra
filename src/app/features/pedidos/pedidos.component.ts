@@ -60,7 +60,7 @@ export class PedidosComponent implements OnInit {
 
   openPedidoForm(): void {
     this.sidebarTitle = 'Nuevo pedido';
-    this.componentToLoad = PedidosFormComponent; // <-- Cambias el componente aquí
+    this.componentToLoad = PedidosFormComponent;
     this.sidebarInputs = {
       // Opcional: Cuando este formulario se guarde, puedes volver al anterior o cerrar todo
       formResult: (result: { success: boolean; message: string }) =>

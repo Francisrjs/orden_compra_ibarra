@@ -1,4 +1,19 @@
-/* src/app/app.component.css */
+@media (max-width: 1028px) {
+  .sidebar-container {
+    width: 90% !important; /* ocupa toda la pantalla */
+    min-width: unset;
+
+    z-index: 1050; /* por encima del contenido */
+    height: 100%;
+  }
+  .sidebar-container.collapsed {
+    width: 10% !important; /* ocupa toda la pantalla */
+    min-width: unset;
+
+    z-index: 1050; /* por encima del contenido */
+    height: 100%;
+  }
+}
 
 /* --- Estructura del Layout General --- */
 .layout-wrapper {
@@ -19,27 +34,69 @@
   border-right: 1px solid #dee2e6;
   display: flex;
   flex-direction: column;
-  width: 280px; /* Ancho por defecto (expandido) */
+  width: 480px; /* Ancho fijo y predecible */
+  min-width: 280px; /* límite mínimo */
   transition: width 0.3s ease;
+
   overflow: hidden; /* Clave para que el contenido no se desborde */
 }
 
 /* --- Estado Colapsado del Sidebar --- */
 .sidebar-container.collapsed {
-  width: 80px; /* Un ancho adecuado para mostrar solo los iconos */
+  width: 40px; /* Ancho fijo para los íconos */
+  min-width: 80px; /* Mínimo para el estado colapsado */
+  align-items: center;
+  margin: 0;
+}
+.sidebar-container.collapsed .logo {
+  display: flex;
+  align-items: center;
 }
 
-/* Ocultamos todo excepto el logo cuando el sidebar está colapsado */
+/* 2. Oculta todos los elementos de texto y los títulos de sección */
 .sidebar-container.collapsed .menu-item-label,
-.sidebar-container.collapsed .app-title,
 .sidebar-container.collapsed .shortcut,
-.sidebar-container.collapsed .logo,
-.sidebar-container.collapsed .menu-item-link,
+.sidebar-container.collapsed .app-title {
+  display: none !important; /* Usamos !important para el título por Bootstrap */
+}
+
+/* 3. Oculta los elementos generados por PrimeNG usando ::ng-deep */
 :host ::ng-deep .sidebar-container.collapsed .p-badge,
-:host ::ng-deep .sidebar-container.collapsed .submenu-header {
+:host ::ng-deep .sidebar-container.collapsed .p-submenu-header {
+  /* <-- ESTA ES LA CORRECCIÓN */
   display: none;
 }
 
+/* 4. Centra el logo y los íconos que quedan visibles */
+.sidebar-container.collapsed .app-brand {
+  justify-content: center;
+  margin-left: 30px;
+}
+
+.sidebar-container.collapsed .menu-item-link {
+  justify-content: center;
+  padding: 0.75rem 0; /* Ajusta el padding para que no haya espacio extra */
+}
+
+.app-title {
+  display: flex;
+  flex-direction: column; /* Apila "TRANSPORTE" e "IBARRA" */
+  line-height: 1.2; /* Ajusta el espacio entre líneas */
+  margin-left: 0.5rem; /* Espacio respecto al logo */
+}
+.menu-item-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  color: #495057;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  border-radius: 6px;
+  margin: 0 0.5rem;
+  white-space: nowrap;
+  width: calc(100% - 1rem); /* Ocupa el 100% del ancho menos los márgenes */
+  box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+}
 /* Centramos el logo cuando está colapsado */
 .sidebar-container.collapsed .app-brand {
   justify-content: center;
@@ -59,12 +116,10 @@
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   padding: 1.25rem;
   border-bottom: 1px solid #dee2e6;
-  white-space: nowrap; /* Evita que el texto se parta durante la transición */
+  white-space: nowrap;
 }
-
 /* --- Plantilla #submenuheader: Títulos --- */
 .submenu-header {
   display: block;

@@ -48,9 +48,9 @@ declare var bootstrap: any;
       multi: true,
     },
   ],
-})
+}) // Implementa AfterViewInit
 export class InputModalSelectorComponent
-  implements ControlValueAccessor, OnInit, AfterViewInit // Implementa AfterViewInit
+  implements ControlValueAccessor, OnInit, AfterViewInit
 {
   constructor(private zone: NgZone) {}
 
@@ -61,7 +61,7 @@ export class InputModalSelectorComponent
     .toString(36)
     .substring(2, 9)}`;
   @Input() modalTitle: string = 'Seleccionar un Producto';
-
+  @Input() isDisabled: boolean = false;
   private _data: SelectorData[] = [];
   @Input()
   set data(value: SelectorData[]) {
@@ -81,7 +81,6 @@ export class InputModalSelectorComponent
   // --- Estado Interno ---
   selectedValueId: any = null;
   displayedValueName: string = '';
-  isDisabled: boolean = false;
 
   // Las propiedades 'searchTerm' y 'filteredData' ya no son necesarias.
   // La tabla de PrimeNG gestionará el filtrado internamente.
@@ -141,9 +140,10 @@ export class InputModalSelectorComponent
     if (this.isDisabled) return;
     // Reseteamos el estado del filtro de la tabla cada vez que se abre
     if (this.pTable) {
-        this.pTable.clear(); // Limpia filtros y paginación
-        const searchInput = this.modalElement.nativeElement.querySelector('input[type="text"]');
-        if(searchInput) searchInput.value = '';
+      this.pTable.clear(); // Limpia filtros y paginación
+      const searchInput =
+        this.modalElement.nativeElement.querySelector('input[type="text"]');
+      if (searchInput) searchInput.value = '';
     }
     this.modalInstance.show();
   }

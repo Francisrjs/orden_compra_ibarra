@@ -8,13 +8,21 @@
   >
     <p-menu [model]="items">
       <ng-template pTemplate="start">
-        <div class="app-brand">
-          <i class="pi pi-prime text-3xl"></i>
-          <span
-            class="font-semibold text-xl app-title row justify-content-center align-content-center"
-            >TRANSPORTE
-            <span class="text-success text-center">IBARRA</span>
-          </span>
+        <div class="app-brand bg-light-300 d-flex justify-content-center">
+          <img
+            src="assets/logo_ibarra.png"
+            width="65"
+            height="65"
+            class="logo mx-2 mt-2"
+          />
+          <div>
+            <div
+              class="app-title d-flex justify-content-center align-items-center"
+            >
+              <span class="font-semibold text-xl">TRANSPORTE</span>
+              <span class="font-semibold text-xl text-success">IBARRA</span>
+            </div>
+          </div>
         </div>
       </ng-template>
 

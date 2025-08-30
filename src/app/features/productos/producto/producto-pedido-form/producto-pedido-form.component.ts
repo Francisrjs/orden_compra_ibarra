@@ -77,6 +77,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     message: string;
   }) => void;
 
+  @Input() modeUser?: boolean = true;
+  @Input() pedidoItemOC?: PedidoItem;
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
 
@@ -97,13 +99,46 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   selectedMedida: any[] | undefined;
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Si nos viene un pedidoItem desde el padre, parcheamos el form (si ya existe)
+    if (changes['pedidoItemOC'] && this.pedidoItemOC) {
+      // guardamos id del item para editar luego
+      this.idPedidoItem = this.pedidoItemOC.id;
+      if (this.productoPedidoForm) {
+        this.productoPedidoForm.patchValue({
+          producto_id:
+            this.pedidoItemOC.producto?.id ??
+            (this.pedidoItemOC as any).producto_id ??
+            null,
+          cantidad: this.pedidoItemOC.cantidad ?? null,
+          // Puede venir objeto unidad_medida o id; en onSubmit ya normalizas
+          unidad_medida_id:
+            this.pedidoItemOC.unidad_medida ??
+            (this.pedidoItemOC as any).unidad_medida_id ??
+            null,
+          razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
+          unidad_medidad_id_aceptada: this.pedidoItemOC.unidad_medida ?? null,
+          cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
+        });
+      }
+    }
+
+    // Mantén también la lógica existente para idProduct si la usas
     if (changes['idProduct'] && this.idProduct && this.productoPedidoForm) {
-      this.productoPedidoForm.patchValue({
-        producto_id: this.idProduct,
-        cantidad: this.cantidad,
-        unidad_medida_id: this.idMedida,
-        razon_pedido: this.razonPedido,
-      });
+      if (this.modeUser) {
+        this.productoPedidoForm.patchValue({
+          producto_id: this.idProduct,
+          cantidad: this.cantidad,
+          unidad_medida_id: this.idMedida,
+          razon_pedido: this.razonPedido,
+        });
+      } else {
+        // si no es modeUser, puedes continuar con tu lógica específica
+        this.productoPedidoForm.patchValue({
+          producto_id:
+            this.pedidoItemOC?.producto_id ??
+            this.productoPedidoForm.value.producto_id,
+        });
+      }
     }
   }
 
@@ -122,8 +157,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       if (this.idProduct && this.cantidad && this.idMedida) {
         this.productoPedidoForm.patchValue({
           producto_id: this.idProduct,
-          cantidad: this.cantidad,
-          unidad_medida_id: this.idMedida,
+          cantidad_aceptada: this.cantidad,
+          unidad_medida_id_aceptada: this.idMedida,
         });
       }
     });
@@ -159,6 +194,25 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     }
   }
   private patchFormValues(): void {
+    // Se ejecuta desde ngOnInit: parchea con lo que ya está llegando por inputs
+    if (this.pedidoItemOC) {
+      this.idPedidoItem = this.pedidoItemOC.id;
+      this.productoPedidoForm.patchValue({
+        producto_id:
+          this.pedidoItemOC.producto?.id ??
+          (this.pedidoItemOC as any).producto_id ??
+          null,
+        cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
+        unidad_medida_id_aceptada:
+          this.pedidoItemOC.unidad_medida.id ??
+          (this.pedidoItemOC as any).unidad_medida_id ??
+          null,
+        razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
+      });
+      return;
+    }
+
+    // Si no hay pedidoItemOC, parchea con entradas individuales (idProduct, cantidad, etc.)
     this.productoPedidoForm.patchValue({
       producto_id: this.idProduct ?? null,
       cantidad: this.cantidad ?? null,

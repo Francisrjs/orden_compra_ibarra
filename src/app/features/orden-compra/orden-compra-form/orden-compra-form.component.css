@@ -1,0 +1,170 @@
+.separator {
+  display: flex; /* Convierte el contenedor en un flexbox */
+  align-items: center; /* Centra verticalmente los elementos */
+  text-align: center; /* Alinea el texto en el centro */
+  margin: 20px 0; /* Agrega espacio arriba y abajo */
+}
+
+.separator span {
+  padding: 0 10px; /* Espacio horizontal para el texto */
+  color: #555;
+  font-weight: 500;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ccc; /* Color de la línea */
+}
+body {
+  background-color: #f8f9fa; /* Un color de fondo suave para la página */
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+}
+
+/* Contenedor de la sección de detalle del pedido (simulado) */
+.order-details-container {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+/* Estilos para el contenedor principal de productos */
+.product-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-family: "Inter", sans-serif;
+  max-width: 800px; /* Ancho ajustado para la demo */
+  margin: auto; /* Centrado */
+}
+
+/* Estilos para el encabezado con buscador */
+.container-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.container-header h5 {
+  color: #333;
+}
+
+.container-header .form-control:focus {
+  box-shadow: none;
+  border-color: #ced4da;
+}
+.container-header .d-flex > * {
+  height: 58px; /* mismo alto que el input de bootstrap */
+}
+.container-header .input-group-text {
+  background-color: #f8f9fa;
+}
+
+/* Estilos para el cuerpo del contenedor */
+.container-body {
+  padding: 0.5rem 0;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Estilos para cada tarjeta de producto */
+.product-card {
+  border: none;
+  padding: 1rem 1.5rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.product-card:hover {
+  background-color: #f8f9fa;
+}
+
+/* Estilos para el ícono del producto */
+.product-icon {
+  font-size: 2.5rem;
+  color: #4a4a4a;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Estilos para la información del producto */
+.product-info .product-title {
+  font-weight: 600;
+  color: #212529;
+}
+
+.product-info .product-description {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.product-info .product-quantity {
+  font-size: 0.85rem;
+}
+
+/* Estilos para los botones de acción de la tarjeta */
+.product-actions .btn {
+  color: #6c757d; /* Gris sutil para los iconos */
+}
+
+.product-actions .btn:hover {
+  color: #212529; /* Color más oscuro al pasar el mouse */
+  background-color: #e9ecef;
+}
+
+/* Estilos para el mensaje de "Sin productos" */
+.no-products-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  color: #adb5bd;
+}
+
+.add-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #f1f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  color: #868e96;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.add-icon-circle:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Media query para pantallas pequeñas (responsive) */
+@media (max-width: 576px) {
+  .container-header .btn span {
+    display: none; /* Oculta el texto "Agregar" */
+  }
+  .container-header .btn .bi-plus-lg {
+    margin-right: 0 !important; /* Elimina el margen del icono */
+  }
+}
+:host ::ng-deep .mi-speed-dial {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+}
+:host ::ng-deep .p-speeddial .p-speeddial-action {
+  color: green !important;
+  background: rgb(206, 235, 206);
+}

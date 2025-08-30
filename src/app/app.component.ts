@@ -1,4 +1,9 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  HostListener,
+  OnInit,
+} from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { MenuItemContent, MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
@@ -23,8 +28,14 @@ import { RouterLink, RouterModule } from '@angular/router';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+  @HostListener('window:resize', ['$event'])
+  window = window;
   items: MenuItem[] = []; // Inicializamos como array vacío
   expanded = false;
+  onResize(event: any) {
+    // Si la pantalla es menor a 768px (Bootstrap md), colapsa
+    this.expanded = window.innerWidth >= 768;
+  }
   ngOnInit() {
     this.items = [
       {
@@ -57,6 +68,7 @@ export class AppComponent implements OnInit {
             label: 'Orden de compras',
             icon: 'pi pi-inbox',
             shortcut: '⌘+O',
+            routerLink: '/oc',
           },
           {
             label: 'Logout',
@@ -66,5 +78,6 @@ export class AppComponent implements OnInit {
         ],
       },
     ];
+    this.expanded = window.innerWidth >= 768;
   }
 }

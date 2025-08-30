@@ -10,6 +10,7 @@ import { ProductoFormComponent } from './features/productos/producto/producto-fo
 import { ProductoPedidoFormComponent } from './features/productos/producto/producto-pedido-form/producto-pedido-form.component';
 import { TableNGPedidos } from './shared/tables/table-ng/table-ng.component';
 import { ConfirmacionPedidosComponent } from './features/orden-compra/confirmacion-pedidos/confirmacion-pedidos.component';
+import { OrdenCompraFormComponent } from './features/orden-compra/orden-compra-form/orden-compra-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -25,6 +26,7 @@ export const routes: Routes = [
   },
   //Orden de compra
   { path: 'oc/pendientes', component: ConfirmacionPedidosComponent },
+  { path: 'oc', component: OrdenCompraFormComponent },
   { path: '**', redirectTo: 'pedidos' },
 ];
 

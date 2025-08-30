@@ -16,6 +16,7 @@
         label="Introduce una razón de rechazo"
         id="razon"
         [isTextarea]="true"
+        [(ngModel)]="justificacionRechazo"
       ></app-input-box>
     </div>
   </ng-template>
@@ -325,6 +326,7 @@
                       [rounded]="true"
                       [text]="true"
                       severity="warning"
+                      (onClick)="requestEditPedidoOC(pedidoItem)"
                       class="text-center"
                     ></p-button>
                   </td>
@@ -334,11 +336,19 @@
                       styleClass="p-button-rounded p-button-outlined"
                       [rounded]="true"
                       [text]="true"
+                      (onClick)="confirmarPedidoItem(pedidoItem)"
                       severity="success"
                     ></p-button>
                     <p-button
                       icon="pi pi-times"
-                      (click)="confirm2()"
+                      (click)="
+                        confirmarMensaje(
+                          'Rechazar item del pedido',
+                          'Quieres rechazar el pedido del item',
+                          true,
+                          pedidoItem
+                        )
+                      "
                       styleClass="p-button-rounded p-button-outlined"
                       [rounded]="true"
                       [text]="true"

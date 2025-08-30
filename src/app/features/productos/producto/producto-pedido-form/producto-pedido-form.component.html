@@ -1,14 +1,15 @@
 <div class="container mx-auto my-auto form mb-2">
   <p-toast position="top-right"></p-toast>
   <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()">
-    <app-input-box
-      label="ID del Pedido"
-      type="text"
-      id="pedido_id"
-      [value]="pedidoId"
-      [disabled]="true"
-    ></app-input-box>
-
+    <div *ngIf="modeUser">
+      <app-input-box
+        label="ID del Pedido"
+        type="text"
+        id="pedido_id"
+        [value]="pedidoId"
+        [disabled]="true"
+      ></app-input-box>
+    </div>
     <!-- Mensaje de error para el título -->
     <div>
       <app-input-modal-selector
@@ -17,58 +18,95 @@
         [data]="productoData"
         placeholder="Seleccione un producto"
         formControlName="producto_id"
+        [disabled]="modeUser ? false : true"
       ></app-input-modal-selector>
-      <p class="mt-0 mb-2 text-secondary fs-6">
-        ¿no te aparece el producto que buscas ?
-        <a
-          (click)="onNavigateToCreateProduct()"
-          style="cursor: pointer; color: #0d6efd"
-          >Agregá un producto</a
-        >
-      </p>
-    </div>
-    <div class="row g-2">
-      <div class="col-12 col-md-6 d-flex flex-column">
-        <label class="input_label">Cantidad</label>
-        <p-inputNumber
-          formControlName="cantidad"
-          [min]="0"
-          placeholder="0"
-          mode="decimal"
-          [showButtons]="true"
-          buttonLayout="stacked"
-          inputId="cantidad"
-          class="w-100 h-30 wid"
-          inputStyleClass="w-100 h-30 responsive-input"
-        ></p-inputNumber>
+      <div *ngIf="modeUser">
+        <p class="mt-0 mb-2 text-secondary fs-6">
+          ¿no te aparece el producto que buscas ?
+          <a
+            (click)="onNavigateToCreateProduct()"
+            style="cursor: pointer; color: #0d6efd"
+            >Agregá un producto</a
+          >
+        </p>
+
+        <div class="row g-2">
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <label class="input_label">Cantidad</label>
+            <p-inputNumber
+              formControlName="cantidad"
+              [min]="0"
+              placeholder="0"
+              mode="decimal"
+              [showButtons]="true"
+              buttonLayout="stacked"
+              inputId="cantidad"
+              class="w-100 h-30 wid"
+              inputStyleClass="w-100 h-30 responsive-input"
+            ></p-inputNumber>
+          </div>
+
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <label class="input_label mb-1">Unidad de Medida</label>
+            <p-autoComplete
+              formControlName="unidad_medida_id"
+              [suggestions]="filteredMedidasData"
+              (completeMethod)="filterData($event)"
+              [dropdown]="true"
+              optionLabel="nombre"
+              placeholder="Selecciona una unidad de medida"
+              dropdownIcon="pi pi-chevron-down"
+              class="w-100 responsive-input"
+              inputStyleClass="w-100"
+            ></p-autoComplete>
+          </div>
+        </div>
+
+        <app-input-box
+          label="Razon del pedido (opcional)"
+          type="text"
+          id="razon_pedido"
+          placeholder="Ej: Este pedido es urgente por.."
+          [required]="false"
+          [isTextarea]="false"
+          formControlName="razon_pedido"
+        ></app-input-box>
       </div>
+    </div>
+    <!-- Modo jefe de compras -->
+    <div *ngIf="!modeUser">
+      <div class="row g-2">
+        <div class="col-12 col-md-6 d-flex flex-column">
+          <label class="input_label">Cantidad Aceptada</label>
+          <p-inputNumber
+            formControlName="cantidad_aceptada"
+            [min]="0"
+            placeholder="0"
+            mode="decimal"
+            [showButtons]="true"
+            buttonLayout="stacked"
+            inputId="cantidad"
+            class="w-100 h-30 wid"
+            inputStyleClass="w-100 h-30 responsive-input"
+          ></p-inputNumber>
+        </div>
 
-      <div class="col-12 col-md-6 d-flex flex-column">
-        <label class="input_label mb-1">Unidad de Medida</label>
-        <p-autoComplete
-          formControlName="unidad_medida_id"
-          [suggestions]="filteredMedidasData"
-          (completeMethod)="filterData($event)"
-          [dropdown]="true"
-          optionLabel="nombre"
-          placeholder="Selecciona una unidad de medida"
-          dropdownIcon="pi pi-chevron-down"
-          class="w-100 responsive-input"
-          inputStyleClass="w-100"
-        ></p-autoComplete>
+        <div class="col-12 col-md-6 d-flex flex-column">
+          <label class="input_label mb-1">Unidad de Medida Aceptada</label>
+          <p-autoComplete
+            formControlName="unidad_medida_id_aceptada"
+            [suggestions]="filteredMedidasData"
+            (completeMethod)="filterData($event)"
+            [dropdown]="true"
+            optionLabel="nombre"
+            placeholder="Selecciona una unidad de medida"
+            dropdownIcon="pi pi-chevron-down"
+            class="w-100 responsive-input"
+            inputStyleClass="w-100"
+          ></p-autoComplete>
+        </div>
       </div>
     </div>
-
-    <app-input-box
-      label="Razon del pedido (opcional)"
-      type="text"
-      id="razon_pedido"
-      placeholder="Ej: Este pedido es urgente por.."
-      [required]="false"
-      [isTextarea]="false"
-      formControlName="razon_pedido"
-    ></app-input-box>
-
     <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
       <!-- Cambiamos el botón para que sea de tipo 'submit' -->
       <app-custom-button

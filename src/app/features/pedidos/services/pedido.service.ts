@@ -360,4 +360,97 @@ export class PedidoService extends StateService<Pedido> {
 
     return { data: nuevoNumero, error };
   }
+  private actualizarItemEnSenal(updatedItem: PedidoItem) {
+    // updatedItem aquí es plano
+
+    // 1. ACTUALIZAR LA SEÑAL DEL PEDIDO INDIVIDUAL ('pedido')
+    this.pedido.update((currentPedido) => {
+      if (!currentPedido || !currentPedido.pedido_items) {
+        return currentPedido;
+      }
+
+      const updatedItems = currentPedido.pedido_items.map((item) => {
+        if (item.id === updatedItem.id) {
+          // --- ¡LA MAGIA ESTÁ AQUÍ! ---
+          // Mantenemos el 'item' viejo (con .producto y .unidad_medida)
+          // y sobrescribimos solo las propiedades que vienen en 'updatedItem'.
+          return { ...item, ...updatedItem };
+        }
+        return item;
+      });
+
+      return { ...currentPedido, pedido_items: updatedItems };
+    });
+
+    // 2. ACTUALIZAR LA SEÑAL DE LA LISTA DE PEDIDOS ('pedidos')
+    this.pedidos.update((currentPedidos) => {
+      return currentPedidos.map((p) => {
+        if (p.id === updatedItem.pedido_id) {
+          const updatedItems = p.pedido_items?.map((item) =>
+            item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+          );
+          return { ...p, pedido_items: updatedItems };
+        }
+        return p;
+      });
+    });
+  }
+  async aceptarPedidoItem(
+    pedidoItemId: number
+  ): Promise<{ data: PedidoItem | null; error: any }> {
+    // 1. ELIMINA el tipado genérico <PedidoItem, ...> de aquí
+    const { data, error } = await this._supabaseClient
+      .rpc('aceptar_pedido_item', {
+        p_pedido_item_id: pedidoItemId,
+      })
+      .single();
+
+    if (!error && data) {
+      // 2. AÑADE el tipado aquí. 'data' es 'any', así que lo casteamos.
+      this.actualizarItemEnSenal(data as PedidoItem);
+    }
+
+    // 3. Devuelve el dato casteado también.
+    return { data: data as PedidoItem | null, error };
+  }
+
+  async rechazarPedidoItem(
+    pedidoItemId: number,
+    justificacion: string
+  ): Promise<{ data: PedidoItem | null; error: any }> {
+    // 1. ELIMINA el tipado genérico
+    const { data, error } = await this._supabaseClient
+      .rpc('rechazar_pedido_item', {
+        p_pedido_item_id: pedidoItemId,
+        p_justificacion: justificacion,
+      })
+      .single();
+
+    if (!error && data) {
+      // 2. AÑADE el tipado aquí
+      this.actualizarItemEnSenal(data as PedidoItem);
+    }
+
+    // 3. Devuelve el dato casteado
+    return { data: data as PedidoItem | null, error };
+  }
+
+  async aceptarParcialPedidoItem(
+    pedidoItemId: number
+  ): Promise<{ data: PedidoItem | null; error: any }> {
+    // 1. ELIMINA el tipado genérico
+    const { data, error } = await this._supabaseClient
+      .rpc('aceptar_parcial_pedido_item', {
+        p_pedido_item_id: pedidoItemId,
+      })
+      .single();
+
+    if (!error && data) {
+      // 2. AÑADE el tipado aquí
+      this.actualizarItemEnSenal(data as PedidoItem);
+    }
+
+    // 3. Devuelve el dato casteado
+    return { data: data as PedidoItem | null, error };
+  }
 }

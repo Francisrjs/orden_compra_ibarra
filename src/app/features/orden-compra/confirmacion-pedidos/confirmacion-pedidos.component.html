@@ -1,4 +1,14 @@
+<p-toast></p-toast>
+<app-sidebar
+  [(isVisible)]="sidebarVisible"
+  [title]="sidebarTitle"
+  [componentToLoad]="componentToLoad"
+  [componentInputs]="sidebarInputs"
+></app-sidebar>
+
+<h2 class="mb-2 text-center">Pedidos por aceptar:</h2>
 <app-table-ng-pedidos
   [modoUsuario]="false"
   [filtroPedidos]="'pedidos_pendientes'"
+  (openEditPedidoOC)="openPedidoForm($event)"
 ></app-table-ng-pedidos>
