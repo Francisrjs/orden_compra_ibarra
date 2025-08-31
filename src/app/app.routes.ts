@@ -11,10 +11,11 @@ import { ProductoPedidoFormComponent } from './features/productos/producto/produ
 import { TableNGPedidos } from './shared/tables/table-ng/table-ng.component';
 import { ConfirmacionPedidosComponent } from './features/orden-compra/confirmacion-pedidos/confirmacion-pedidos.component';
 import { OrdenCompraFormComponent } from './features/orden-compra/orden-compra-form/orden-compra-form.component';
+import { LoginComponent } from './features/auth/login/login.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
-  //Pedidos
+  { path: 'login', component: LoginComponent },
   { path: 'pedidos', component: PedidosComponent },
   { path: 'pedidos/agregar', component: PedidosComponent },
   { path: 'pedido/:id', component: PedidosDetalleComponent },
