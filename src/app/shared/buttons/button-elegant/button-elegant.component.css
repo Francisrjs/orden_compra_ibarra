@@ -28,11 +28,13 @@
   align-items: center;
   text-decoration: none;
 }
-
+.btn:hover {
+  opacity: 1;
+}
 /* 2. ESTADO DESHABILITADO: Común a todos los tipos de botón */
 .btn[disabled],
 .btn.disabled {
-  opacity: 0.6;
+  opacity: 0.8;
   cursor: not-allowed;
 }
 
@@ -50,7 +52,7 @@
   color: #fff;
 }
 .btn-success:hover {
-  background: #323332;
+  background: rgb(50, 94, 50);
 }
 
 .btn-danger {

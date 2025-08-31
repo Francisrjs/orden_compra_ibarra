@@ -27,6 +27,7 @@ import { CategoriaService } from '../../service/categoria-service.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-items-pedidos-card/table-items-pedidos-card.component';
 @Component({
   selector: 'app-producto-form',
   standalone: true,
@@ -38,6 +39,7 @@ import { MessageService } from 'primeng/api';
     InputModalSelectorComponent,
     ButtonElegantComponent,
     InputOptionsComponent,
+    TableItemsPedidosCardComponent,
   ],
   providers: [],
   templateUrl: './producto-form.component.html',

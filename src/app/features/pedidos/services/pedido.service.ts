@@ -35,7 +35,8 @@ export class PedidoService extends StateService<Pedido> {
           cantidad,
           estado,
           unidad_medida:unidad_medida_id (id, nombre),
-          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
+          razon_pedido
         )
       `
         )
@@ -83,7 +84,8 @@ export class PedidoService extends StateService<Pedido> {
           cantidad,
           estado,
           unidad_medida:unidad_medida_id (id, nombre),
-          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
+          razon_pedido
         )
       `
         )
@@ -149,7 +151,8 @@ export class PedidoService extends StateService<Pedido> {
           cantidad,
           estado,
           unidad_medida:unidad_medida_id (id, nombre),
-          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text))
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
+          razon_pedido
         )
       `
       )

@@ -11,6 +11,7 @@ import { ToastModule } from 'primeng/toast';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 import { PedidosFormComponent } from './pedidos-form/pedidos-form.component';
 import { MessageService } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-pedidos',
@@ -25,6 +26,7 @@ import { MessageService } from 'primeng/api';
     TableNGPedidos,
     ToastModule,
     SidebarComponent,
+    PedidosFormComponent,
   ],
   providers: [MessageService],
 })
@@ -35,24 +37,19 @@ export class PedidosComponent implements OnInit {
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   private _pedidoService = inject(PedidoService);
   private _messageService = inject(MessageService);
+  private route = inject(ActivatedRoute);
   loading = false;
   error: string | null = null;
-  pedidos: Pedido[] = [];
+  pedidosSignal = this._pedidoService.pedidos();
 
   async ngOnInit(): Promise<void> {
     this.loading = true;
-    try {
-      const data = await this._pedidoService.getAllPedidos();
-      if (data) {
-        this.pedidos = data;
-      } else {
-        this.pedidos = [];
+    this.route.queryParams.subscribe((params) => {
+      if (params['agregar']) {
+        this.openPedidoForm();
+        console.log('form');
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.loading = false;
-    }
+    });
   }
   getBadgeClass(estado: string): string {
     return getBadgeClassByEstadoPedido(estado);

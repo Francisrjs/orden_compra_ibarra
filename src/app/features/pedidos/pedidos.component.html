@@ -37,4 +37,7 @@
 <h2 class="text-center my-auto mx-auto mb-3 mt-3 bg-gray">
   Historial de mis pedidos
 </h2>
-<app-table-ng-pedidos (openCreatePedido)="openPedidoForm()" />
+<app-table-ng-pedidos
+  (openCreatePedido)="openPedidoForm()"
+  filtroPedidos="usuario"
+/>

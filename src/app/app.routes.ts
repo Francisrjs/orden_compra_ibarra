@@ -16,7 +16,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
   //Pedidos
   { path: 'pedidos', component: PedidosComponent },
-  { path: 'pedidos/add', component: PedidosFormComponent },
+  { path: 'pedidos/agregar', component: PedidosComponent },
   { path: 'pedido/:id', component: PedidosDetalleComponent },
   { path: 'producto/add', component: ProductoFormComponent },
   { path: 'tabla', component: TableNGPedidos },

@@ -108,8 +108,6 @@ export class TableNGPedidos implements OnInit {
     // Usamos 'effect' para reaccionar a los cambios de la señal
     effect(() => {
       this.pedidos = this.pedidosSignal();
-      console.log(this.pedidos);
-      console.log('Número de pedidos actualizados:', this.pedidos.length);
     });
   }
   ngOnInit() {
@@ -120,13 +118,16 @@ export class TableNGPedidos implements OnInit {
     let raw: Pedido[] | null = [];
     switch (this.filtroPedidos) {
       case 'usuario':
-        // raw = await this._PedidoService.getPedidosByUsuario('USUARIO_ID');
+        if (this.pedidosSignal.length === 0) {
+          await this._PedidoService.getAllPedidos();
+        }
+        raw = this.pedidosSignal();
         break;
       case 'pedidos_pendientes':
         raw = await this._PedidoService.getAllPedidosPendientes();
         console.log('pedidos pendientes');
         break;
-      case 'todos':
+      case 'OC':
         raw = await this._PedidoService.getAllPedidos();
         break;
       default:

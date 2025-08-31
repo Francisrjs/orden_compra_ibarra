@@ -27,14 +27,16 @@
 
       <p>
         <b>Urgente:</b>
+
         <span
-          class="mx-2 badge"
+          class="badge mx-2"
           [ngClass]="{
             'text-bg-secondary': !pedido()?.urgente,
-            'text-bg-red': pedido()?.urgente
+            'text-bg-danger': pedido()?.urgente
           }"
-          >{{ pedido()?.urgente ? "SI" : "NO" }}</span
         >
+          {{ pedido()?.urgente ? "SI" : "NO" }}
+        </span>
       </p>
       <p>
         <b>Estado:</b>
@@ -45,12 +47,14 @@
         >
       </p>
       <p *ngIf="pedido()?.plazo_entrega">
-        <b>Plazo de entrega:</b> {{ pedido()?.plazo_entrega }}
+        <b>Plazo de entrega:</b>
+        {{ pedido()?.plazo_entrega | date : "dd/MM/yyyy" }}
         <i class="bi bi-calendar-event"></i>
       </p>
 
       <p>
-        <b>Fecha de creacion:</b> {{ pedido()?.fecha_creacion | date : "medium"
+        <b>Fecha de creacion:</b>
+        {{ pedido()?.fecha_creacion | date : "dd/MM/yyyy, hh:mm"
         }}<i class="bi bi-calendar mx-2"></i>
       </p>
     </div>
@@ -75,130 +79,19 @@
       </ng-template>
     </p-timeline>
   </div>
-  <div class="product-container shadow-sm wi">
-    <!-- Encabezado con el título, buscador y botón de agregar -->
-    <div class="container-header min-vh-25" style="min-width: 350px">
-      <h5 class="fw-bold">Productos/Servicios Agregados</h5>
-      <div class="d-flex align-items-center mt-3 gap-2">
-        <div class="input-group flex-grow-1">
-          <span class="input-group-text bg-light border-end-0" id="search-icon">
-            <i class="bi bi-search"></i>
-          </span>
-          <input
-            type="text"
-            class="form-control border-start-0"
-            placeholder="Buscar producto..."
-          />
-        </div>
-        <app-button-with-icon
-          text="Agregar"
-          iconClass="bi bi-plus"
-          class="w-2 h-1"
-          (buttonClick)="openPedidoProducto()"
-          *ngIf="pedido()?.estado == 'En Creacion'"
-        ></app-button-with-icon>
-      </div>
-    </div>
-
-    <!-- Contenido: Lista de productos o mensaje de "sin productos" -->
-    <div class="container-body">
-      <!-- ***** VISTA 1: Con productos ***** -->
-      <div>
-        <ul
-          class="list-group list-group-flush"
-          *ngFor="let item of pedidoItems"
-        >
-          <!-- Producto 1 -->
-          <li
-            class="list-group-item d-flex justify-content-between align-items-center product-card"
-          >
-            <div class="d-flex align-items-center">
-              <div class="product-icon me-3">
-                <i
-                  class="{{ item.producto?.categoria?.icon_text }} text-success"
-                ></i>
-              </div>
-
-              <div class="product-info">
-                <h6 class="product-title mb-1">
-                  {{ item.producto?.nombre }}
-                  <span
-                    class="mx-2 badge"
-                    [ngClass]="getBadgeClass(item?.estado, true)"
-                    *ngIf="pedido()?.estado != 'En Creacion'"
-                    >{{ item?.estado }}</span
-                  >
-                </h6>
-
-                <p
-                  class="product-description mb-1"
-                  *ngIf="item.producto?.descripcion"
-                >
-                  {{ item.producto?.descripcion }}
-                </p>
-                <div class="d-flex row">
-                  <small class="product-quantity text-muted"
-                    ><b>Cantidad:</b> {{ item.cantidad }},
-                    {{ item.unidad_medida.nombre }}</small
-                  >
-
-                  <small
-                    class="product-description mb-1"
-                    *ngIf="item.razon_pedido"
-                  >
-                    Razon del pedido:{{ item.razon_pedido }}
-                  </small>
-                </div>
-              </div>
-            </div>
-            <div
-              class="product-actions d-flex gap-1"
-              *ngIf="pedido()?.estado == 'En Creacion'"
-            >
-              <button
-                class="btn btn-sm btn-light border rounded-circle text-center text-warning gap-5"
-                title="Editar producto"
-                (click)="editProductItem(item)"
-              >
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button
-                class="btn btn-sm btn-light border rounded-circle text-center text-danger"
-                title="Eliminar producto"
-                (click)="deleteItemPedido(item.id)"
-              >
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- ***** VISTA 2: Sin productos (Comentada por defecto) ***** -->
-
-      <div class="no-products-placeholder" *ngIf="pedidoItems.length == 0">
-        <div class="add-icon-circle" (click)="openPedidoProducto()">
-          <i class="bi bi-plus-lg"></i>
-        </div>
-        <p class="mt-3 text-muted">Agregar</p>
-      </div>
-      <div
-        class="no-products-placeholder"
-        *ngIf="pedidoItems.length > 0 && pedido()?.estado == 'En Creacion'"
-      >
-        <div class="add-icon-circle" (click)="showConfirm()">
-          <i class="bi bi-check text-success"></i>
-        </div>
-        <p class="mt-3 text-muted">Finalizar pedido</p>
-      </div>
-    </div>
-  </div>
+  <app-table-items-pedidos-card
+    [pedido]="pedido()"
+    (openCreateItem)="openPedidoProducto()"
+    (deleteItem)="deleteItemPedido($event)"
+    (openEditItem)="editProductItem($event)"
+    (finalizarPedido)="showConfirmarPedido()"
+  ></app-table-items-pedidos-card>
 </div>
 <div class="flex justify-content-center">
   <p-toast
     position="bottom-center"
     key="confirm"
-    (onClose)="onReject()"
+    (onClose)="onRejectPedido()"
     [baseZIndex]="5000"
   >
     <ng-template let-message pTemplate="message">
@@ -213,7 +106,7 @@
             <button
               type="button"
               pButton
-              (click)="onConfirm()"
+              (click)="onConfirmPedido()"
               label="Si"
               class="p-button-success"
             ></button>
@@ -222,7 +115,7 @@
             <button
               type="button"
               pButton
-              (click)="onReject()"
+              (click)="onRejectPedido()"
               label="No"
               class="p-button-secondary"
             ></button>

@@ -27,6 +27,7 @@ import { ProductoPedidoFormComponent } from '../../productos/producto/producto-p
 import { TimelineModule } from 'primeng/timeline';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { TooltipModule } from 'primeng/tooltip';
+import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-items-pedidos-card/table-items-pedidos-card.component';
 interface EventItem {
   status?: string;
   color?: string;
@@ -51,6 +52,7 @@ interface EventItem {
     TimelineModule,
     SpeedDialModule,
     TooltipModule,
+    TableItemsPedidosCardComponent,
   ],
   providers: [MessageService],
 })
@@ -223,8 +225,8 @@ export class PedidosDetalleComponent implements OnInit {
       });
     }
   }
-  deleteItemPedido(idProductoPedido: number) {
-    this._PedidoService.deleteProductoPedido(idProductoPedido);
+  deleteItemPedido(idProductoPedido: PedidoItem) {
+    this._PedidoService.deleteProductoPedido(idProductoPedido.id);
     this._messageService.add({
       severity: 'success',
       summary: 'Éxito',
@@ -286,7 +288,7 @@ export class PedidosDetalleComponent implements OnInit {
     // Retorna true si el índice del evento es menor o igual al del estado actual
     return indexEvento <= indexActual;
   }
-  showConfirm() {
+  showConfirmarPedido() {
     this._messageService.clear('confirm');
     this._messageService.add({
       key: 'confirm',
@@ -297,14 +299,14 @@ export class PedidosDetalleComponent implements OnInit {
     });
   }
 
-  onConfirm() {
+  onConfirmPedido() {
     this._messageService.clear('confirm');
     if (this.pedido()) {
       this._PedidoService.finalizarPedido(this.pedido()!.id);
     }
   }
 
-  onReject() {
+  onRejectPedido() {
     this._messageService.clear('confirm');
   }
 }
