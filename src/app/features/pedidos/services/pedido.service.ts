@@ -89,7 +89,7 @@ export class PedidoService extends StateService<Pedido> {
         )
       `
         )
-        .eq('estado', 'En Proceso de Aprobacion')
+        .in('estado', ['En Proceso de Aprobacion', 'En Proceso de Entrega'])
         .order('id', { ascending: false }); // <-- Opcional: ordena los pedidos del más nuevo al más viejo
 
       if (error) {
@@ -363,27 +363,34 @@ export class PedidoService extends StateService<Pedido> {
 
     return { data: nuevoNumero, error };
   }
-  
-  private actualizarItemEnSenal(updatedItem: PedidoItem) {
 
-
+  private actualizarItemEnSenal(updatedItem: PedidoItem, isAccepted: boolean) {
     // 1. ACTUALIZAR LA SEÑAL DEL PEDIDO INDIVIDUAL ('pedido')
     this.pedido.update((currentPedido) => {
       if (!currentPedido || !currentPedido.pedido_items) {
+        if (currentPedido && isAccepted) {
+          currentPedido.estado = 'En Proceso de Entrega';
+        }
         return currentPedido;
       }
 
       const updatedItems = currentPedido.pedido_items.map((item) => {
         if (item.id === updatedItem.id) {
-          // --- ¡LA MAGIA ESTÁ AQUÍ! ---
-          // Mantenemos el 'item' viejo (con .producto y .unidad_medida)
-          // y sobrescribimos solo las propiedades que vienen en 'updatedItem'.
           return { ...item, ...updatedItem };
         }
         return item;
       });
 
-      return { ...currentPedido, pedido_items: updatedItems };
+      // Si se aceptó un item, actualiza el estado del pedido
+      const nuevoEstado = isAccepted
+        ? 'En Proceso de Entrega'
+        : currentPedido.estado;
+
+      return {
+        ...currentPedido,
+        pedido_items: updatedItems,
+        estado: nuevoEstado,
+      };
     });
 
     // 2. ACTUALIZAR LA SEÑAL DE LA LISTA DE PEDIDOS ('pedidos')
@@ -393,7 +400,9 @@ export class PedidoService extends StateService<Pedido> {
           const updatedItems = p.pedido_items?.map((item) =>
             item.id === updatedItem.id ? { ...item, ...updatedItem } : item
           );
-          return { ...p, pedido_items: updatedItems };
+          // Si se aceptó un item, actualiza el estado del pedido
+          const nuevoEstado = isAccepted ? 'En Proceso de Entrega' : p.estado;
+          return { ...p, pedido_items: updatedItems, estado: nuevoEstado };
         }
         return p;
       });
@@ -411,13 +420,7 @@ export class PedidoService extends StateService<Pedido> {
 
     if (!error && data) {
       // 2. AÑADE el tipado aquí. 'data' es 'any', así que lo casteamos.
-      this.actualizarItemEnSenal(data as PedidoItem);
-      this.pedido.update((currentPedido) => {
-        if (currentPedido.id === (data as PedidoItem).pedido_id) {
-          return { ...currentPedido, estado: 'En Proceso De Entrega' };
-        }
-        return currentPedido;
-      });
+      this.actualizarItemEnSenal(data as PedidoItem, true);
     }
 
     // 3. Devuelve el dato casteado también.
@@ -438,19 +441,18 @@ export class PedidoService extends StateService<Pedido> {
 
     if (!error && data) {
       // 2. AÑADE el tipado aquí
-      this.actualizarItemEnSenal(data as PedidoItem);
+      this.actualizarItemEnSenal(data as PedidoItem, false);
     }
 
     // 3. Devuelve el dato casteado
     return { data: data as PedidoItem | null, error };
   }
 
-    async aceptarParcialPedidoItem(
+  async aceptarParcialPedidoItem(
     pedidoItemId: number,
     cantidadAceptada: number,
     unidadMedidaIdAceptada: number
   ): Promise<{ data: PedidoItem | null; error: any }> {
-    
     const { data, error } = await this._supabaseClient
       .rpc('aceptar_parcial_pedido_item', {
         // Pasamos todos los parámetros que la función SQL espera
@@ -462,7 +464,7 @@ export class PedidoService extends StateService<Pedido> {
 
     if (!error && data) {
       // La función 'actualizarItemEnSenal' que ya tienes funcionará perfectamente aquí
-      this.actualizarItemEnSenal(data as PedidoItem);
+      this.actualizarItemEnSenal(data as PedidoItem, true);
     }
 
     return { data: data as PedidoItem | null, error };

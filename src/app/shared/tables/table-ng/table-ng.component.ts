@@ -124,7 +124,8 @@ export class TableNGPedidos implements OnInit {
         raw = this.pedidosSignal();
         break;
       case 'pedidos_pendientes':
-        raw = await this._PedidoService.getAllPedidosPendientes();
+        await this._PedidoService.getAllPedidosPendientes();
+        raw = this.pedidosSignal();
         console.log('pedidos pendientes');
         break;
       case 'OC':
@@ -198,6 +199,11 @@ export class TableNGPedidos implements OnInit {
   requestEditPedidoOC(pedidoItem: PedidoItem) {
     console.log(pedidoItem);
     this.openEditPedidoOC.emit(pedidoItem);
+  }
+  itemsPendientes(p: Pedido): number {
+    return (
+      p.pedido_items?.filter((item) => item.estado === 'Pendiente').length ?? 0
+    );
   }
 
   configurarTraducciones() {
@@ -326,9 +332,9 @@ export class TableNGPedidos implements OnInit {
 
   async aceptarParcialPedidoItem(pedidoItem: PedidoItem) {
     try {
-        // const { data, error } =
-        //   await this._PedidoService.aceptarParcialPedidoItem(pedidoItem.id);
-        // if (error) throw error;
+      // const { data, error } =
+      //   await this._PedidoService.aceptarParcialPedidoItem(pedidoItem.id);
+      // if (error) throw error;
 
       this._messageService.add({
         severity: 'info',

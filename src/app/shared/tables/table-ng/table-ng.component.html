@@ -160,6 +160,17 @@
             ></p-columnFilter>
           </div>
         </th> -->
+        <th pSortableColumn="items_pendientes" *ngIf="!modoUsuario">
+          <div class="flex align-items-center">
+            Items Pendientes
+            <p-sortIcon field="items_pendientes"></p-sortIcon>
+            <p-columnFilter
+              type="string"
+              field="items_pendientes"
+              display="menu"
+            ></p-columnFilter>
+          </div>
+        </th>
         <th pSortableColumn="estado" style="max-width: 2rem; min-width: 1rem">
           <div class="flex align-items-center" style="max-width: 1rem">
             Estado
@@ -226,7 +237,16 @@
         </td>
 
         <td>{{ pedido.plazo_entrega }}</td>
-
+        <td *ngIf="!modoUsuario">
+          <ng-container *ngIf="itemsPendientes(pedido) > 0; else noPendientes">
+            <span class="badge bg-danger text-white">{{
+              itemsPendientes(pedido)
+            }}</span>
+          </ng-container>
+          <ng-template #noPendientes>
+            <span>{{ itemsPendientes(pedido) }}</span>
+          </ng-template>
+        </td>
         <td>
           <!-- <p-tag
            [value]="pedido.estado"
