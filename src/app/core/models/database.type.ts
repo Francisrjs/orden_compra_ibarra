@@ -87,6 +87,8 @@ export interface PedidoItem {
   unidad_medida: UnidadMedida;
   //Relacion opcional
   producto?: Producto;
+  unidad_medida_id_aceptada?: UnidadMedida;
+  cantidad_aceptada?:number;
 }
 
 export interface OrdenCompra {

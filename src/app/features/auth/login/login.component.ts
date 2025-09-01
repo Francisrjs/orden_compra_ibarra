@@ -11,6 +11,9 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
 import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
 import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { Toast, ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
@@ -22,35 +25,67 @@ import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/bu
     ReactiveFormsModule,
     ButtonFancyComponent,
     ButtonElegantComponent,
+    ToastModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
+  providers:[MessageService]
 })
 export class LoginComponent {
+  private fb = inject(FormBuilder);
+  private _authService= inject(AuthService);
+  private messageService = inject(MessageService);
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
     message: string;
   }) => void;
-  private fb = inject(FormBuilder);
+  messageResult?: { severity?: string; success: boolean; message: string };
+  
   loginForm!: FormGroup;
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      passwrod: ['', Validators.required],
+      password: ['', Validators.required],
     });
   }
   async onSubmit() {
     this.loginForm.markAllAsTouched();
     if (this.loginForm.invalid) {
       const msg = 'Revisá los campos obligatorios ❌';
-
-      this.formResult?.({ success: false, message: msg });
+      this.setMessage({ success: false, message: msg });
       return;
     }
-    const formValue = {
-      ...this.loginForm.value,
-      area: this.loginForm.value.area.name,
-    };
+    const formValue= this.loginForm.value;
+    try {
+      const authResponse= await this._authService.signIn(
+        formValue.email ?? '',
+        formValue.password ?? ''
+      )
+      if (!authResponse) {
+        this.setMessage({ success: true, message: 'Login exitoso ✅' });
+        console.log("Login exitoso")
+      } else {
+        this.setMessage({ success: false, message: 'Credenciales inválidas ❌' });
+        console.log("Error al iniciar sesión");
+      }
+    } catch (error) {
+      this.setMessage({ success: false, message: `error al iniciar seción '${error}'` });
+      console.log("Error al iniciar sesión");
+    }
+
+  }
+    setMessage(result: { severity?: string; success: boolean; message: string }) {
+    this.messageResult = result;
+    this.formResult?.(result);
+     this.messageService.add({
+      severity: result.success ? 'success' : 'error',
+      summary: result.success ? 'Éxito' : 'Error',
+      detail: result.message,
+      life: 20000 // 20 segundos
+    });
+    setTimeout(() => {
+      this.messageResult = undefined;
+    }, 20000); // 20 segundos
   }
 }

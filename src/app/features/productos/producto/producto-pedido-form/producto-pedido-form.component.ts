@@ -137,6 +137,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
           producto_id:
             this.pedidoItemOC?.producto_id ??
             this.productoPedidoForm.value.producto_id,
+      
         });
       }
     }
@@ -197,10 +198,10 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     // Se ejecuta desde ngOnInit: parchea con lo que ya está llegando por inputs
     if (this.pedidoItemOC) {
       this.idPedidoItem = this.pedidoItemOC.id;
+      this.pedidoId=this.pedidoItemOC.pedido_id;
       this.productoPedidoForm.patchValue({
         producto_id:
           this.pedidoItemOC.producto?.id ??
-          (this.pedidoItemOC as any).producto_id ??
           null,
         cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
         unidad_medida_id_aceptada:
@@ -258,11 +259,22 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     let result;
     if (this.idProduct) {
       // Modo edición
+
       if (typeof this.idPedidoItem === 'number') {
-        result = await this._pedidoService.updatePedidoProducto(
+        if(this.pedidoItemOC){
+          result = await this._pedidoService.aceptarParcialPedidoItem(
+            this.idPedidoItem,
+            formValues.cantidad_aceptada,
+            formValues.unidad_medida_id_aceptada
+          );
+        }else{
+          result = await this._pedidoService.updatePedidoProducto(
           this.idPedidoItem,
           formValues
         );
+
+        }
+                
       } else {
         this.formResult?.({
           success: false,

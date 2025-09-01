@@ -363,8 +363,9 @@ export class PedidoService extends StateService<Pedido> {
 
     return { data: nuevoNumero, error };
   }
+  
   private actualizarItemEnSenal(updatedItem: PedidoItem) {
-    // updatedItem aquí es plano
+
 
     // 1. ACTUALIZAR LA SEÑAL DEL PEDIDO INDIVIDUAL ('pedido')
     this.pedido.update((currentPedido) => {
@@ -411,6 +412,12 @@ export class PedidoService extends StateService<Pedido> {
     if (!error && data) {
       // 2. AÑADE el tipado aquí. 'data' es 'any', así que lo casteamos.
       this.actualizarItemEnSenal(data as PedidoItem);
+      this.pedido.update((currentPedido) => {
+        if (currentPedido.id === (data as PedidoItem).pedido_id) {
+          return { ...currentPedido, estado: 'En Proceso De Entrega' };
+        }
+        return currentPedido;
+      });
     }
 
     // 3. Devuelve el dato casteado también.
@@ -438,22 +445,26 @@ export class PedidoService extends StateService<Pedido> {
     return { data: data as PedidoItem | null, error };
   }
 
-  async aceptarParcialPedidoItem(
-    pedidoItemId: number
+    async aceptarParcialPedidoItem(
+    pedidoItemId: number,
+    cantidadAceptada: number,
+    unidadMedidaIdAceptada: number
   ): Promise<{ data: PedidoItem | null; error: any }> {
-    // 1. ELIMINA el tipado genérico
+    
     const { data, error } = await this._supabaseClient
       .rpc('aceptar_parcial_pedido_item', {
+        // Pasamos todos los parámetros que la función SQL espera
         p_pedido_item_id: pedidoItemId,
+        p_cantidad_aceptada: cantidadAceptada,
+        p_unidad_medida_id_aceptada: unidadMedidaIdAceptada,
       })
       .single();
 
     if (!error && data) {
-      // 2. AÑADE el tipado aquí
+      // La función 'actualizarItemEnSenal' que ya tienes funcionará perfectamente aquí
       this.actualizarItemEnSenal(data as PedidoItem);
     }
 
-    // 3. Devuelve el dato casteado
     return { data: data as PedidoItem | null, error };
   }
 }

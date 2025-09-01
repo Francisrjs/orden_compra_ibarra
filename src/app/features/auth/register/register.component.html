@@ -1,1 +1,53 @@
-<p>register works!</p>
+<div class="d-flex justify-content-center align-items-center">
+  <img src="assets/logo_ibarra.png" width="65" height="65" class="logo mt-2" />
+  <div>
+    <div class="justify-content-center align-items-center">
+      <span class="font-semibold text-xl">TRANSPORTE </span>
+      <span class="font-semibold text-xl text-success">IBARRA</span>
+    </div>
+  </div>
+</div>
+<div class="container mx-auto my-auto form">
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Titulo input box -->
+    <app-input-box
+      label="Email:"
+      type="text"
+      id="email"
+      placeholder="Ingresa tu email"
+      formControlName="email"
+    ></app-input-box>
+    <!-- Mensaje de error para el título -->
+    <div
+      *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+      class="text-red-500 text-sm"
+    >
+      <small
+        *ngIf="registerForm.get('titulo')?.errors?.['required']"
+        class="text-danger"
+        >El email es invalido.</small
+      >
+    </div>
+    <app-input-box
+      label="Contraseña:"
+      type="text"
+      id="password"
+      placeholder="****"
+      formControlName="password"
+    ></app-input-box>
+    ¿Has olvidado tu contraseña? <a href="#" class="text-success mb-2"
+      >Recuperar contraseña</a>
+    <div style="max-width: 400px; display: grid; gap: 20px">
+      <!-- Cambiamos el botón para que sea de tipo 'submit' -->
+      <app-custom-button
+        text="Ingresar"
+        type="submit"
+        styleType="success"
+        [disabled]="registerForm.invalid"
+        (click)="onSubmit()"
+      >
+        ></app-custom-button
+      >
+    </div>
+  </form>
+</div>

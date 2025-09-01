@@ -326,9 +326,9 @@ export class TableNGPedidos implements OnInit {
 
   async aceptarParcialPedidoItem(pedidoItem: PedidoItem) {
     try {
-      const { data, error } =
-        await this._PedidoService.aceptarParcialPedidoItem(pedidoItem.id);
-      if (error) throw error;
+        // const { data, error } =
+        //   await this._PedidoService.aceptarParcialPedidoItem(pedidoItem.id);
+        // if (error) throw error;
 
       this._messageService.add({
         severity: 'info',
