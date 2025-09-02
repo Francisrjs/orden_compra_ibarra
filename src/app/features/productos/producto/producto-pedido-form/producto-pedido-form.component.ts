@@ -99,70 +99,35 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   selectedMedida: any[] | undefined;
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Si nos viene un pedidoItem desde el padre, parcheamos el form (si ya existe)
-    if (changes['pedidoItemOC'] && this.pedidoItemOC) {
-      // guardamos id del item para editar luego
-      this.idPedidoItem = this.pedidoItemOC.id;
-      if (this.productoPedidoForm) {
-        this.productoPedidoForm.patchValue({
-          producto_id:
-            this.pedidoItemOC.producto?.id ??
-            (this.pedidoItemOC as any).producto_id ??
-            null,
-          cantidad: this.pedidoItemOC.cantidad ?? null,
-          // Puede venir objeto unidad_medida o id; en onSubmit ya normalizas
-          unidad_medida_id:
-            this.pedidoItemOC.unidad_medida ??
-            (this.pedidoItemOC as any).unidad_medida_id ??
-            null,
-          razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
-          unidad_medidad_id_aceptada: this.pedidoItemOC.unidad_medida ?? null,
-          cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
-        });
-      }
-    }
-
-    // Mantén también la lógica existente para idProduct si la usas
-    if (changes['idProduct'] && this.idProduct && this.productoPedidoForm) {
-      if (this.modeUser) {
-        this.productoPedidoForm.patchValue({
-          producto_id: this.idProduct,
-          cantidad: this.cantidad,
-          unidad_medida_id: this.idMedida,
-          razon_pedido: this.razonPedido,
-        });
-      } else {
-        // si no es modeUser, puedes continuar con tu lógica específica
-        this.productoPedidoForm.patchValue({
-          producto_id:
-            this.pedidoItemOC?.producto_id ??
-            this.productoPedidoForm.value.producto_id,
-      
-        });
-      }
+    if (changes['pedidoItemOC'] && this.productoPedidoForm) {
+      this.patchFormValues();
     }
   }
 
   async ngOnInit(): Promise<void> {
     this.productoPedidoForm = this.fb.group({
+      pedido_id: [this.pedidoId ?? null, Validators.required],
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(1)]],
       unidad_medida_id: [null, Validators.required],
       razon_pedido: [null, [Validators.maxLength(10)]],
+      cantidad_aceptada: [null],
+      unidad_medida_id_aceptada: [null],
     });
+    if (!this.pedidoItemOC) {
+      this.route.paramMap.subscribe((params) => {
+        const id = params.get('id');
+        if (id) this.pedidoId = +id;
 
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) this.pedidoId = +id;
-
-      if (this.idProduct && this.cantidad && this.idMedida) {
-        this.productoPedidoForm.patchValue({
-          producto_id: this.idProduct,
-          cantidad_aceptada: this.cantidad,
-          unidad_medida_id_aceptada: this.idMedida,
-        });
-      }
-    });
+        if (this.idProduct && this.cantidad && this.idMedida) {
+          this.productoPedidoForm.patchValue({
+            producto_id: this.idProduct,
+            cantidad_aceptada: this.cantidad,
+            unidad_medida_id_aceptada: this.idMedida.nombre,
+          });
+        }
+      });
+    }
 
     await this.loadMedidas();
     await this.loadProductos();
@@ -195,26 +160,24 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     }
   }
   private patchFormValues(): void {
-    // Se ejecuta desde ngOnInit: parchea con lo que ya está llegando por inputs
     if (this.pedidoItemOC) {
       this.idPedidoItem = this.pedidoItemOC.id;
-      this.pedidoId=this.pedidoItemOC.pedido_id;
+      this.pedidoId = this.pedidoItemOC.pedido_id;
+
       this.productoPedidoForm.patchValue({
-        producto_id:
-          this.pedidoItemOC.producto?.id ??
-          null,
+        pedido_id: this.pedidoId, // 👈 Aquí se asegura que quede en el form
+        producto_id: this.pedidoItemOC.producto?.id ?? null,
         cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
         unidad_medida_id_aceptada:
-          this.pedidoItemOC.unidad_medida.id ??
-          (this.pedidoItemOC as any).unidad_medida_id ??
-          null,
+          this.pedidoItemOC.unidad_medida?.nombre ?? null,
         razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
       });
       return;
     }
 
-    // Si no hay pedidoItemOC, parchea con entradas individuales (idProduct, cantidad, etc.)
+    // Si no hay pedidoItemOC
     this.productoPedidoForm.patchValue({
+      pedido_id: this.pedidoId ?? null, // 👈 también lo seteo acá
       producto_id: this.idProduct ?? null,
       cantidad: this.cantidad ?? null,
       unidad_medida_id: this.idMedida ?? null,
@@ -231,9 +194,14 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     );
   }
   async onSubmit() {
+    console.log(
+      this.productoPedidoForm.value,
+      this.productoPedidoForm.valid,
+      this.productoPedidoForm.errors
+    );
     this.productoPedidoForm.markAllAsTouched();
 
-    if (this.productoPedidoForm.invalid || !this.pedidoId) {
+    if (this.productoPedidoForm.invalid) {
       const msg = !this.pedidoId
         ? 'No se pudo identificar el pedido.'
         : 'Revisá los campos obligatorios ❌';
@@ -261,20 +229,18 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       // Modo edición
 
       if (typeof this.idPedidoItem === 'number') {
-        if(this.pedidoItemOC){
+        if (this.pedidoItemOC) {
           result = await this._pedidoService.aceptarParcialPedidoItem(
             this.idPedidoItem,
             formValues.cantidad_aceptada,
             formValues.unidad_medida_id_aceptada
           );
-        }else{
+        } else {
           result = await this._pedidoService.updatePedidoProducto(
-          this.idPedidoItem,
-          formValues
-        );
-
+            this.idPedidoItem,
+            formValues
+          );
         }
-                
       } else {
         this.formResult?.({
           success: false,

@@ -126,6 +126,7 @@ export class TableNGPedidos implements OnInit {
       case 'pedidos_pendientes':
         await this._PedidoService.getAllPedidosPendientes();
         raw = this.pedidosSignal();
+        console.log(raw);
         console.log('pedidos pendientes');
         break;
       case 'OC':

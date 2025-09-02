@@ -33,6 +33,7 @@ export class PedidoService extends StateService<Pedido> {
         pedido_items (
           id,
           cantidad,
+           pedido_id,
           estado,
           unidad_medida:unidad_medida_id (id, nombre),
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
@@ -82,6 +83,7 @@ export class PedidoService extends StateService<Pedido> {
         pedido_items (
           id,
           cantidad,
+           pedido_id,
           estado,
           unidad_medida:unidad_medida_id (id, nombre),
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
@@ -229,6 +231,7 @@ export class PedidoService extends StateService<Pedido> {
     // 5. CONSTRUIMOS EL OBJETO FINAL 'itemDetallado' usando las piezas que ya preparamos.
     const itemDetallado: PedidoItem = {
       ...newItem,
+      pedido_id: pedidoId,
       producto: productoCompleto, // Usamos el producto ya hidratado
       unidad_medida: unidadMedidaCompleta,
     } as PedidoItem;
@@ -317,6 +320,7 @@ export class PedidoService extends StateService<Pedido> {
     // Construimos el objeto detallado
     const itemDetallado: PedidoItem = {
       ...updatedItemPlano,
+      pedido_id: idProductoPedido,
       producto: productoCompleto,
       unidad_medida: unidadMedidaCompleta,
     } as PedidoItem;
