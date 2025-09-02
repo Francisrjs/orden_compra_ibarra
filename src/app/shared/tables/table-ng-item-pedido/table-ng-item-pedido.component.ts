@@ -16,6 +16,7 @@ import { TagModule } from 'primeng/tag';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-table-ng-item-pedido',
@@ -27,6 +28,7 @@ import { MessageService } from 'primeng/api';
     TagModule,
     RippleModule,
     ToastModule,
+    RouterLink
   ],
   templateUrl: './table-ng-item-pedido.component.html',
   styleUrls: ['./table-ng-item-pedido.component.css'],
@@ -35,27 +37,18 @@ import { MessageService } from 'primeng/api';
 export class TableNgItemPedidoComponent implements OnInit {
   @Input() modoUsuario = true; // si necesitas condicionales
   @Output() addItem = new EventEmitter<PedidoItem>();
-
+  pedidos: Pedido[] = [];
   private _pedidoService = inject(PedidoService);
 
   items: PedidoItem[] = [];
 
   constructor() {
-    // React to changes in pedidos signal (or pedidoItems if exists)
+    
     effect(() => {
-      // Si tu servicio ya tiene `pedidoItems` signal, úsalo:
-      // const signalExists = (this._pedidoService as any).pedidoItems;
-      // if (signalExists) { this.items = (this._pedidoService as any).pedidoItems(); return; }
+      const p = this._pedidoService.pedidos() ?? [];
+      this.pedidos = p;
 
-      // En caso contrario, derive items pendientes desde pedidos
-      this._pedidoService.getAllPedidos();
-      const pedidos = this._pedidoService.pedidos(); // señal existente en tu servicio
-      if (!pedidos) {
-        this.items = [];
-        return;
-      }
-
-      const allItems: PedidoItem[] = pedidos
+      const allItems: PedidoItem[] = this.pedidos
         .flatMap((p) => p.pedido_items ?? [])
         .filter(
           (it) =>
@@ -70,8 +63,8 @@ export class TableNgItemPedidoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Por si quieres precargar desde el service:
-    // this._pedidoService.getAllPedidos(); // si no están cargados ya
+
+   this._pedidoService.getAllPedidosPendientes();
   }
 
   onAdd(item: PedidoItem) {
@@ -93,5 +86,11 @@ export class TableNgItemPedidoComponent implements OnInit {
       default:
         return undefined;
     }
+  }
+  getNumeroPedido(idItem:PedidoItem){
+    return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.numero_pedido;
+  }
+    getPedido_id(idItem:PedidoItem){
+    return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.id;
   }
 }

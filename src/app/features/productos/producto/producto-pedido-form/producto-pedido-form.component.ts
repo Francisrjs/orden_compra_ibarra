@@ -122,8 +122,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
         if (this.idProduct && this.cantidad && this.idMedida) {
           this.productoPedidoForm.patchValue({
             producto_id: this.idProduct,
-            cantidad_aceptada: this.cantidad,
-            unidad_medida_id_aceptada: this.idMedida.nombre,
+            cantidad: this.cantidad,
+            unidad_medida_id: this.idMedida,
           });
         }
       });
@@ -167,10 +167,9 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       this.productoPedidoForm.patchValue({
         pedido_id: this.pedidoId, // 👈 Aquí se asegura que quede en el form
         producto_id: this.pedidoItemOC.producto?.id ?? null,
-        cantidad_aceptada: this.pedidoItemOC.cantidad ?? null,
-        unidad_medida_id_aceptada:
-          this.pedidoItemOC.unidad_medida?.nombre ?? null,
         razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
+        cantidad: this.pedidoItemOC.cantidad ?? null,
+        unidad_medida_id: this.pedidoItemOC?.unidad_medida?.id ?? null,
       });
       return;
     }
@@ -193,7 +192,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       }
     );
   }
-  async onSubmit() {
+   async onSubmit() {
     console.log(
       this.productoPedidoForm.value,
       this.productoPedidoForm.valid,
@@ -210,7 +209,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       return;
     }
 
-    const formValues = { ...this.productoPedidoForm.value };
+    const formValues: any = { ...this.productoPedidoForm.value };
 
     if (
       formValues.unidad_medida_id &&
@@ -218,60 +217,75 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     ) {
       formValues.unidad_medida_id = formValues.unidad_medida_id.id;
     }
+    if (
+      formValues.unidad_medida_id_aceptada &&
+      typeof formValues.unidad_medida_id_aceptada === 'object'
+    ) {
+      formValues.unidad_medida_id_aceptada =
+        formValues.unidad_medida_id_aceptada.id;
+    }
 
     this.formResult?.({
       severity: 'info',
       success: true,
       message: 'Guardando, por favor espera...',
     });
-    let result;
-    if (this.idProduct) {
-      // Modo edición
 
-      if (typeof this.idPedidoItem === 'number') {
-        if (this.pedidoItemOC) {
-          result = await this._pedidoService.aceptarParcialPedidoItem(
-            this.idPedidoItem,
-            formValues.cantidad_aceptada,
-            formValues.unidad_medida_id_aceptada
-          );
-        } else {
-          result = await this._pedidoService.updatePedidoProducto(
-            this.idPedidoItem,
-            formValues
-          );
-        }
-      } else {
+    let result;
+    // PRIORITARIO: si viene pedidoItemOC -> aceptar parcial
+    if (this.pedidoItemOC) {
+      if (typeof this.pedidoItemOC.id !== 'number') {
         this.formResult?.({
           success: false,
-          message: 'No se pudo identificar el item a editar.',
+          message: 'No se pudo identificar el item a aceptar.',
         });
         return;
       }
+      console.log('Aceptando parcialmente el pedido item (pedidoItemOC)');
+      result = await this._pedidoService.aceptarParcialPedidoItem(
+        this.pedidoItemOC.id,
+        formValues.cantidad_aceptada,
+        formValues.unidad_medida_id_aceptada
+      );
+    } else if (typeof this.idPedidoItem === 'number') {
+      // edición de un item existente (update)
+      result = await this._pedidoService.updatePedidoProducto(
+        this.idPedidoItem,
+        formValues
+      );
     } else {
-      // Modo creación
+      // creación de nuevo item
+      if (!this.pedidoId) {
+        this.formResult?.({
+          success: false,
+          message: 'No se pudo identificar el pedido para crear el item.',
+        });
+        return;
+      }
       result = await this._pedidoService.addPedidoProducto(
         this.pedidoId,
         formValues
       );
     }
 
-    const { data, error } = result;
-    const payload: Partial<PedidoItem> = formValues;
+    const { data, error } = result as { data: Partial<PedidoItem> | null; error: any };
 
     if (error) {
       this.formResult?.({
         success: false,
-        message: 'No se pudo guardar el producto. ' + error.message,
+        message: 'No se pudo guardar el producto. ' + (error.message ?? JSON.stringify(error)),
       });
     } else {
       this.formResult?.({
         success: true,
-        message: 'El producto fue agregado correctamente ✅',
+        message:
+          this.pedidoItemOC || typeof this.idPedidoItem === 'number'
+            ? 'El producto fue actualizado correctamente ✅'
+            : 'El producto fue agregado correctamente ✅',
       });
 
       if (this.onSaveSuccess) {
-        this.onSaveSuccess(); // Esto cierra el sidebar
+        this.onSaveSuccess();
       }
       this.productoPedidoForm.reset();
     }

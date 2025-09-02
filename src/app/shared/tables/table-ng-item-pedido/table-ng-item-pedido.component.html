@@ -3,8 +3,9 @@
 <p-table [value]="items" dataKey="id" [tableStyle]="{ 'min-width': '40rem' }">
   <ng-template pTemplate="header">
     <tr>
-      <th pSortableColumn="id" class="small-col">
-        Id <p-sortIcon field="id"></p-sortIcon>
+  
+       <th pSortableColumn="numero_pedido" style="width: 30rem">
+        Numero Pedido <p-sortIcon field="numero_pedido"></p-sortIcon>
       </th>
       <th pSortableColumn="producto.nombre">
         Producto <p-sortIcon field="producto.nombre"></p-sortIcon>
@@ -25,10 +26,18 @@
 
   <ng-template pTemplate="body" let-item>
     <tr>
-      <td>{{ item.id }}</td>
+    
+      <td style="width: 8rem">{{ getNumeroPedido(item) }}</td>
       <td>{{ item.producto?.nombre }}</td>
-      <td>{{ item.cantidad }}</td>
-      <td>{{ item.unidad_medida?.nombre }}</td>
+      <td>
+        {{ (item.cantidad_aceptada ?? 0) > 0 ? item.cantidad_aceptada : item.cantidad }}
+      </td>
+
+      <!-- Un solo td para unidad: muestra la unidad aceptada si existe, sino la unidad original -->
+      <td>
+        {{ item.unidad_medida_aceptada?.nombre ?? item.unidad_medida?.nombre }}
+      </td>
+
       <td>
         <p-tag
           [value]="item.estado"
@@ -39,7 +48,7 @@
       <!-- Si quieres mostrar un input o icono para cambiar cantidad aceptada, aquí -->
 
       <!-- Botón PLUS que emite el item -->
-      <td class="actions-col">
+      <td class="actions-col d-flex">
         <!-- <button
           pButton
           type="button"
@@ -56,6 +65,13 @@
           [text]="true"
           severity="success"
         ></p-button>
+        <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              [routerLink]="['/pedido', getPedido_id(item)]"
+            />
       </td>
     </tr>
   </ng-template>

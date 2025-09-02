@@ -342,9 +342,14 @@
 
                   <td>{{ pedidoItem.producto?.nombre }}</td>
 
-                  <td>{{ pedidoItem.cantidad }}</td>
+                  <td>
+        {{ (pedidoItem.cantidad_aceptada ?? 0) > 0 ? pedidoItem.cantidad_aceptada : pedidoItem.cantidad }}
+      </td>
 
-                  <td>{{ pedidoItem.unidad_medida?.nombre }}</td>
+      <!-- Un solo td para unidad: muestra la unidad aceptada si existe, sino la unidad original -->
+      <td>
+  {{ pedidoItem.unidad_medida_aceptada?.nombre ?? pedidoItem.unidad_medida?.nombre }}
+</td>
 
                   <td>
                     <p-tag
