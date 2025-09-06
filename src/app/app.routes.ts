@@ -12,6 +12,8 @@ import { TableNGPedidos } from './shared/tables/table-ng/table-ng.component';
 import { ConfirmacionPedidosComponent } from './features/orden-compra/confirmacion-pedidos/confirmacion-pedidos.component';
 import { OrdenCompraFormComponent } from './features/orden-compra/orden-compra-form/orden-compra-form.component';
 import { LoginComponent } from './features/auth/login/login.component';
+import { ProveedoresDetalleComponent } from './features/proveedores/proveedores-detalle/proveedores-detalle.component';
+import { ProveedoresFormComponent } from './features/proveedores/proveedores-form/proveedores-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -25,6 +27,8 @@ export const routes: Routes = [
     path: 'pedido/:id/AgregarProducto',
     component: ProductoPedidoFormComponent,
   },
+  { path: 'proveedores', component: ProveedoresDetalleComponent },
+  { path: 'proveedores/form', component: ProveedoresFormComponent },
   //Orden de compra
   { path: 'oc/pendientes', component: ConfirmacionPedidosComponent },
   { path: 'oc', component: OrdenCompraFormComponent },

@@ -77,6 +77,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     message: string;
   }) => void;
 
+  @Input() link_Referencia?: string = '';
+
   @Input() modeUser?: boolean = true;
   @Input() pedidoItemOC?: PedidoItem;
   private route = inject(ActivatedRoute);
@@ -110,9 +112,10 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(1)]],
       unidad_medida_id: [null, Validators.required],
-      razon_pedido: [null, [Validators.maxLength(10)]],
+      razon_pedido: [null, [Validators.maxLength(30)]],
       cantidad_aceptada: [null],
       unidad_medida_id_aceptada: [null],
+      link_referencia: [null, [Validators.maxLength(300)]],
     });
     if (!this.pedidoItemOC) {
       this.route.paramMap.subscribe((params) => {
@@ -170,10 +173,15 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
         razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
         cantidad: this.pedidoItemOC.cantidad ?? null,
         unidad_medida_id: this.pedidoItemOC?.unidad_medida?.id ?? null,
+        link_referencia: (this.pedidoItemOC as any).link_referencia ?? '',
       });
       return;
     }
 
+    console.log(
+      'Formulario después de patchValue:',
+      this.productoPedidoForm.value
+    );
     // Si no hay pedidoItemOC
     this.productoPedidoForm.patchValue({
       pedido_id: this.pedidoId ?? null, // 👈 también lo seteo acá
@@ -181,7 +189,12 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       cantidad: this.cantidad ?? null,
       unidad_medida_id: this.idMedida ?? null,
       razon_pedido: this.razonPedido ?? '',
+      link_referencia: this.link_Referencia ?? '',
     });
+    console.log(
+      'Formulario después de patchValue:',
+      this.productoPedidoForm.value
+    );
   }
   filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
@@ -192,7 +205,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       }
     );
   }
-   async onSubmit() {
+  async onSubmit() {
     console.log(
       this.productoPedidoForm.value,
       this.productoPedidoForm.valid,
@@ -268,12 +281,17 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       );
     }
 
-    const { data, error } = result as { data: Partial<PedidoItem> | null; error: any };
+    const { data, error } = result as {
+      data: Partial<PedidoItem> | null;
+      error: any;
+    };
 
     if (error) {
       this.formResult?.({
         success: false,
-        message: 'No se pudo guardar el producto. ' + (error.message ?? JSON.stringify(error)),
+        message:
+          'No se pudo guardar el producto. ' +
+          (error.message ?? JSON.stringify(error)),
       });
     } else {
       this.formResult?.({

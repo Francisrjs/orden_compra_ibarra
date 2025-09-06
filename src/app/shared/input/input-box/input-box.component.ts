@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, forwardRef } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import {
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  FormControl,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-input-box',
@@ -16,25 +22,33 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     },
   ],
 })
-export class InputBoxComponent implements ControlValueAccessor {
+export class InputBoxComponent implements ControlValueAccessor, OnInit {
   @Input() label: string = '';
   @Input() type: string = 'text';
   @Input() placeholder: string = '';
   @Input() required: boolean = false;
+  @Input() minLength?: number;
+  @Input() maxLength?: number;
   @Input() id: string = '';
   @Input() isTextarea: boolean = false;
-  @Input() disabled = false; // <--- ahora se puede usar [disabled]
-  @Input() readOnly = false; // <--- opcional, por si lo querés
+  @Input() disabled = false;
+  @Input() readOnly = false;
   @Input() value: any = '';
+  @Input() icon: string = '';
+
   isDisabled = false;
+  control: FormControl | null = null;
 
   // Callbacks que Angular inyecta
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
 
-  // ControlValueAccessor ------------------------------------------------
+  ngOnInit() {
+    // Si quieres aplicar validadores aquí, solo hazlo si NO los pones en el FormGroup
+    // Si usas formControlName, los validadores deben ir en el FormGroup, no aquí
+  }
+
   writeValue(obj: any): void {
-    // Angular llama esto para inicializar/actualizar el valor desde el FormControl padre
     this.value = obj ?? '';
   }
 
@@ -50,18 +64,14 @@ export class InputBoxComponent implements ControlValueAccessor {
     this.isDisabled = isDisabled;
   }
 
-  // Manejo de eventos desde la plantilla ---------------------------------
-  // Recibimos el Event (no el value directo) y casteamos de forma segura.
   onInput(event: Event) {
-    // event.target puede ser HTMLInputElement | HTMLTextAreaElement | EventTarget | null
-    // casteamos a las interfaces DOM correctas para acceder a `value` sin que el template arroje errores
     const target = event.target as
       | HTMLInputElement
       | HTMLTextAreaElement
       | null;
-    const v = target?.value ?? ''; // operador ?. evita error si target es null
+    const v = target?.value ?? '';
     this.value = v;
-    this.onChange(v); // notificamos al form
+    this.onChange(v);
   }
 
   onBlur() {

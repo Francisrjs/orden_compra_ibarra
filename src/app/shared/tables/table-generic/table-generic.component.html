@@ -1,0 +1,147 @@
+<div class="generic-table-wrapper">
+  <p-table
+    #ptable
+    [value]="items"
+    [dataKey]="dataKey"
+    [loading]="loading"
+    [tableStyle]="{ 'min-width': '40rem' }"
+    [globalFilterFields]="globalFilterFields"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center gap-2">
+        <span class="p-input-icon-left flex-grow-1">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            [placeholder]="searchPlaceholder"
+            (input)="applyGlobalFilter($event, ptable)"
+            style="width: 100%"
+          />
+        </span>
+        <button
+          *ngIf="showAddButton"
+          pButton
+          type="button"
+          icon="pi pi-plus"
+          class="p-button-sm"
+          [label]="addButtonLabel"
+          (click)="onAddClick()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngIf="expandableRows" style="width: 2rem"></th>
+        <ng-container *ngFor="let col of columns">
+          <th
+            [pSortableColumn]="col.sortable ? col.field : undefined"
+            [style.width]="col.width"
+            [ngClass]="col.styleClass"
+          >
+            <div
+              class="flex align-items-center"
+              *ngIf="col.sortable || col.filter; else onlyHeader"
+            >
+              {{ col.header }}
+              <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+              <p-columnFilter
+                *ngIf="col.filter"
+                [type]="col.type || 'text'"
+                [field]="col.field"
+                display="menu"
+                class="ml-auto"
+              ></p-columnFilter>
+            </div>
+            <ng-template #onlyHeader>{{ col.header }}</ng-template>
+          </th>
+        </ng-container>
+        <th *ngIf="rowActions?.length">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row let-expanded="expanded">
+      <tr (click)="onRowClick(row)">
+        <td *ngIf="expandableRows">
+          <button
+            type="button"
+            pButton
+            pRipple
+            [pRowToggler]="row"
+            class="p-button-text p-button-rounded p-button-plain"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          ></button>
+        </td>
+        <ng-container *ngFor="let col of columns">
+          <td>
+            <ng-container *ngIf="col.bodyTemplate; else defaultCell">
+              <ng-container
+                *ngTemplateOutlet="
+                  col.bodyTemplate;
+                  context: {
+                    $implicit: row,
+                    field: col.field,
+                    value: resolveFieldData(row, col.field)
+                  }
+                "
+              ></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>{{
+              resolveFieldData(row, col.field)
+            }}</ng-template>
+          </td>
+        </ng-container>
+        <td *ngIf="rowActions?.length">
+          <div class="flex gap-1">
+            <ng-container *ngFor="let action of rowActions">
+              <p-button
+                *ngIf="!action.visible || action.visible(row)"
+                type="button"
+                [icon]="action.icon || ''"
+                [label]="action.label || ''"
+                [severity]="action.severity"
+                [text]="!!action.text"
+                [rounded]="!!action.rounded"
+                [styleClass]="action.styleClass"
+                (click)="action.onClick(row); $event.stopPropagation()"
+              ></p-button>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="rowexpansion" let-row>
+      <tr *ngIf="expandableRows">
+        <td [attr.colspan]="columns.length + (rowActions.length ? 1 : 0) + 1">
+          <ng-container *ngIf="rowExpansionTemplate; else noExpansion">
+            <ng-container
+              *ngTemplateOutlet="
+                rowExpansionTemplate;
+                context: { $implicit: row }
+              "
+            ></ng-container>
+          </ng-container>
+          <ng-template #noExpansion>
+            <div class="p-3 text-600 text-sm">Sin contenido.</div>
+          </ng-template>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td
+          [attr.colspan]="
+            columns.length +
+            (rowActions.length ? 1 : 0) +
+            (expandableRows ? 1 : 0)
+          "
+        >
+          <div class="p-3 text-center text-600 text-sm">No hay datos.</div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

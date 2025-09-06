@@ -85,6 +85,16 @@ export class AppComponent implements OnInit {
             shortcut: '⌘+O',
             routerLink: '/oc',
           },
+          {
+            label: 'Proveedores',
+            icon: 'pi pi-shop',
+            routerLink: '/proveedores',
+          },
+          {
+            label: 'Configuración',
+            icon: 'pi pi-cog',
+            routerLink: '/proveedores',
+          },
         ],
       },
       {

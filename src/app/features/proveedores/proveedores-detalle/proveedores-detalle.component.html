@@ -5,3 +5,13 @@
   [componentToLoad]="componentToLoad"
   [componentInputs]="sidebarInputs"
 ></app-sidebar>
+
+<app-table-generic
+  [serviceFn]="serviceFn"
+  [columns]="columns"
+  [rowActions]="actions"
+  [showAddButton]="true"
+  addButtonLabel="Nuevo"
+  (add)="crear()"
+  (rowSelect)="verDetalle($event)"
+></app-table-generic>

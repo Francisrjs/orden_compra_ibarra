@@ -39,7 +39,8 @@ export class PedidoService extends StateService<Pedido> {
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
           razon_pedido,
           unidad_medida_aceptada: unidad_medida_id_aceptada(id,nombre),
-          cantidad_aceptada
+          cantidad_aceptada,
+          link_referencia
         )
       `
         )
@@ -91,7 +92,8 @@ export class PedidoService extends StateService<Pedido> {
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
           razon_pedido,
                unidad_medida_aceptada: unidad_medida_id_aceptada(id,nombre),
-          cantidad_aceptada
+          cantidad_aceptada,
+          link_referencia
         )
       `
         )
@@ -160,7 +162,8 @@ export class PedidoService extends StateService<Pedido> {
           producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
           razon_pedido,
           unidad_medida_aceptada: unidad_medida_id(id,nombre),
-          cantidad_aceptada
+          cantidad_aceptada,
+          link_referencia
         )
       `
       )

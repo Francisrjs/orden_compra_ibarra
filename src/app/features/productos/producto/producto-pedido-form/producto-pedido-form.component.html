@@ -69,7 +69,18 @@
           placeholder="Ej: Este pedido es urgente por.."
           [required]="false"
           [isTextarea]="false"
+          [disabled]="false"
           formControlName="razon_pedido"
+        ></app-input-box>
+        <app-input-box
+          label="Link de Pedido (opcional)"
+          type="text"
+          id="link_referencia"
+          placeholder="www.mercadolibre.com.ar/.."
+          [required]="false"
+          [isTextarea]="false"
+          [disabled]="false"
+          formControlName="link_referencia"
         ></app-input-box>
       </div>
     </div>

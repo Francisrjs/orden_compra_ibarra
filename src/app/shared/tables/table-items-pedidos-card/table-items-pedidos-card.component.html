@@ -52,18 +52,29 @@
                 >
               </h6>
 
-              <p
-                class="product-description mb-1"
-                *ngIf="item.producto?.descripcion"
-              >
-                {{ item.producto?.descripcion }}
-              </p>
               <div class="d-flex row">
                 <small class="product-quantity text-muted"
                   ><b>Cantidad:</b> {{ item.cantidad }},
                   {{ item.unidad_medida.nombre }}</small
                 >
+                <p
+                  class="product-description mb-1"
+                  *ngIf="item.producto?.descripcion"
+                >
+                  {{ item.producto?.descripcion }}
+                </p>
 
+                <small
+                  class="product-description mb-1"
+                  *ngIf="item.link_referencia"
+                >
+                  <a
+                    [href]="item.link_referencia"
+                    target="_blank"
+                    rel="noopener"
+                    >LINK REFERENCIA</a
+                  >
+                </small>
                 <small
                   class="product-description mb-1"
                   *ngIf="item.razon_pedido"

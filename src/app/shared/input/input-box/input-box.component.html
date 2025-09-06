@@ -15,16 +15,35 @@
   ></textarea>
 
   <!-- Input normal -->
-  <input
-    *ngIf="!isTextarea"
-    [type]="type"
-    [id]="id"
-    [placeholder]="placeholder"
-    [required]="required"
-    [value]="value"
-    (input)="onInput($event)"
-    (blur)="onBlur()"
-    [disabled]="disabled"
-    [readOnly]="readOnly"
-  />
+  <div>
+    <input
+      *ngIf="!isTextarea"
+      [type]="type"
+      [id]="id"
+      [placeholder]="placeholder"
+      [required]="required"
+      [value]="value"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+      [disabled]="disabled"
+      [readOnly]="readOnly"
+    />
+  </div>
+
+  <div
+    *ngIf="control?.invalid && (control?.touched || control?.dirty)"
+    class="text-red-500 text-sm"
+  >
+    <small *ngIf="control?.errors?.['required']" class="text-danger"
+      >Este campo es requerido.</small
+    >
+    <small *ngIf="control?.errors?.['minlength']" class="text-danger">
+      Debe tener al menos
+      {{ control?.errors?.['minlength']?.requiredLength }} caracteres.
+    </small>
+    <small *ngIf="control?.errors?.['maxlength']" class="text-danger">
+      No puede superar los
+      {{ control?.errors?.['maxlength']?.requiredLength }} caracteres.
+    </small>
+  </div>
 </div>

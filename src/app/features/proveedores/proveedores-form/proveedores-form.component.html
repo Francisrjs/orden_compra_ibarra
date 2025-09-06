@@ -1,1 +1,56 @@
-<p>proveedores-form works!</p>
+<div class="container mx-auto my-auto form w-75">
+  <!-- <h3 class="my-2">Agregar un pedido</h3> -->
+  <form [formGroup]="proveedoresForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- nombre input box -->
+    <app-input-box
+      label="Nombre del proveedor"
+      type="text"
+      id="nombre"
+      placeholder="Nombre"
+      formControlName="nombre"
+      [required]="true"
+      [minLength]="3"
+      [maxLength]="30"
+    ></app-input-box>
+    <app-input-box
+      label="CUIT (Sin guiones)"
+      type="number"
+      id="cuit"
+      placeholder="30712217444"
+      formControlName="cuit"
+      [required]="true"
+      [minLength]="11"
+      [maxLength]="11"
+    ></app-input-box>
+    <app-input-box
+      label="Domicilio (Opcional)"
+      type="text"
+      id="domicilio"
+      placeholder="Garibaldi 1300, Zaráte"
+      formControlName="domicilio"
+      [required]="false"
+    ></app-input-box>
+    <app-input-box
+      label="Nombre del contacto (Opcional)"
+      type="text"
+      id="contacto"
+      placeholder="Pedrito.."
+      formControlName="contacto"
+      icon="pi pi-user"
+      [required]="false"
+      [maxLength]="3"
+      [maxLength]="20"
+    ></app-input-box>
+    <app-input-box
+      label="Telefono (Opcional)"
+      type="number"
+      id="telefono"
+      placeholder="+543487301738"
+      formControlName="contacto"
+      icon="pi pi-phone"
+      [required]="false"
+      [minLength]="5"
+      [maxLength]="60"
+    ></app-input-box>
+  </form>
+</div>

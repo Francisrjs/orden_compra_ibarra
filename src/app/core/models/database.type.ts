@@ -43,6 +43,8 @@ export interface Proveedor {
   contacto?: string;
   email?: string;
   telefono?: string;
+  domicilio?: string;
+  cuit?: string;
 }
 
 export interface Producto {
@@ -81,14 +83,14 @@ export interface PedidoItem {
   cantidad: number;
   estado: EstadoItemPedido;
   justificacion_rechazo?: string;
-  razon_pedido: string;
+  razon_pedido?: string;
   unidad_medida_id: number;
-
+  link_referencia: string;
   unidad_medida: UnidadMedida;
   //Relacion opcional
   producto?: Producto;
   unidad_medida_id_aceptada?: UnidadMedida;
-  cantidad_aceptada?:number;
+  cantidad_aceptada?: number;
 }
 
 export interface OrdenCompra {
