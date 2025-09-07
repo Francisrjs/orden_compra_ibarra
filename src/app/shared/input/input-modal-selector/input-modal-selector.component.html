@@ -1,6 +1,13 @@
 <div class="input_box">
-  <label [for]="id" *ngIf="label">{{ label }}</label>
-
+  <div class="d-flex align-items-center">
+    <ng-container *ngIf="required">
+      <i
+        class="bi bi-asterisk text-danger fs-6 mb-1"
+        style="font-size: 0.85rem"
+      ></i>
+    </ng-container>
+    <label [for]="id" *ngIf="label">{{ label }}</label>
+  </div>
   <div
     [id]="id"
     class="selector-input"

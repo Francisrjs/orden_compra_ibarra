@@ -18,6 +18,7 @@
         [data]="productoData"
         placeholder="Seleccione un producto"
         formControlName="producto_id"
+        [required]="true"
         [disabled]="modeUser ? false : true"
       ></app-input-modal-selector>
       <div *ngIf="modeUser">
@@ -63,7 +64,7 @@
         </div>
 
         <app-input-box
-          label="Razon del pedido (opcional)"
+          label="Razon del pedido"
           type="text"
           id="razon_pedido"
           placeholder="Ej: Este pedido es urgente por.."
@@ -99,6 +100,7 @@
             inputId="cantidad"
             class="w-100 h-30 wid"
             inputStyleClass="w-100 h-30 responsive-input"
+            [required]="true"
           ></p-inputNumber>
         </div>
 
@@ -114,9 +116,14 @@
             dropdownIcon="pi pi-chevron-down"
             class="w-100 responsive-input"
             inputStyleClass="w-100"
+            [required]="true"
           ></p-autoComplete>
         </div>
       </div>
+    </div>
+    <div class="d-flex col align-content-center">
+      <i class="bi bi-asterisk text-danger"></i>
+      CAMPOS OBLIGATORIOS
     </div>
     <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
       <!-- Cambiamos el botón para que sea de tipo 'submit' -->

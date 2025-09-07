@@ -1,3 +1,28 @@
+/* Icono dentro del input */
+.input-icon-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.input-with-icon {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 2.2rem;
+  height: 2.5rem;
+}
+
+.input-icon {
+  color: #888;
+  font-size: 1.2em;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 0.5rem;
+  margin-right: -1.7rem;
+  z-index: 2;
+}
 .input_box label {
   display: block;
   font-weight: 500;
@@ -31,4 +56,23 @@
 .input_box input:focus,
 .input_box textarea:focus {
   border-color: #449e48;
+}
+.input-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #888;
+  font-size: 1.1em;
+  pointer-events: none;
+}
+
+.input-with-icon {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 2rem; /* Espacio para el icono */
 }

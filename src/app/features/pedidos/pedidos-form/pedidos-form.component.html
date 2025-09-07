@@ -9,6 +9,7 @@
       id="title"
       placeholder="Ingresa un titulo del pedido"
       formControlName="titulo"
+      [required]="true"
     ></app-input-box>
     <!-- Mensaje de error para el título -->
     <div
@@ -29,7 +30,14 @@
       >
     </div>
     <div class="card flex border-0 mb-2">
-      <label for="area">Área:</label>
+      <div class="d-flex col align-items-center">
+        <i
+          class="bi bi-asterisk text-danger mb-0"
+          style="font-size: 0.85rem"
+        ></i>
+        <label for="area" style="font-size: 1.1rem">Área:</label>
+      </div>
+
       <p-dropdown
         [options]="areasData"
         optionLabel="name"
@@ -80,6 +88,7 @@
       label="Plazo de entrega"
       id="plazo"
       formControlName="plazo_entrega"
+      [required]="true"
     >
     </app-input-date>
     <!-- Mensaje de error para la fecha -->
@@ -97,18 +106,20 @@
         >La fecha debe ser posterior a hoy.</small
       >
     </div>
-
-    <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
-      <!-- Cambiamos el botón para que sea de tipo 'submit' -->
-      <app-custom-button
-        text="Guardar Pedido"
-        type="submit"
-        styleType="success"
-        [disabled]="pedidoForm.invalid"
-        (click)="onSubmit()"
-      >
-        ></app-custom-button
-      >
+    <div class="d-flex col align-content-center mb-2">
+      <i class="bi bi-asterisk text-danger"></i>
+      CAMPOS OBLIGATORIOS
     </div>
+
+    <!-- Cambiamos el botón para que sea de tipo 'submit' -->
+    <app-custom-button
+      text="Guardar Pedido"
+      type="submit"
+      styleType="success"
+      [disabled]="pedidoForm.invalid"
+      (click)="onSubmit()"
+    >
+      ></app-custom-button
+    >
   </form>
 </div>

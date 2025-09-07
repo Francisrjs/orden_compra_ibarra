@@ -62,6 +62,7 @@ export class InputModalSelectorComponent
     .substring(2, 9)}`;
   @Input() modalTitle: string = 'Seleccionar un Producto';
   @Input() isDisabled: boolean = false;
+  @Input() required: boolean = false;
   private _data: SelectorData[] = [];
   @Input()
   set data(value: SelectorData[]) {

@@ -1,5 +1,10 @@
 <div class="input_box">
-  <label [for]="id">{{ label }}</label>
+  <div class="d-flex align-items-center">
+    <ng-container *ngIf="required">
+      <i class="bi bi-asterisk text-danger fs-6" style="font-size: 0.85rem"></i>
+    </ng-container>
+    <label [for]="id" class="mb-0">{{ label }}</label>
+  </div>
 
   <!-- Textarea -->
   <textarea
@@ -12,10 +17,15 @@
     (blur)="onBlur()"
     [disabled]="disabled"
     [readOnly]="readOnly"
+    [attr.maxlength]="maxLength"
+    [attr.minlength]="minLength"
   ></textarea>
 
   <!-- Input normal -->
-  <div>
+  <div class="input-icon-container">
+    <ng-container *ngIf="icon">
+      <i [ngClass]="icon" class="input-icon mb-4 mx-0"></i>
+    </ng-container>
     <input
       *ngIf="!isTextarea"
       [type]="type"
@@ -27,6 +37,10 @@
       (blur)="onBlur()"
       [disabled]="disabled"
       [readOnly]="readOnly"
+      class="input-with-icon"
+      [style.paddingLeft]="icon ? '2.2rem' : undefined"
+      [attr.maxlength]="maxLength"
+      [attr.minlength]="minLength"
     />
   </div>
 
@@ -37,7 +51,7 @@
     <small *ngIf="control?.errors?.['required']" class="text-danger"
       >Este campo es requerido.</small
     >
-    <small *ngIf="control?.errors?.['minlength']" class="text-danger">
+    <small *ngIf=" control?.errors?.['minlength']" class="text-danger">
       Debe tener al menos
       {{ control?.errors?.['minlength']?.requiredLength }} caracteres.
     </small>

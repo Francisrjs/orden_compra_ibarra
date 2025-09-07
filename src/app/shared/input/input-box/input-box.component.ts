@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import { Component, Input, OnInit, forwardRef, Optional } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
   FormControl,
   ValidatorFn,
   Validators,
+  ControlContainer,
+  // NgControl,
 } from '@angular/forms';
 
 @Component({
@@ -23,6 +25,7 @@ import {
   ],
 })
 export class InputBoxComponent implements ControlValueAccessor, OnInit {
+  constructor(@Optional() private controlContainer?: ControlContainer) {}
   @Input() label: string = '';
   @Input() type: string = 'text';
   @Input() placeholder: string = '';
@@ -39,13 +42,21 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
   isDisabled = false;
   control: FormControl | null = null;
 
+  // (No se necesita exponer formControlName; usaremos la directiva si está presente)
+
   // Callbacks que Angular inyecta
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
 
   ngOnInit() {
-    // Si quieres aplicar validadores aquí, solo hazlo si NO los pones en el FormGroup
-    // Si usas formControlName, los validadores deben ir en el FormGroup, no aquí
+    // Intentar obtener el control desde el ControlContainer usando el id
+    if (this.controlContainer && (this.controlContainer.control as any)?.get) {
+      const parent = this.controlContainer.control;
+      const name = this.id;
+      if (parent && name) {
+        this.control = parent.get(name) as FormControl;
+      }
+    }
   }
 
   writeValue(obj: any): void {

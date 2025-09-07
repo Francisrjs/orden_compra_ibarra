@@ -1,5 +1,13 @@
 <div class="input_box">
-  <label [for]="id">{{ label }}</label>
+  <div class="d-flex align-items-center">
+    <ng-container *ngIf="required">
+      <i
+        class="bi bi-asterisk text-danger fs-6 mb-2"
+        style="font-size: 0.85rem"
+      ></i>
+    </ng-container>
+    <label [for]="id" *ngIf="label">{{ label }}</label>
+  </div>
   <input
     type="date"
     [id]="id"

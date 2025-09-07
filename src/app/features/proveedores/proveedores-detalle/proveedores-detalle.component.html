@@ -7,11 +7,11 @@
 ></app-sidebar>
 
 <app-table-generic
-  [serviceFn]="serviceFn"
+  [data]="proveedores()"
   [columns]="columns"
   [rowActions]="actions"
   [showAddButton]="true"
   addButtonLabel="Nuevo"
-  (add)="crear()"
+  (add)="createProveedor()"
   (rowSelect)="verDetalle($event)"
 ></app-table-generic>

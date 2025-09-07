@@ -78,7 +78,19 @@ export interface GenericTableAction<T = any> {
 })
 export class TableGenericComponent<T = any> {
   /** Lista de datos ya cargada (alternativa a serviceFn) */
-  @Input() data: T[] | null = null;
+  private _data: T[] | null = null;
+  @Input()
+  set data(value: T[] | null) {
+    this._data = value;
+    if (value) {
+      this.items = value;
+    } else {
+      this.items = [];
+    }
+  }
+  get data(): T[] | null {
+    return this._data;
+  }
   /** Si se pasa una función async se llamará en ngOnInit y al ejecutar reload(). Puede devolver null y se normaliza a [] */
   @Input() serviceFn?: () => Promise<T[] | null | undefined>;
   /** Columnas configurables */

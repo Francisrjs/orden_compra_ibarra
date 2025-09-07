@@ -6,7 +6,6 @@
       label="Nombre del proveedor"
       type="text"
       id="nombre"
-      placeholder="Nombre"
       formControlName="nombre"
       [required]="true"
       [minLength]="3"
@@ -14,7 +13,7 @@
     ></app-input-box>
     <app-input-box
       label="CUIT (Sin guiones)"
-      type="number"
+      type="text"
       id="cuit"
       placeholder="30712217444"
       formControlName="cuit"
@@ -23,34 +22,54 @@
       [maxLength]="11"
     ></app-input-box>
     <app-input-box
-      label="Domicilio (Opcional)"
+      label="Email"
+      type="email"
+      id="email"
+      formControlName="email"
+    ></app-input-box>
+    <app-input-box
+      label="Domicilio"
       type="text"
       id="domicilio"
       placeholder="Garibaldi 1300, Zaráte"
       formControlName="domicilio"
       [required]="false"
+      [maxLength]="50"
     ></app-input-box>
     <app-input-box
-      label="Nombre del contacto (Opcional)"
+      label="Nombre del contacto "
       type="text"
       id="contacto"
       placeholder="Pedrito.."
       formControlName="contacto"
       icon="pi pi-user"
       [required]="false"
-      [maxLength]="3"
       [maxLength]="20"
     ></app-input-box>
     <app-input-box
-      label="Telefono (Opcional)"
-      type="number"
+      label="Telefono"
+      type="text"
       id="telefono"
       placeholder="+543487301738"
-      formControlName="contacto"
+      formControlName="telefono"
       icon="pi pi-phone"
       [required]="false"
-      [minLength]="5"
-      [maxLength]="60"
+      [minLength]="10"
+      [maxLength]="15"
     ></app-input-box>
+
+    <div class="d-flex col align-content-center">
+      <i class="bi bi-asterisk text-danger"></i>
+      CAMPOS OBLIGATORIOS
+    </div>
+    <app-custom-button
+      text="Guardar Pedido"
+      type="submit"
+      [disabled]="proveedoresForm.invalid"
+      (click)="onSubmit()"
+      styleType="success"
+    >
+      ></app-custom-button
+    >
   </form>
 </div>

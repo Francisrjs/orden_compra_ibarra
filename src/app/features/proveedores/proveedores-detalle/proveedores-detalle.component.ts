@@ -1,4 +1,4 @@
-import { Component, Type } from '@angular/core';
+import { Component, effect, inject, OnInit, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -11,6 +11,7 @@ import {
 import { Proveedor } from 'src/app/core/models/database.type';
 import { ProveedorService } from '../services/proveedor.service';
 import { ProveedoresFormComponent } from '../proveedores-form/proveedores-form.component';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-proveedores-detalle',
@@ -20,12 +21,19 @@ import { ProveedoresFormComponent } from '../proveedores-form/proveedores-form.c
   styleUrls: ['./proveedores-detalle.component.css'],
   providers: [MessageService],
 })
-export class ProveedoresDetalleComponent {
+export class ProveedoresDetalleComponent implements OnInit {
   sidebarVisible = false;
   sidebarTitle = '';
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined;
+  private _proveedorService = inject(ProveedorService);
+  private _messageService = inject(MessageService);
+  public proveedores = this._proveedorService.proveedores;
 
+  async ngOnInit(): Promise<void> {
+    console.log('hola');
+    await this._proveedorService.getAllProveedores();
+  }
   columns: GenericTableColumn<Proveedor>[] = [
     { field: 'nombre', header: 'Nombre', sortable: true, filter: true },
     { field: 'cuit', header: 'CUIT', sortable: true, filter: true },
@@ -48,30 +56,68 @@ export class ProveedoresDetalleComponent {
       text: true,
       rounded: true,
       severity: 'warning',
-      onClick: (row) => this.editar(row),
+      onClick: (row) => this.editProveedor(row),
     },
   ];
-
-  constructor(private proveedorService: ProveedorService) {}
-
-  serviceFn = () => this.proveedorService.getAllProveedores();
 
   verDetalle(row: Proveedor) {
     this.sidebarTitle = 'Detalle Proveedor';
     this.sidebarInputs = { proveedor: row };
     this.sidebarVisible = true;
   }
-
+  handleCloseSidebar() {
+    console.log('Producto guardado, cerrando sidebar...');
+    this.sidebarVisible = false;
+  }
   editar(row: Proveedor) {
     this.sidebarTitle = 'Editar Proveedor';
     this.sidebarInputs = { proveedor: row, modo: 'edit' };
     this.sidebarVisible = true;
   }
-
-  crear() {
+  handleFormResult(result: {
+    severity?: string;
+    success?: boolean;
+    message: string;
+  }): void {
+    if (!result.severity) {
+      this._messageService.add({
+        severity: result.success ? 'success' : 'error',
+        summary: result.success ? 'Éxito' : 'Error',
+        detail: result.message,
+      });
+    } else {
+      this._messageService.add({
+        severity: result.severity,
+        summary: 'Info',
+        detail: result.message,
+      });
+    }
+  }
+  createProveedor() {
     this.sidebarTitle = 'Nuevo Proveedor';
-
     this.sidebarVisible = true;
     this.componentToLoad = ProveedoresFormComponent;
+    this.sidebarInputs = {
+      onSaveSuccess: () => {
+        this.handleCloseSidebar();
+      },
+      formResult: (result: { success: boolean; message: string }) =>
+        this.handleFormResult(result),
+    };
+  }
+  editProveedor(idProovedor: Proveedor) {
+    this.sidebarTitle = 'Editar Proveedor';
+    this.sidebarVisible = true;
+    this.componentToLoad = ProveedoresFormComponent;
+    this.sidebarInputs = {
+      proveedor: idProovedor,
+      editMode: true,
+      onSaveSuccess: () => this.handleCloseSidebar(),
+      formResult: (result: {
+        severity?: string;
+        success: boolean;
+        message: string;
+      }) => this.handleFormResult(result),
+    };
   }
 }
