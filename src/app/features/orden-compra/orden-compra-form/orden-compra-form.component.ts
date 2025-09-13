@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableNgItemPedidoComponent } from 'src/app/shared/tables/table-ng-item-pedido/table-ng-item-pedido.component';
 import { PedidoItem } from 'src/app/core/models/database.type';
@@ -17,11 +17,15 @@ import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
 import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
 import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
+import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-items-pedidos-card/table-items-pedidos-card.component';
+import { OrdenCompraService } from '../services/orden-compra.service';
+import { ProveedorService } from '../../proveedores/services/proveedor.service';
+import { InputModalSelectorComponent, SelectorData } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
 }
@@ -31,29 +35,37 @@ export interface LocalPedidoItem extends PedidoItem {
   imports: [
     CommonModule,
     FormsModule,
-    DialogModule, // <<<< aquí: DialogModule para <p-dialog>
-    InputNumberModule, // <<<< p-inputNumber
-    ToastModule, // <<<< p-toast si lo usás
+    DialogModule, 
+    InputNumberModule, 
+    ToastModule, 
     ButtonModule,
-    ConfirmDialogModule, // confirm dialog (no confundir con DialogModule)
+    ConfirmDialogModule,
     TableNgItemPedidoComponent,
     ButtonWithIconComponent,
     ButtonElegantComponent,
     ButtonFancyComponent,
     InputBoxComponent,
+    TableItemsPedidosCardComponent,
+    InputModalSelectorComponent,
+    ReactiveFormsModule
   ],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
   providers: [PrimeNGConfig, MessageService, ConfirmationService],
 })
-export class OrdenCompraFormComponent {
+export class OrdenCompraFormComponent implements OnInit{
+  
   pedidoItems: LocalPedidoItem[] = [];
-
-  // diálogo / precio
+ 
+  private _ordenCompraService=inject(OrdenCompraService);
+  private _proveedorService=inject(ProveedorService)
+  proovedores= this._proveedorService.proveedores
+   proveedoresData: SelectorData[] = [];
+  public itemsOC: PedidoItem[] | null= this._ordenCompraService.itemsOC();
   showPriceDialog = false;
   precioAsignado: number | null = null;
   private pendingItem: PedidoItem | null = null;
-
+ 
   private _pedidoService = inject(PedidoService);
   private _messageService = inject(MessageService);
 
@@ -66,7 +78,20 @@ export class OrdenCompraFormComponent {
       this.pedidoItems = [...(current.pedido_items || [])] as LocalPedidoItem[];
     }
   }
+  ngOnInit(): void {
+       if (this.proovedores && this.proovedores.length === 0) {
+        this._proveedorService.getAllProveedores();
+    }
+  
+    if(this.proovedores()){
+      this.proveedoresData= this.proovedores().map((proveedor) => ({
+        id: proveedor.id,
+        name: proveedor.nombre,
+      }));
+    }
+  }
 
+ 
   /* -------------------
      Nuevo flujo: abrir dialog para precio
      ------------------- */

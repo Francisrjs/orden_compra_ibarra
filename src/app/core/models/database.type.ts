@@ -108,11 +108,9 @@ export interface OrdenCompra {
 
 export interface OrdenCompraItem {
   id: number;
-  orden_compra_id: number;
-  pedido_item_id: number;
+  orden_compra_id?: number;
+  pedido_item_id?: number;
   precio_unitario?: number;
-  cantidad_comprada: number;
-
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
 }

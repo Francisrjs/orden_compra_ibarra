@@ -15,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { PedidoService } from 'src/app/features/pedidos/services/pedido.service';
 import { SidebarService } from '../../sidebar/sidebar/services/sidebar.service';
-import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
+import { OrdenCompraItem, Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { ProductoPedidoFormComponent } from 'src/app/features/productos/producto/producto-pedido-form/producto-pedido-form.component';
 import { ProductoFormComponent } from 'src/app/features/productos/producto/producto-form/producto-form.component';
 import {
@@ -45,10 +45,12 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   @Output() finalizarPedido = new EventEmitter<void>();
   //
   @Input() pedido: Pedido | null = null;
+  @Input() itemsOC: PedidoItem[] | null= null;
   private listaCompletaItems: PedidoItem[] = []; // 2. Guardará la lista original
   public pedidoItems: PedidoItem[] = []; // La lista filtrada que se muestra
   public searchTerm: string = ''; // El texto del input de búsqueda
-
+  
+ 
   ngOnChanges(changes: SimpleChanges): void {
     // Verifica si la propiedad 'pedido' ha cambiado
     if (changes['pedido'] && this.pedido) {
@@ -56,6 +58,10 @@ export class TableItemsPedidosCardComponent implements OnChanges {
       this.pedidoItems = this.pedido.pedido_items ?? [];
       this.listaCompletaItems = this.pedido.pedido_items ?? [];
       this.filterItems(); // Llama al filtro para mostrar la lista inicial
+    }
+    if(this.itemsOC){
+      this.pedidoItems= this.itemsOC ?? [];
+      this.listaCompletaItems= this.itemsOC ?? [];
     }
   }
   getBadgeClass(estado?: string, itsItem?: boolean): string {
