@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <p-dialog
   header="Precio del Objeto/Servicio"
   [(visible)]="showPriceDialog"
@@ -6,7 +7,7 @@
   [style]="{ width: '350px' }"
 >
   <div class="p-fluid">
-    <label class="mb-2">Precio</label>
+    <label class="mb-2 ">Precio</label>
 
     <!-- Usamos p-inputNumber (si lo importaste) -->
     <p-inputNumber
@@ -15,14 +16,12 @@
       [mode]="'decimal'"
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
-      placeholder="Ingrese el precio"
+      placeholder="Ingrese el presupuesto"
       inputId="precioInput"
+      class="mb-2"
     >
+    
     </p-inputNumber>
-
-    <!-- Alternativa simple si no tenés p-inputNumber:
-    <input type="number" step="0.01" class="form-control" [(ngModel)]="precioAsignado" /> 
-    -->
 
     <div class="d-flex justify-content-end gap-2 mt-3">
       <button
@@ -54,9 +53,11 @@
         [required]="true"
       />
     <div class="container-body">
+      
         <app-table-items-pedidos-card
           [itemsOC]="itemsOC"
-  
+          (deleteItem)="deleteItemPedido($event)"
+          (messageNull)="showMessageWhenIsNull()"
   ></app-table-items-pedidos-card>
     </div>
 

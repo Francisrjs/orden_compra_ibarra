@@ -43,11 +43,12 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   @Output() openEditItem = new EventEmitter<PedidoItem>();
   @Output() deleteItem = new EventEmitter<PedidoItem>();
   @Output() finalizarPedido = new EventEmitter<void>();
-  //
+  @Input() messageWhenNull: boolean = true
+  @Output() messageNull = new EventEmitter<void>()
   @Input() pedido: Pedido | null = null;
-  @Input() itemsOC: PedidoItem[] | null= null;
-  private listaCompletaItems: PedidoItem[] = []; // 2. Guardará la lista original
-  public pedidoItems: PedidoItem[] = []; // La lista filtrada que se muestra
+  @Input() itemsOC: OrdenCompraItem[] | null= null;
+  private listaCompletaItems: Array<PedidoItem | OrdenCompraItem> = [];
+public pedidoItems: Array<PedidoItem | OrdenCompraItem> = [];
   public searchTerm: string = ''; // El texto del input de búsqueda
   
  
@@ -89,16 +90,102 @@ export class TableItemsPedidosCardComponent implements OnChanges {
     this.finalizarPedido.emit();
   }
 
-  filterItems(): void {
-    if (!this.searchTerm || this.searchTerm.trim() === '') {
-      // Si no hay texto de búsqueda, muestra todos los items
-      this.pedidoItems = [...this.listaCompletaItems];
-    } else {
-      // Si hay texto, filtra la lista completa
-      const terminoBusqueda = this.searchTerm.toLowerCase();
-      this.pedidoItems = this.listaCompletaItems.filter((item) =>
-        item.producto?.nombre.toLowerCase().includes(terminoBusqueda)
+ filterItems(): void {
+  if (!this.searchTerm || this.searchTerm.trim() === '') {
+    this.pedidoItems = [...this.listaCompletaItems];
+  } else {
+    const terminoBusqueda = this.searchTerm.toLowerCase();
+    this.pedidoItems = this.listaCompletaItems.filter((item) => {
+      // Si es OrdenCompraItem
+      if ('pedido_items' in item && item.pedido_items) {
+        return (
+          item.pedido_items.producto?.nombre
+            ?.toLowerCase()
+            .includes(terminoBusqueda)
+        );
+      }
+      // Si es PedidoItem
+      return (
+        (item as PedidoItem).producto?.nombre
+          ?.toLowerCase()
+          .includes(terminoBusqueda)
       );
+    });
+  }
+}
+  showMessageWhenIsNull(){
+    this.messageNull.emit();
+  }
+
+  //helpers
+  getProducto(item: PedidoItem | OrdenCompraItem) {
+  if ('pedido_items' in item && item.pedido_items) {
+    return item.pedido_items.producto;
+  }
+  return (item as PedidoItem).producto;
+}
+
+getCategoriaIcon(item: PedidoItem | OrdenCompraItem) {
+  return this.getProducto(item)?.categoria?.icon_text ?? '';
+}
+
+getNombreProducto(item: PedidoItem | OrdenCompraItem) {
+  return this.getProducto(item)?.nombre ?? '';
+}
+
+  getEstado(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.estado;
     }
+    return (item as PedidoItem).estado;
+  }
+
+  getCantidad(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.cantidad;
+    }
+    return (item as PedidoItem).cantidad;
+  }
+
+  getUnidadMedida(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.unidad_medida?.nombre;
+    }
+    return (item as PedidoItem).unidad_medida?.nombre;
+  }
+
+  getDescripcion(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.producto?.descripcion ?? '';
+    }
+    return (item as PedidoItem).producto?.descripcion ?? '';
+  }
+
+  getLinkReferencia(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.link_referencia;
+    }
+    return (item as PedidoItem).link_referencia;
+  }
+
+  getRazonPedido(item: PedidoItem | OrdenCompraItem) {
+    if ('pedido_items' in item && item.pedido_items) {
+      return item.pedido_items.razon_pedido;
+    }
+    return (item as PedidoItem).razon_pedido;
+  }
+getPedidoItem(item: PedidoItem | OrdenCompraItem): PedidoItem {
+  return 'pedido_items' in item && item.pedido_items ? item.pedido_items : (item as PedidoItem);
+}
+  
+  getPrice(item: PedidoItem | OrdenCompraItem) {
+    if ('precio_unitario' in item && typeof item.precio_unitario !== 'undefined') {
+      return item.precio_unitario;
+    }
+    // Si el PedidoItem tiene un campo de precio (por ejemplo, precio_asignado)
+    if ('precio_asignado' in item && typeof (item as any).precio_asignado !== 'undefined') {
+      return (item as any).precio_asignado;
+    }
+    return null;
   }
 }

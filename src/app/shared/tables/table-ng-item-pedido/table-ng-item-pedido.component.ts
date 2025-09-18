@@ -37,6 +37,7 @@ import { RouterLink } from '@angular/router';
 export class TableNgItemPedidoComponent implements OnInit {
   @Input() modoUsuario = true; // si necesitas condicionales
   @Output() addItem = new EventEmitter<PedidoItem>();
+
   pedidos: Pedido[] = [];
   private _pedidoService = inject(PedidoService);
 
@@ -93,4 +94,5 @@ export class TableNgItemPedidoComponent implements OnInit {
     getPedido_id(idItem:PedidoItem){
     return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.id;
   }
+  
 }

@@ -35,82 +35,97 @@
           class="list-group-item d-flex justify-content-between align-items-center product-card"
         >
           <div class="d-flex align-items-center">
-            <div class="product-icon me-3">
+            <div class="product-icon me-3  ">
               <i
-                class="{{ item.producto?.categoria?.icon_text }} text-success"
+                class="{{ getCategoriaIcon(item) }} text-success"
               ></i>
             </div>
 
-            <div class="product-info">
-              <h6 class="product-title mb-1">
-                {{ item.producto?.nombre }}
-                <span
-                  class="mx-2 badge"
-                  [ngClass]="getBadgeClass(item?.estado, true)"
-                  *ngIf="pedido?.estado != 'En Creacion'"
-                  >{{ item?.estado }}</span
-                >
-              </h6>
+             <div class="product-info">
+      <h6 class="product-title mb-1">
+        {{ getNombreProducto(item) }}
+        <span
+          class="mx-2 badge"
+          [ngClass]="getBadgeClass(getEstado(item), true)"
+          *ngIf="pedido?.estado != 'En Creacion'"
+        >
+          {{ getEstado(item) }}
+        </span>
+      </h6>
 
-              <div class="d-flex row">
-                <small class="product-quantity text-muted"
-                  ><b>Cantidad:</b> {{ item.cantidad }},
-                  {{ item.unidad_medida.nombre }}</small
-                >
-                <p
-                  class="product-description mb-1"
-                  *ngIf="item.producto?.descripcion"
-                >
-                  {{ item.producto?.descripcion }}
-                </p>
+      <div class="d-flex row">
+        <small class="product-quantity text-muted">
+          <b>Cantidad:</b> {{ getCantidad(item) }}, {{ getUnidadMedida(item) }}
+        </small>
 
-                <small
-                  class="product-description mb-1"
-                  *ngIf="item.link_referencia"
-                >
-                  <a
-                    [href]="item.link_referencia"
-                    target="_blank"
-                    rel="noopener"
-                    >LINK REFERENCIA</a
-                  >
-                </small>
-                <small
-                  class="product-description mb-1"
-                  *ngIf="item.razon_pedido"
-                >
-                  <b>Razon del pedido:</b>
-                  <div
-                    class="bg-light card shadow-sm border-1 align-items-center"
-                  >
-                    {{ item.razon_pedido }}
-                  </div>
-                </small>
-              </div>
-            </div>
-          </div>
-          <div
-            class="product-actions d-flex gap-1"
-            *ngIf="pedido?.estado == 'En Creacion'"
+        <p class="product-description mb-1" *ngIf="getDescripcion(item)">
+          {{ getDescripcion(item) }}
+        </p>
+
+        <small
+          class="product-description mb-1"
+          *ngIf="getLinkReferencia(item)"
+        >
+          <a
+            [href]="getLinkReferencia(item)"
+            target="_blank"
+            rel="noopener"
+            >LINK REFERENCIA</a
           >
-            <button
-              class="btn btn-sm btn-light border rounded-circle text-center text-warning gap-5"
-              title="Editar producto"
-              (click)="editProductItem(item)"
-            >
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button
-              class="btn btn-sm btn-light border rounded-circle text-center text-danger"
-              title="Eliminar producto"
-              (click)="deleteItemPedido(item)"
-            >
-              <i class="bi bi-trash"></i>
-            </button>
+        </small>
+
+        <small
+          class="product-description mb-1"
+          *ngIf="getRazonPedido(item)"
+        >
+          <b>Razon del pedido:</b>
+          <div class="bg-light card shadow-sm border-1 align-items-center w-50">
+            {{ getRazonPedido(item) }}
           </div>
-        </li>
-      </ul>
+        </small>
+      </div>
+
+      <!-- 🔽 PRECIO ABAJO -->
+      <div *ngIf="getPrice(item)" class="mt-2">
+        <b>Precio:</b>
+        <div class="bg-success card shadow-sm border-1 align-items-center w-100">
+          <div class="text-white">
+            {{ getPrice(item) | currency:'$'}}
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Botones siguen a la derecha -->
+  <div
+    class="product-actions d-flex gap-1"
+    *ngIf="pedido?.estado == 'En Creacion' || itemsOC"
+  >
+    <button
+      class="btn btn-lg btn-light border rounded-circle text-center text-warning"
+      title="Editar producto"
+      (click)="editProductItem(getPedidoItem(item))"
+    >
+      <i class="bi bi-pencil"></i>
+    </button>
+    <button
+      class="btn btn-lg btn-light border rounded-circle text-center text-sucess"
+      title="Presupuestar"
+      (click)="editProductItem(getPedidoItem(item))"
+    >
+      <i class="bi bi-currency-dollar"></i>
+    </button>
+    <button
+      class="btn btn-lg btn-light border rounded-circle text-center text-danger"
+      title="Eliminar producto"
+      (click)="deleteItemPedido(getPedidoItem(item))"
+    >
+      <i class="bi bi-trash"></i>
+    </button>
+        
+  </div>
+</li>
 
     <!-- ***** VISTA 2: Sin productos (Comentada por defecto) ***** -->
 
@@ -129,5 +144,4 @@
       </div>
       <p class="mt-3 text-muted">Finalizar pedido</p>
     </div>
-  </div>
-</div>
+  

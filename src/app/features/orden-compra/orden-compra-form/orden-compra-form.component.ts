@@ -1,7 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableNgItemPedidoComponent } from 'src/app/shared/tables/table-ng-item-pedido/table-ng-item-pedido.component';
-import { PedidoItem } from 'src/app/core/models/database.type';
+import { OrdenCompraItem, PedidoItem } from 'src/app/core/models/database.type';
 import { PedidoService } from '../../pedidos/services/pedido.service';
 import {
   ConfirmationService,
@@ -77,25 +77,30 @@ export class OrdenCompraFormComponent implements OnInit{
       // Inicializa con lo que ya viniera en el pedido (map para incluir precio_asignado si quisiera)
       this.pedidoItems = [...(current.pedido_items || [])] as LocalPedidoItem[];
     }
+    effect(()=>{
+      this.itemsOC= this._ordenCompraService.itemsOC() ?? []
+    })
+      effect(() => {
+    const lista = this.proovedores();
+    this.proveedoresData = lista.map((proveedor) => ({
+      id: proveedor.id,
+      name: proveedor.nombre,
+    }));
+    console.log("proveedores cargados: ", lista);
+  });
   }
   ngOnInit(): void {
-       if (this.proovedores && this.proovedores.length === 0) {
-        this._proveedorService.getAllProveedores();
-    }
-  
-    if(this.proovedores()){
-      this.proveedoresData= this.proovedores().map((proveedor) => ({
-        id: proveedor.id,
-        name: proveedor.nombre,
-      }));
-    }
+    
+        if (this.proovedores().length === 0) {
+    this._proveedorService.getAllProveedores();
+  }
+
+  // Usamos effect para reaccionar cuando cambia la lista de proveedores
+
   }
 
  
-  /* -------------------
-     Nuevo flujo: abrir dialog para precio
-     ------------------- */
-  // Este método será el receptor del evento addItem de la tabla
+
   handleItemAdd(item: PedidoItem) {
     // Guardamos el item pendiente y abrimos diálogo para el precio
     this.pendingItem = item;
@@ -145,38 +150,37 @@ export class OrdenCompraFormComponent implements OnInit{
       return;
     }
 
-    // Creamos una copia local con precio asignado
-    const itemWithPrice: LocalPedidoItem = {
-      ...(this.pendingItem as PedidoItem),
-      precio_asignado: this.precioAsignado as number,
-    };
+      const itemWithPrice: LocalPedidoItem = {
+    ...(this.pendingItem as PedidoItem),
+    precio_asignado: this.precioAsignado as number,
+  };
 
-    // Agregamos a la lista local (manteniendo inmutabilidad)
-    this.pedidoItems = [...this.pedidoItems, itemWithPrice];
+  // Agrega a la lista local
+  this.pedidoItems = [...this.pedidoItems, itemWithPrice];
 
-    this._messageService.add({
-      severity: 'success',
-      summary: 'Item agregado',
-      detail: `${
-        itemWithPrice.producto?.nombre || 'Producto'
-      } agregado con precio ${itemWithPrice.precio_asignado}`,
-    });
+  // AGREGA TAMBIÉN AL SERVICIO
+  this._ordenCompraService.addItemOC(itemWithPrice, itemWithPrice.precio_asignado!);
+  console.log("Se agrega al ITEMS OC: ",this._ordenCompraService.ordenCompraItems())
+  this._messageService.add({
+    severity: 'success',
+    summary: 'Item agregado',
+    detail: `${itemWithPrice.producto?.nombre || 'Producto'} agregado con precio ${itemWithPrice.precio_asignado}`,
+  });
 
-    // reset y cerrar dialog
-    this.cancelAdd();
+  this.cancelAdd();
   }
 
   // El resto de tus métodos: editProductItem, deleteItemPedido, etc.
   editProductItem(item: PedidoItem) {
     /* ... */
   }
-  deleteItemPedido(itemId: number | undefined) {
-    if (itemId === undefined) return;
-    this.pedidoItems = this.pedidoItems.filter((it) => it.id !== itemId);
+  deleteItemPedido(item: PedidoItem  | undefined) {
+    if (item === undefined) return;
+    this._ordenCompraService.deleteItemOC(item)
     this._messageService.add({
       severity: 'info',
       summary: 'Item eliminado',
-      detail: `Item #${itemId} eliminado.`,
+      detail: `Item #${item.producto?.nombre} eliminado.`,
     });
   }
 
@@ -193,5 +197,12 @@ export class OrdenCompraFormComponent implements OnInit{
     } else {
       return '';
     }
+  }
+  showMessageWhenIsNull(){
+    this._messageService.add({
+      severity: 'info',
+      summary: 'Seleccione un item',
+      detail: `Seleccione un item pendiente en la OC.`,
+    });
   }
 }

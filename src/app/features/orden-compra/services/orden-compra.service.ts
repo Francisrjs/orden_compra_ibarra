@@ -13,6 +13,15 @@ export class OrdenCompraService {
     this.itemsOC.update(items => items ? [...items, newItem] : [newItem]);
     this.ordenCompraItems.update(items => [...items, { pedido_item_id: newItem.id, pedido_items: newItem,precio_unitario: new_precio_unitario } as OrdenCompraItem]);
   }
-
-}
+  }
+  deleteItemOC(item: PedidoItem) {
+    // Elimina el PedidoItem de itemsOC
+    this.itemsOC.update(items =>
+      items ? items.filter(i => i.id !== item.id) : items
+    );
+    // Elimina el OrdenCompraItem correspondiente de ordenCompraItems
+    this.ordenCompraItems.update(items =>
+      items.filter(ocItem => ocItem.pedido_item_id !== item.id)
+    );
+  }
 }
