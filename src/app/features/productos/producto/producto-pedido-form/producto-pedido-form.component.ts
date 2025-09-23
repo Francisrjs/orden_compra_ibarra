@@ -168,7 +168,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       this.pedidoId = this.pedidoItemOC.pedido_id;
 
       this.productoPedidoForm.patchValue({
-        pedido_id: this.pedidoId, // 👈 Aquí se asegura que quede en el form
+        pedido_id: this.pedidoId, 
         producto_id: this.pedidoItemOC.producto?.id ?? null,
         razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
         cantidad: this.pedidoItemOC.cantidad ?? null,

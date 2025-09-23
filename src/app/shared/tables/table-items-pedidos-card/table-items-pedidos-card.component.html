@@ -1,3 +1,10 @@
+<app-sidebar
+  [(isVisible)]="sidebarVisible"
+  [title]="sidebarTitle"
+  [componentToLoad]="componentToLoad"
+  [componentInputs]="sidebarInputs"
+  
+></app-sidebar>
 <div class="product-container shadow-sm wi">
   <!-- Encabezado con el título, buscador y botón de agregar -->
   <div class="container-header min-vh-25" style="min-width: 350px">
@@ -34,14 +41,14 @@
         <li
           class="list-group-item d-flex justify-content-between align-items-center product-card"
         >
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center w-100">
             <div class="product-icon me-3  ">
               <i
                 class="{{ getCategoriaIcon(item) }} text-success"
               ></i>
             </div>
 
-             <div class="product-info">
+             <div class="product-info flex-shrink-1">
       <h6 class="product-title mb-1">
         {{ getNombreProducto(item) }}
         <span
@@ -86,14 +93,14 @@
       </div>
 
       <!-- 🔽 PRECIO ABAJO -->
-      <div *ngIf="getPrice(item)" class="mt-2">
-        <b>Precio:</b>
-        <div class="bg-success card shadow-sm border-1 align-items-center w-100">
-          <div class="text-white">
-            {{ getPrice(item) | currency:'$'}}
-          </div>
-        </div>
-      </div>
+     <div *ngIf="getPrice(item)" class="mt-2">
+  <b>Precio:</b>
+  <div class="bg-success card shadow-sm border-1 align-items-center w-100">
+    <div class="text-white">
+      {{ getPrice(item) | currency:'$'}}
+    </div>
+  </div>
+</div>
     </div>
   </div>
 
@@ -105,6 +112,7 @@
     <button
       class="btn btn-lg btn-light border rounded-circle text-center text-warning"
       title="Editar producto"
+      *ngIf="!itemsOC"
       (click)="editProductItem(getPedidoItem(item))"
     >
       <i class="bi bi-pencil"></i>
@@ -112,7 +120,8 @@
     <button
       class="btn btn-lg btn-light border rounded-circle text-center text-sucess"
       title="Presupuestar"
-      (click)="editProductItem(getPedidoItem(item))"
+      *ngIf="itemsOC"
+      (click)="openPresupuestoItemForm(getPedidoItem(item))"
     >
       <i class="bi bi-currency-dollar"></i>
     </button>

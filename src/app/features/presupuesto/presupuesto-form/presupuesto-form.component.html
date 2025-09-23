@@ -1,0 +1,77 @@
+<div class="container mx-auto my-auto form w-75">
+  <!-- <h3 class="my-2">Agregar un pedido</h3> -->
+  <form [formGroup]="presupuestoForm" (ngSubmit)="onSubmit()" class="space-y-6">
+     <app-input-modal-selector
+        label="Selecciona un Proovedor"
+        id="proovedor_id"
+        [data]="proveedoresData"
+        placeholder="Seleccione un proveedor"
+        formControlName="id"
+        [required]="true"
+      />
+      
+    <app-input-modal-selector
+        label="Selecciona un Producto"
+        id="producto_id"
+        [data]="productoData"
+        placeholder="Seleccione un producto"
+        formControlName="producto_id"
+        [required]="true"
+        
+      ></app-input-modal-selector>
+           <div class="row g-2">
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <label class="input_label">Cantidad</label>
+            <p-inputNumber
+              formControlName="cantidad"
+              [min]="0"
+              placeholder="0"
+              mode="decimal"
+              [showButtons]="true"
+              buttonLayout="stacked"
+              inputId="cantidad"
+              class="w-100 h-30 wid"
+              inputStyleClass="w-100 h-30 responsive-input"
+            ></p-inputNumber>
+          </div>
+
+          <div class="col-12 col-md-6 d-flex flex-column">
+            <label class="input_label mb-1">Unidad de Medida</label>
+            <p-autoComplete
+              formControlName="unidad_medida_id"
+              [suggestions]="filteredMedidasData"
+              (completeMethod)="filterData($event)"
+              [dropdown]="true"
+              optionLabel="nombre"
+              placeholder="Selecciona una unidad de medida"
+              dropdownIcon="pi pi-chevron-down"
+              class="w-100 responsive-input"
+              inputStyleClass="w-100"
+            ></p-autoComplete>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 d-flex flex-column">
+            <label class="input_label mb-1">Importe total</label>
+            <p-inputNumber
+              formControlName="cantidad"
+              [min]="0"
+              placeholder="0"
+              mode="decimal"
+              [showButtons]="true"
+              buttonLayout="stacked"
+              inputId="cantidad"
+              class="w-100 h-30 wid"
+              inputStyleClass="w-100 h-30 responsive-input"
+            ></p-inputNumber>
+          </div>
+      <app-custom-button
+        text="Guardar Pedido"
+        type="submit"
+        [disabled]="presupuestoForm.invalid"
+        (click)="onSubmit()"
+        styleType="success"
+      >
+        ></app-custom-button
+      >
+  </form>
+</div>

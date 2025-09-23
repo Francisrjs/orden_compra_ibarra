@@ -1,4 +1,10 @@
 <p-toast></p-toast>
+<app-sidebar
+  [(isVisible)]="sidebarVisible"
+  [title]="sidebarTitle"
+  [componentToLoad]="componentToLoad"
+  [componentInputs]="sidebarInputs"
+></app-sidebar>
 <p-dialog
   header="Precio del Objeto/Servicio"
   [(visible)]="showPriceDialog"
@@ -58,6 +64,7 @@
           [itemsOC]="itemsOC"
           (deleteItem)="deleteItemPedido($event)"
           (messageNull)="showMessageWhenIsNull()"
+          (openPresupuestoItem)="presupuestoItem($event)"
   ></app-table-items-pedidos-card>
     </div>
 

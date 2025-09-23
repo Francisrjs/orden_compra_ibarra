@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, Input, OnInit, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableNgItemPedidoComponent } from 'src/app/shared/tables/table-ng-item-pedido/table-ng-item-pedido.component';
 import { OrdenCompraItem, PedidoItem } from 'src/app/core/models/database.type';
@@ -26,6 +26,8 @@ import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-item
 import { OrdenCompraService } from '../services/orden-compra.service';
 import { ProveedorService } from '../../proveedores/services/proveedor.service';
 import { InputModalSelectorComponent, SelectorData } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
+import { PresupuestoFormComponent } from '../../presupuesto/presupuesto-form/presupuesto-form.component';
+import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
 }
@@ -47,16 +49,22 @@ export interface LocalPedidoItem extends PedidoItem {
     InputBoxComponent,
     TableItemsPedidosCardComponent,
     InputModalSelectorComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SidebarComponent
   ],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
-  providers: [PrimeNGConfig, MessageService, ConfirmationService],
+  providers: [PrimeNGConfig, MessageService, ConfirmationService,SidebarComponent],
 })
 export class OrdenCompraFormComponent implements OnInit{
-  
+
+     sidebarVisible = false;
+  sidebarTitle = '';
+  componentToLoad: Type<any> | null = null;
+  sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
+  @Input() onSaveSuccess?: () => void;
   pedidoItems: LocalPedidoItem[] = [];
- 
+  
   private _ordenCompraService=inject(OrdenCompraService);
   private _proveedorService=inject(ProveedorService)
   proovedores= this._proveedorService.proveedores
@@ -204,5 +212,47 @@ export class OrdenCompraFormComponent implements OnInit{
       summary: 'Seleccione un item',
       detail: `Seleccione un item pendiente en la OC.`,
     });
+  }
+  presupuestoItem(idItemProduct: OrdenCompraItem) {
+      console.log('Abriendo producto ..', idItemProduct);
+      this.sidebarTitle = 'Presupuesto:';
+      this.componentToLoad = PresupuestoFormComponent;
+      this.sidebarInputs = {
+        producto_id: idItemProduct.pedido_items?.id,
+        cantidad: idItemProduct.pedido_items?.cantidad,
+        unidad_medida_id: idItemProduct.pedido_items?.unidad_medida_id,
+        onSaveSuccess: () => this.handleCloseSidebar(),
+        formResult: (result: {
+          severity?: string;
+          success: boolean;
+          message: string;
+        }) => this.handleFormResult(result),
+      };
+  
+      this.sidebarVisible = true;
+    }
+
+      handleCloseSidebar() {
+    console.log('Producto guardado, cerrando sidebar...');
+    this.sidebarVisible = false;
+  }
+   handleFormResult(result: {
+    severity?: string;
+    success?: boolean;
+    message: string;
+  }): void {
+    if (!result.severity) {
+      this._messageService.add({
+        severity: result.success ? 'success' : 'error',
+        summary: result.success ? 'Éxito' : 'Error',
+        detail: result.message,
+      });
+    } else {
+      this._messageService.add({
+        severity: result.severity,
+        summary: 'Info',
+        detail: result.message,
+      });
+    }
   }
 }

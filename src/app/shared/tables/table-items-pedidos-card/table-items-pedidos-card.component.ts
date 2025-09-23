@@ -15,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { PedidoService } from 'src/app/features/pedidos/services/pedido.service';
 import { SidebarService } from '../../sidebar/sidebar/services/sidebar.service';
-import { OrdenCompraItem, Pedido, PedidoItem } from 'src/app/core/models/database.type';
+import { OrdenCompraItem, Pedido, PedidoItem, Producto } from 'src/app/core/models/database.type';
 import { ProductoPedidoFormComponent } from 'src/app/features/productos/producto/producto-pedido-form/producto-pedido-form.component';
 import { ProductoFormComponent } from 'src/app/features/productos/producto/producto-form/producto-form.component';
 import {
@@ -34,13 +34,20 @@ import { FormsModule } from '@angular/forms';
     ButtonWithIconComponent,
     ButtonWithIconComponent,
     FormsModule,
+    SidebarComponent
   ],
   templateUrl: './table-items-pedidos-card.component.html',
   styleUrls: ['./table-items-pedidos-card.component.css'],
 })
 export class TableItemsPedidosCardComponent implements OnChanges {
+    sidebarVisible = false;
+  sidebarTitle = '';
+  componentToLoad: Type<any> | null = null;
+  sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
+  @Input() onSaveSuccess?: () => void;
   @Output() openCreateItem = new EventEmitter<void>();
   @Output() openEditItem = new EventEmitter<PedidoItem>();
+  @Output() openPresupuestoItem= new EventEmitter<OrdenCompraItem>()
   @Output() deleteItem = new EventEmitter<PedidoItem>();
   @Output() finalizarPedido = new EventEmitter<void>();
   @Input() messageWhenNull: boolean = true
@@ -78,7 +85,9 @@ public pedidoItems: Array<PedidoItem | OrdenCompraItem> = [];
     console.log(this.pedido);
     this.openCreateItem.emit();
   }
-
+  openPresupuestoItemForm(item: OrdenCompraItem)  {
+    this.openPresupuestoItem.emit(item)
+  }
   deleteItemPedido(item: PedidoItem) {
     this.deleteItem.emit(item);
   }
@@ -188,4 +197,5 @@ getPedidoItem(item: PedidoItem | OrdenCompraItem): PedidoItem {
     }
     return null;
   }
+
 }

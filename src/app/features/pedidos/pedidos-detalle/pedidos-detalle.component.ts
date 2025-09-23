@@ -63,7 +63,6 @@ export class PedidosDetalleComponent implements OnInit {
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() onSaveSuccess?: () => void;
-  //
   pedido = this._PedidoService.pedido;
   pedidoItems: PedidoItem[] = [];
   loading = false;
