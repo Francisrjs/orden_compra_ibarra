@@ -13,7 +13,7 @@
   [style]="{ width: '350px' }"
 >
   <div class="p-fluid">
-    <label class="mb-2 ">Precio</label>
+    <label class="mb-2">Precio</label>
 
     <!-- Usamos p-inputNumber (si lo importaste) -->
     <p-inputNumber
@@ -26,7 +26,6 @@
       inputId="precioInput"
       class="mb-2"
     >
-    
     </p-inputNumber>
 
     <div class="d-flex justify-content-end gap-2 mt-3">
@@ -50,22 +49,23 @@
 <div class="d-flex gap-5">
   <div class="w-75">
     <h4>Formulario de orden de compra:</h4>
-        <app-input-modal-selector
-        label="Selecciona un Proovedor"
-        id="proovedor_id"
-        [data]="proveedoresData"
-        placeholder="Seleccione un proveedor"
-        formControlName="id"
-        [required]="true"
-      />
+    <app-input-modal-selector
+      label="Selecciona un Proovedor"
+      id="proovedor_id"
+      [data]="proveedoresData"
+      placeholder="Seleccione un proveedor"
+      formControlName="id"
+      [required]="true"
+    />
+
     <div class="container-body">
-      
-        <app-table-items-pedidos-card
-          [itemsOC]="itemsOC"
-          (deleteItem)="deleteItemPedido($event)"
-          (messageNull)="showMessageWhenIsNull()"
-          (openPresupuestoItem)="presupuestoItem($event)"
-  ></app-table-items-pedidos-card>
+      <app-table-items-pedidos-card
+        [itemsOC]="itemsOC"
+        (deleteItem)="deleteItemPedido($event)"
+        (messageNull)="showMessageWhenIsNull()"
+        (openPresupuestoItem)="presupuestoItem($event)"
+        [total]="totalOC"
+      ></app-table-items-pedidos-card>
     </div>
 
     <app-custom-button

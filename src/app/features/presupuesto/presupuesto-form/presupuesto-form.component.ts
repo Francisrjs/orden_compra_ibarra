@@ -1,57 +1,107 @@
-import { Component, inject, Input, OnInit, Output, WritableSignal } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  Input,
+  OnInit,
+  WritableSignal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ProductoService } from '../../productos/service/producto-service.service';
-import { InputModalSelectorComponent, SelectorData } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
+import {
+  InputModalSelectorComponent,
+  SelectorData,
+} from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
 import { Producto, UnidadMedida } from 'src/app/core/models/database.type';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteModule,
+} from 'primeng/autocomplete';
 import { UnidadesMedidaService } from '../../productos/service/unidades-medida-service';
-import { PedidoService } from '../../pedidos/services/pedido.service';
 import { ProveedorService } from '../../proveedores/services/proveedor.service';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
+import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
+import { PresupuestoService } from '../presupuesto.service';
 
 @Component({
   selector: 'app-presupuesto-form',
   standalone: true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,InputModalSelectorComponent,InputNumberModule,AutoCompleteModule,ButtonElegantComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    InputModalSelectorComponent,
+    InputNumberModule,
+    AutoCompleteModule,
+    ButtonElegantComponent,
+    InputBoxComponent,
+  ],
   templateUrl: './presupuesto-form.component.html',
-  styleUrls: ['./presupuesto-form.component.css']
+  styleUrls: ['./presupuesto-form.component.css'],
 })
-export class PresupuestoFormComponent implements OnInit{
-    @Input() formResult?: (result: {
-      severity?: string;
-      success: boolean;
-      message: string;
-    }) => void;
-     @Input() onSaveSuccess?: () => void;
-     @Input() producto_id?: number;
-     @Input() unidad_medida_id?: number;
-     @Input() cantidad?: number;
-    private _productoService = inject(ProductoService);
-    private _unididadMedidas = inject(UnidadesMedidaService);
-    private _proveedorService = inject(ProveedorService)
+export class PresupuestoFormComponent implements OnInit {
+  @Input() formResult?: (result: {
+    severity?: string;
+    success: boolean;
+    message: string;
+  }) => void;
+  @Input() onSaveSuccess?: () => void;
+  @Input() producto_id?: number;
+  @Input() unidad_medida_id?: number;
+  @Input() cantidad?: number;
+  private _productoService = inject(ProductoService);
+  private _unididadMedidas = inject(UnidadesMedidaService);
+  private _proveedorService = inject(ProveedorService);
   private fb = inject(FormBuilder);
+  private _presupuestoService = inject(PresupuestoService);
   productoData: SelectorData[] = [];
-  presupuestoForm!:FormGroup;
-   proovedores= this._proveedorService.proveedores
-   proveedoresData: SelectorData[] = [];
+  presupuestoForm!: FormGroup;
+  proovedores = this._proveedorService.proveedores;
+  proveedoresData: SelectorData[] = [];
   filteredMedidasData: any[] = [];
-    productos: WritableSignal<Producto[]> = this._productoService.productos;
-    medidasData: WritableSignal<UnidadMedida[]> =
-      this._unididadMedidas.Unidadmedidas;
+  productos: WritableSignal<Producto[]> = this._productoService.productos;
+  medidasData: WritableSignal<UnidadMedida[]> =
+    this._unididadMedidas.Unidadmedidas;
   selectedMedida: any[] | undefined;
 
+  constructor() {
+    effect(() => {
+      const lista = this.proovedores();
+      this.proveedoresData = lista.map((proveedor) => ({
+        id: proveedor.id,
+        name: proveedor.nombre,
+      }));
+    });
+  }
   async ngOnInit(): Promise<void> {
-      this.presupuestoForm = this.fb.group({
-        producto_id: [null, Validators.required],
-        cantidad: [null, [Validators.required, Validators.min(1)]],
-        unidad_medida_id: [null, Validators.required],
-        importe:[null, Validators.required, Validators.min(1)]
-      });
-     await this.loadMedidas();
+    this.presupuestoForm = this.fb.group({
+      proveedor_id: [null, Validators.required],
+      producto_id: [null, Validators.required],
+      cantidad: [null, [Validators.required, Validators.min(0)]],
+      unidad_medida_id: [null, Validators.required],
+      importe: [null, [Validators.required, Validators.min(0)]],
+    });
+    await this.loadMedidas();
     await this.loadProductos();
-    }
+    // Normalizar el valor de unidad_medida_id al id después de seleccionar
+    this.presupuestoForm
+      .get('unidad_medida_id')
+      ?.valueChanges.subscribe((val) => {
+        if (val && typeof val === 'object' && val.id) {
+          this.presupuestoForm
+            .get('unidad_medida_id')
+            ?.setValue(val.id, { emitEvent: false });
+        }
+      });
+  }
   async loadMedidas() {
     if (this.medidasData().length === 0) {
       const data = await this._unididadMedidas.getAllMedidas();
@@ -66,18 +116,33 @@ export class PresupuestoFormComponent implements OnInit{
       // FIX: Asegurarse de no pasar null a la señal
       this.productos.set(data || []);
     }
-}
+    const productosActuales = this.productos();
+    if (productosActuales) {
+      this.productoData = productosActuales.map((producto) => ({
+        id: producto.id,
+        name: producto.nombre,
+        descripcion: producto.descripcion,
+      }));
+    }
+  }
+  async loadProveedores() {
+    if (this.proovedores().length === 0) {
+      const data = await this._proveedorService.getAllProveedores();
+      // FIX: Asegurarse de no pasar null a la señal
+      this.proovedores.set(data || []);
+    }
+  }
 
-  patchValues(): void{
-    if(this.unidad_medida_id||this.producto_id){
+  patchValues(): void {
+    if (this.unidad_medida_id || this.producto_id) {
       this.presupuestoForm.patchValue({
         producto_id: this.producto_id,
         unidad_medida_id: this.unidad_medida_id,
-        cantidad: this.cantidad
-      })
+        cantidad: this.cantidad,
+      });
     }
   }
- filterData(event: AutoCompleteCompleteEvent) {
+  filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
     // FIX: Acceder al valor de la señal con () y tipar el parámetro 'medida'
     this.filteredMedidasData = this.medidasData().filter(
@@ -86,8 +151,9 @@ export class PresupuestoFormComponent implements OnInit{
       }
     );
   }
-   async onSubmit() {
+  async onSubmit() {
     this.presupuestoForm.markAllAsTouched();
+
     if (this.presupuestoForm.invalid) {
       this.formResult?.({
         success: false,
@@ -96,9 +162,17 @@ export class PresupuestoFormComponent implements OnInit{
       return;
     }
 
-    const formValue = {
-      ...this.presupuestoForm.value,
-    };
+    // Normalizar el valor de unidad_medida_id al id si es un objeto
+    let formValue = { ...this.presupuestoForm.value };
+    if (
+      formValue.unidad_medida_id &&
+      typeof formValue.unidad_medida_id === 'object' &&
+      formValue.unidad_medida_id.id
+    ) {
+      formValue.unidad_medida_id = formValue.unidad_medida_id.id;
+    }
+
+    console.log(formValue);
 
     // Avisar al padre que estamos guardando (opcional si querés mostrar "cargando...")
     this.formResult?.({
@@ -106,16 +180,16 @@ export class PresupuestoFormComponent implements OnInit{
       message: 'Guardando producto en el pedido...',
     });
 
-    const { data, error } = await this._productoService.addProducto(formValue);
+    const { data, error } = await this._presupuestoService.addPresupuesto(
+      formValue
+    );
 
     if (error) {
-      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
       this.formResult?.({
         success: false,
         message: 'No se pudo guardar el producto. ' + error.message,
       });
     } else {
-      // ⬇️ CAMBIO AQUÍ: Usa el callback en lugar de _messageService
       this.formResult?.({
         success: true,
         message: 'El producto fue agregado correctamente ✅',

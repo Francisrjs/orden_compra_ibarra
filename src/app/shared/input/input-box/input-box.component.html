@@ -22,7 +22,29 @@
   ></textarea>
 
   <!-- Input normal -->
-  <div class="input-icon-container">
+  <div
+    class="input-icon-container currency-group mb-2"
+    *ngIf="type === 'currency'"
+  >
+    <span class="currency-box">$</span>
+    <input
+      [type]="'text'"
+      [id]="id"
+      [placeholder]="placeholder"
+      [required]="required"
+      [value]="displayValue"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+      [disabled]="disabled"
+      [readOnly]="readOnly"
+      class="input-with-currency align-middle"
+      [attr.maxlength]="maxLength"
+      [attr.minlength]="minLength"
+      autocomplete="off"
+      style="margin: 0"
+    />
+  </div>
+  <div class="input-icon-container" *ngIf="type !== 'currency'">
     <ng-container *ngIf="icon">
       <i [ngClass]="icon" class="input-icon mb-4 mx-0"></i>
     </ng-container>
@@ -32,7 +54,7 @@
       [id]="id"
       [placeholder]="placeholder"
       [required]="required"
-      [value]="value"
+      [value]="displayValue"
       (input)="onInput($event)"
       (blur)="onBlur()"
       [disabled]="disabled"
@@ -41,6 +63,7 @@
       [style.paddingLeft]="icon ? '2.2rem' : undefined"
       [attr.maxlength]="maxLength"
       [attr.minlength]="minLength"
+      autocomplete="off"
     />
   </div>
 
@@ -58,6 +81,9 @@
     <small *ngIf="control?.errors?.['maxlength']" class="text-danger">
       No puede superar los
       {{ control?.errors?.['maxlength']?.requiredLength }} caracteres.
+    </small>
+    <small *ngIf="control?.errors?.['min']" class="text-danger">
+      El valor debe ser mayor o igual a {{ min }}.
     </small>
   </div>
 </div>

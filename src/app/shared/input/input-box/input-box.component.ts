@@ -4,8 +4,6 @@ import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
   FormControl,
-  ValidatorFn,
-  Validators,
   ControlContainer,
   // NgControl,
 } from '@angular/forms';
@@ -32,6 +30,7 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
   @Input() required: boolean = false;
   @Input() minLength?: number;
   @Input() maxLength?: number;
+  @Input() min?: number; // para validación mínima
   @Input() id: string = '';
   @Input() isTextarea: boolean = false;
   @Input() disabled = false;
@@ -42,7 +41,7 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
   isDisabled = false;
   control: FormControl | null = null;
 
-  // (No se necesita exponer formControlName; usaremos la directiva si está presente)
+  displayValue: string = '';
 
   // Callbacks que Angular inyecta
   private onChange: (v: any) => void = () => {};
@@ -57,10 +56,12 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
         this.control = parent.get(name) as FormControl;
       }
     }
+    this.updateDisplayValue();
   }
 
   writeValue(obj: any): void {
     this.value = obj ?? '';
+    this.updateDisplayValue();
   }
 
   registerOnChange(fn: any): void {
@@ -80,12 +81,69 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
       | HTMLInputElement
       | HTMLTextAreaElement
       | null;
-    const v = target?.value ?? '';
-    this.value = v;
-    this.onChange(v);
+    let v = target?.value ?? '';
+    if (this.type === 'currency') {
+      // Solo permitir dígitos positivos (no negativos, no signos, no letras)
+      v = v.replace(/[^\d]/g, '');
+      // Evitar ceros a la izquierda innecesarios
+      v = v.replace(/^0+(?!$)/, '');
+      let num = Number(v);
+      if (!isNaN(num)) {
+        // Validar mínimo si corresponde
+        if (this.min !== undefined && num < this.min) {
+          this.value = num;
+          this.displayValue = this.formatCurrency(num);
+          this.onChange(num);
+          if (this.control) {
+            this.control.setErrors({
+              ...(this.control.errors || {}),
+              min: true,
+            });
+          }
+        } else {
+          this.value = num;
+          this.displayValue = this.formatCurrency(num);
+          this.onChange(num);
+          if (
+            this.control &&
+            this.control.errors &&
+            this.control.errors['min']
+          ) {
+            const { min, ...rest } = this.control.errors;
+            this.control.setErrors(Object.keys(rest).length ? rest : null);
+          }
+        }
+      } else {
+        this.value = '';
+        this.displayValue = '';
+        this.onChange('');
+      }
+    } else {
+      this.value = v;
+      this.displayValue = v;
+      this.onChange(v);
+    }
   }
 
   onBlur() {
     this.onTouched();
+    if (this.type === 'currency') {
+      this.updateDisplayValue();
+    }
+  }
+
+  updateDisplayValue() {
+    if (this.type === 'currency' && this.value !== '' && this.value != null) {
+      this.displayValue = this.formatCurrency(this.value);
+    } else {
+      this.displayValue = this.value ?? '';
+    }
+  }
+
+  formatCurrency(value: any): string {
+    // Formatea como 100.000
+    const num = Number(value);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('es-CL');
   }
 }

@@ -1,3 +1,5 @@
+import { Time } from '@angular/common';
+
 export type EstadoPedido =
   | 'En Creacion'
   | 'En Proceso de Aprobacion'
@@ -113,4 +115,14 @@ export interface OrdenCompraItem {
   precio_unitario?: number;
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
+}
+
+export interface Presupuesto {
+  id: number;
+  producto_id: number;
+  unidad_medida_id: number;
+  proveedor_id: number;
+  responsable_id?: number;
+  importe: number;
+  created_at: Time;
 }

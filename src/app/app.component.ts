@@ -30,14 +30,13 @@ import { Router, RouterLink, RouterModule } from '@angular/router';
 })
 export class AppComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
-  window = window;
-  items: MenuItem[] = []; // Inicializamos como array vacío
-  expanded = false;
-  private router = inject(Router);
   onResize(event: any) {
     // Si la pantalla es menor a 768px (Bootstrap md), colapsa
     this.expanded = window.innerWidth >= 768;
   }
+  items: MenuItem[] = []; // Inicializamos como array vacío
+  expanded = false;
+  private router = inject(Router);
   ngOnInit() {
     this.expanded = false;
     this.items = [

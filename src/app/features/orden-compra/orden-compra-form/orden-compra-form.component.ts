@@ -25,7 +25,10 @@ import { DialogModule } from 'primeng/dialog';
 import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-items-pedidos-card/table-items-pedidos-card.component';
 import { OrdenCompraService } from '../services/orden-compra.service';
 import { ProveedorService } from '../../proveedores/services/proveedor.service';
-import { InputModalSelectorComponent, SelectorData } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
+import {
+  InputModalSelectorComponent,
+  SelectorData,
+} from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
 import { PresupuestoFormComponent } from '../../presupuesto/presupuesto-form/presupuesto-form.component';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 export interface LocalPedidoItem extends PedidoItem {
@@ -37,9 +40,9 @@ export interface LocalPedidoItem extends PedidoItem {
   imports: [
     CommonModule,
     FormsModule,
-    DialogModule, 
-    InputNumberModule, 
-    ToastModule, 
+    DialogModule,
+    InputNumberModule,
+    ToastModule,
     ButtonModule,
     ConfirmDialogModule,
     TableNgItemPedidoComponent,
@@ -50,33 +53,37 @@ export interface LocalPedidoItem extends PedidoItem {
     TableItemsPedidosCardComponent,
     InputModalSelectorComponent,
     ReactiveFormsModule,
-    SidebarComponent
+    SidebarComponent,
   ],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
-  providers: [PrimeNGConfig, MessageService, ConfirmationService,SidebarComponent],
+  providers: [
+    PrimeNGConfig,
+    MessageService,
+    ConfirmationService,
+    SidebarComponent,
+  ],
 })
-export class OrdenCompraFormComponent implements OnInit{
-
-     sidebarVisible = false;
+export class OrdenCompraFormComponent implements OnInit {
+  sidebarVisible = false;
   sidebarTitle = '';
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() onSaveSuccess?: () => void;
   pedidoItems: LocalPedidoItem[] = [];
-  
-  private _ordenCompraService=inject(OrdenCompraService);
-  private _proveedorService=inject(ProveedorService)
-  proovedores= this._proveedorService.proveedores
-   proveedoresData: SelectorData[] = [];
-  public itemsOC: PedidoItem[] | null= this._ordenCompraService.itemsOC();
+
+  private _ordenCompraService = inject(OrdenCompraService);
+  private _proveedorService = inject(ProveedorService);
+  proovedores = this._proveedorService.proveedores;
+  proveedoresData: SelectorData[] = [];
+  public itemsOC: PedidoItem[] | null = this._ordenCompraService.itemsOC();
   showPriceDialog = false;
   precioAsignado: number | null = null;
   private pendingItem: PedidoItem | null = null;
- 
+
   private _pedidoService = inject(PedidoService);
   private _messageService = inject(MessageService);
-
+  public totalOC = 0;
   pedido = this._pedidoService.pedido;
 
   constructor() {
@@ -85,29 +92,26 @@ export class OrdenCompraFormComponent implements OnInit{
       // Inicializa con lo que ya viniera en el pedido (map para incluir precio_asignado si quisiera)
       this.pedidoItems = [...(current.pedido_items || [])] as LocalPedidoItem[];
     }
-    effect(()=>{
-      this.itemsOC= this._ordenCompraService.itemsOC() ?? []
-    })
-      effect(() => {
-    const lista = this.proovedores();
-    this.proveedoresData = lista.map((proveedor) => ({
-      id: proveedor.id,
-      name: proveedor.nombre,
-    }));
-    console.log("proveedores cargados: ", lista);
-  });
+    effect(() => {
+      this.itemsOC = this._ordenCompraService.itemsOC() ?? [];
+      this.totalOC = this._ordenCompraService.sumProductsOC();
+    });
+    effect(() => {
+      const lista = this.proovedores();
+      this.proveedoresData = lista.map((proveedor) => ({
+        id: proveedor.id,
+        name: proveedor.nombre,
+      }));
+      console.log('proveedores cargados: ', lista);
+    });
   }
   ngOnInit(): void {
-    
-        if (this.proovedores().length === 0) {
-    this._proveedorService.getAllProveedores();
+    if (this.proovedores().length === 0) {
+      this._proveedorService.getAllProveedores();
+    }
+
+    // Usamos effect para reaccionar cuando cambia la lista de proveedores
   }
-
-  // Usamos effect para reaccionar cuando cambia la lista de proveedores
-
-  }
-
- 
 
   handleItemAdd(item: PedidoItem) {
     // Guardamos el item pendiente y abrimos diálogo para el precio
@@ -158,33 +162,41 @@ export class OrdenCompraFormComponent implements OnInit{
       return;
     }
 
-      const itemWithPrice: LocalPedidoItem = {
-    ...(this.pendingItem as PedidoItem),
-    precio_asignado: this.precioAsignado as number,
-  };
+    const itemWithPrice: LocalPedidoItem = {
+      ...(this.pendingItem as PedidoItem),
+      precio_asignado: this.precioAsignado as number,
+    };
 
-  // Agrega a la lista local
-  this.pedidoItems = [...this.pedidoItems, itemWithPrice];
+    // Agrega a la lista local
+    this.pedidoItems = [...this.pedidoItems, itemWithPrice];
 
-  // AGREGA TAMBIÉN AL SERVICIO
-  this._ordenCompraService.addItemOC(itemWithPrice, itemWithPrice.precio_asignado!);
-  console.log("Se agrega al ITEMS OC: ",this._ordenCompraService.ordenCompraItems())
-  this._messageService.add({
-    severity: 'success',
-    summary: 'Item agregado',
-    detail: `${itemWithPrice.producto?.nombre || 'Producto'} agregado con precio ${itemWithPrice.precio_asignado}`,
-  });
+    // AGREGA TAMBIÉN AL SERVICIO
+    this._ordenCompraService.addItemOC(
+      itemWithPrice,
+      itemWithPrice.precio_asignado!
+    );
+    console.log(
+      'Se agrega al ITEMS OC: ',
+      this._ordenCompraService.ordenCompraItems()
+    );
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Item agregado',
+      detail: `${
+        itemWithPrice.producto?.nombre || 'Producto'
+      } agregado con precio ${itemWithPrice.precio_asignado}`,
+    });
 
-  this.cancelAdd();
+    this.cancelAdd();
   }
 
   // El resto de tus métodos: editProductItem, deleteItemPedido, etc.
   editProductItem(item: PedidoItem) {
     /* ... */
   }
-  deleteItemPedido(item: PedidoItem  | undefined) {
+  deleteItemPedido(item: PedidoItem | undefined) {
     if (item === undefined) return;
-    this._ordenCompraService.deleteItemOC(item)
+    this._ordenCompraService.deleteItemOC(item);
     this._messageService.add({
       severity: 'info',
       summary: 'Item eliminado',
@@ -206,7 +218,7 @@ export class OrdenCompraFormComponent implements OnInit{
       return '';
     }
   }
-  showMessageWhenIsNull(){
+  showMessageWhenIsNull() {
     this._messageService.add({
       severity: 'info',
       summary: 'Seleccione un item',
@@ -214,29 +226,29 @@ export class OrdenCompraFormComponent implements OnInit{
     });
   }
   presupuestoItem(idItemProduct: OrdenCompraItem) {
-      console.log('Abriendo producto ..', idItemProduct);
-      this.sidebarTitle = 'Presupuesto:';
-      this.componentToLoad = PresupuestoFormComponent;
-      this.sidebarInputs = {
-        producto_id: idItemProduct.pedido_items?.id,
-        cantidad: idItemProduct.pedido_items?.cantidad,
-        unidad_medida_id: idItemProduct.pedido_items?.unidad_medida_id,
-        onSaveSuccess: () => this.handleCloseSidebar(),
-        formResult: (result: {
-          severity?: string;
-          success: boolean;
-          message: string;
-        }) => this.handleFormResult(result),
-      };
-  
-      this.sidebarVisible = true;
-    }
+    console.log('Abriendo producto ..', idItemProduct);
+    this.sidebarTitle = 'Presupuesto:';
+    this.componentToLoad = PresupuestoFormComponent;
+    this.sidebarInputs = {
+      producto_id: idItemProduct.pedido_items?.id,
+      cantidad: idItemProduct.pedido_items?.cantidad,
+      unidad_medida_id: idItemProduct.pedido_items?.unidad_medida_id,
+      onSaveSuccess: () => this.handleCloseSidebar(),
+      formResult: (result: {
+        severity?: string;
+        success: boolean;
+        message: string;
+      }) => this.handleFormResult(result),
+    };
 
-      handleCloseSidebar() {
+    this.sidebarVisible = true;
+  }
+
+  handleCloseSidebar() {
     console.log('Producto guardado, cerrando sidebar...');
     this.sidebarVisible = false;
   }
-   handleFormResult(result: {
+  handleFormResult(result: {
     severity?: string;
     success?: boolean;
     message: string;
