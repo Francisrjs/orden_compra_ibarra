@@ -13,14 +13,12 @@ import {
   getBadgeClassByPedidoItem,
 } from 'src/app/shared/funtions/pedidosFuntions';
 import { ButtonModule } from 'primeng/button';
-import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
-import { ButtonFancyComponent } from 'src/app/shared/buttons/button-fancy/button-fancy.component';
-import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
+import { AccordionModule } from 'primeng/accordion';
 import { DialogModule } from 'primeng/dialog';
 import { TableItemsPedidosCardComponent } from 'src/app/shared/tables/table-items-pedidos-card/table-items-pedidos-card.component';
 import { OrdenCompraService } from '../services/orden-compra.service';
@@ -31,6 +29,10 @@ import {
 } from 'src/app/shared/input/input-modal-selector/input-modal-selector.component';
 import { PresupuestoFormComponent } from '../../presupuesto/presupuesto-form/presupuesto-form.component';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
+import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/table-generic-ng.component';
+import { ButtonFancyComponent } from "src/app/shared/buttons/button-fancy/button-fancy.component";
+import { ButtonWithIconComponent } from "src/app/shared/buttons/button-with-icon/button-with-icon.component";
+import { PresupuestoService } from '../../presupuesto/presupuesto.service';
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
 }
@@ -46,15 +48,15 @@ export interface LocalPedidoItem extends PedidoItem {
     ButtonModule,
     ConfirmDialogModule,
     TableNgItemPedidoComponent,
-    ButtonWithIconComponent,
     ButtonElegantComponent,
-    ButtonFancyComponent,
-    InputBoxComponent,
     TableItemsPedidosCardComponent,
     InputModalSelectorComponent,
     ReactiveFormsModule,
     SidebarComponent,
-  ],
+    AccordionModule,
+    TableGenericNGComponent,
+    ButtonWithIconComponent
+],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
   providers: [
@@ -62,6 +64,7 @@ export interface LocalPedidoItem extends PedidoItem {
     MessageService,
     ConfirmationService,
     SidebarComponent,
+    TableGenericNGComponent
   ],
 })
 export class OrdenCompraFormComponent implements OnInit {
@@ -74,6 +77,8 @@ export class OrdenCompraFormComponent implements OnInit {
 
   private _ordenCompraService = inject(OrdenCompraService);
   private _proveedorService = inject(ProveedorService);
+  private _presupuestoService= inject(PresupuestoService);
+  presupuesto=this._presupuestoService.presupuestos;
   proovedores = this._proveedorService.proveedores;
   proveedoresData: SelectorData[] = [];
   public itemsOC: PedidoItem[] | null = this._ordenCompraService.itemsOC();
@@ -110,7 +115,9 @@ export class OrdenCompraFormComponent implements OnInit {
       this._proveedorService.getAllProveedores();
     }
 
-    // Usamos effect para reaccionar cuando cambia la lista de proveedores
+   if (this.presupuesto().length ===0){
+      this._presupuestoService.getAllPresupuestos();
+   }
   }
 
   handleItemAdd(item: PedidoItem) {

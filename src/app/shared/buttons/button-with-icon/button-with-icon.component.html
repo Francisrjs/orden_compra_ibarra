@@ -9,7 +9,7 @@
   (mouseleave)="onMouseLeave()"
 >
   <i *ngIf="iconClass" [ngClass]="'bi bi-' + iconClass"></i>
-  <span>{{ text }}</span>
+  <span class="text-success">{{ text }}</span>
 </a>
 
 <ng-template #buttonTpl>
@@ -24,6 +24,7 @@
       *ngIf="iconClass"
       [class.hovered]="isHovered"
       [ngClass]="'bi bi-' + iconClass"
+      class="text-success"
     ></i>
     <span *ngIf="!iconOnly" [class.hovered]="isHovered">{{ text }}</span>
   </button>

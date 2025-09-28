@@ -12,7 +12,7 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  border: 1px solid;
+  border: 1px solid green;
   border-radius: 5px;
   text-decoration: none;
   font-weight: 500;
@@ -20,7 +20,7 @@
   font-size: 16px;
   cursor: pointer;
   transition: 0.2s ease;
-
+  
   /* Estilos para la animación */
   position: relative;
   overflow: hidden;
@@ -58,7 +58,7 @@
 .btn-default {
   background: #f8f8fb;
   border-color: #18a362;
-  color: #171645;
+  color: #19dba1;
 }
 
 .btn-default:hover {

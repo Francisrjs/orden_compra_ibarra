@@ -13,7 +13,7 @@
   [style]="{ width: '350px' }"
 >
   <div class="p-fluid">
-    <label class="mb-2">Precio</label>
+    <label class="mb-2 ">Precio</label>
 
     <!-- Usamos p-inputNumber (si lo importaste) -->
     <p-inputNumber
@@ -26,6 +26,7 @@
       inputId="precioInput"
       class="mb-2"
     >
+    
     </p-inputNumber>
 
     <div class="d-flex justify-content-end gap-2 mt-3">
@@ -49,25 +50,66 @@
 <div class="d-flex gap-5">
   <div class="w-75">
     <h4>Formulario de orden de compra:</h4>
-    <app-input-modal-selector
-      label="Selecciona un Proovedor"
-      id="proovedor_id"
-      [data]="proveedoresData"
-      placeholder="Seleccione un proveedor"
-      formControlName="id"
-      [required]="true"
-    />
-
+        <app-input-modal-selector
+        label="Selecciona un Proovedor"
+        id="proovedor_id"
+        [data]="proveedoresData"
+        placeholder="Seleccione un proveedor"
+        formControlName="id"
+        [required]="true"
+      />
     <div class="container-body">
-      <app-table-items-pedidos-card
-        [itemsOC]="itemsOC"
-        (deleteItem)="deleteItemPedido($event)"
-        (messageNull)="showMessageWhenIsNull()"
-        (openPresupuestoItem)="presupuestoItem($event)"
-        [total]="totalOC"
-      ></app-table-items-pedidos-card>
-    </div>
+      
+        <app-table-items-pedidos-card
+          [itemsOC]="itemsOC"
+          (deleteItem)="deleteItemPedido($event)"
+          (messageNull)="showMessageWhenIsNull()"
+          (openPresupuestoItem)="presupuestoItem($event)"
+  ></app-table-items-pedidos-card>
 
+          </div>
+<p-accordion >
+    <p-accordionTab header="Presupuestos" headerStyleClass="text-success">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="w-75">
+          <p class="text-center">Agregar presupuestos anteriores</p>
+        </div>
+        
+        <div class="w-25">
+ <app-button-with-icon
+       text="Agregar"
+       iconClass="plus"
+       />
+        </div>
+      
+      </div>
+    </p-accordionTab>
+    </p-accordion>
+    <app-table-generic-ng
+  [columns]="[
+    { field: 'id', header: 'id', width: '2rem' },
+    { field: 'proveedor_id.nombre', header: 'Proveedor' },
+    { field: 'producto.nombre', header: 'Producto' },
+    { field: 'unidad_medida.nombre', header: 'Medida' },
+    { field: 'cantidad', header: 'Cantidad' },
+    { field: 'importe', header: 'Importe' },
+    
+  ]"
+  [data]="itemsOC ?? []"
+  minWidth="40rem"
+>
+  <ng-template #actions let-item>
+    <p-button
+      icon="pi pi-trash"
+      
+      styleClass="p-button-rounded p-button-outlined"
+      [rounded]="true"
+      [text]="true"
+      severity="success"
+    ></p-button>
+  
+  </ng-template>
+</app-table-generic-ng>
     <app-custom-button
       text="Guardar Orden de COmpra"
       type="submit"
