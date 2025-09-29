@@ -1,0 +1,35 @@
+<app-table-generic-ng
+  [columns]="columns"
+  [data]="dataFilter"
+  [minWidth]="minWidth"
+>
+  <ng-template
+    #actions
+    let-item
+    let-i="index"
+  >
+    <p-button
+    *ngIf="trashButton"
+      icon="pi pi-trash"
+      styleClass="p-button-rounded p-button-outlined"
+      [rounded]="true"
+      [text]="true"
+      severity="danger"
+      (onClick)="trashClick(item)"
+      label="Eliminar"
+    ></p-button>
+     <p-button
+    *ngIf="addButton"
+      icon="pi pi-plus"
+      styleClass="p-button-rounded p-button-outlined"
+      [rounded]="true"
+      [text]="true"
+      severity="sucess"
+      (onClick)="addClick(item)"
+      label="Agregar"
+    ></p-button>
+    <ng-container
+  *ngTemplateOutlet="actionsTemplate || null; context: { $implicit: item, index: i }"
+></ng-container>
+  </ng-template>
+</app-table-generic-ng>

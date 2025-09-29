@@ -1,7 +1,7 @@
 import { Component, effect, inject, Input, OnInit, Type } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { TableNgItemPedidoComponent } from 'src/app/shared/tables/table-ng-item-pedido/table-ng-item-pedido.component';
-import { OrdenCompraItem, PedidoItem } from 'src/app/core/models/database.type';
+import { OrdenCompraItem, PedidoItem, Presupuesto, Producto, Proveedor, UnidadMedida } from 'src/app/core/models/database.type';
 import { PedidoService } from '../../pedidos/services/pedido.service';
 import {
   ConfirmationService,
@@ -33,6 +33,9 @@ import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/
 import { ButtonFancyComponent } from "src/app/shared/buttons/button-fancy/button-fancy.component";
 import { ButtonWithIconComponent } from "src/app/shared/buttons/button-with-icon/button-with-icon.component";
 import { PresupuestoService } from '../../presupuesto/presupuesto.service';
+import { TableGenericFilterComponent } from 'src/app/shared/tables/table-generic-filter/table-generic-filter.component';
+import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
+
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
 }
@@ -49,6 +52,7 @@ export interface LocalPedidoItem extends PedidoItem {
     ConfirmDialogModule,
     TableNgItemPedidoComponent,
     ButtonElegantComponent,
+     InputBoxComponent,
     TableItemsPedidosCardComponent,
     InputModalSelectorComponent,
     ReactiveFormsModule,
@@ -64,7 +68,8 @@ export interface LocalPedidoItem extends PedidoItem {
     MessageService,
     ConfirmationService,
     SidebarComponent,
-    TableGenericNGComponent
+    TableGenericNGComponent,
+    CurrencyPipe
   ],
 })
 export class OrdenCompraFormComponent implements OnInit {
@@ -77,8 +82,9 @@ export class OrdenCompraFormComponent implements OnInit {
 
   private _ordenCompraService = inject(OrdenCompraService);
   private _proveedorService = inject(ProveedorService);
-  private _presupuestoService= inject(PresupuestoService);
-  presupuesto=this._presupuestoService.presupuestos;
+  public _presupuestoService= inject(PresupuestoService);
+  private currencyPipe=inject(CurrencyPipe)
+  presupuesto: Presupuesto[] | null =this._presupuestoService.presupuestos();
   proovedores = this._proveedorService.proveedores;
   proveedoresData: SelectorData[] = [];
   public itemsOC: PedidoItem[] | null = this._ordenCompraService.itemsOC();
@@ -107,17 +113,22 @@ export class OrdenCompraFormComponent implements OnInit {
         id: proveedor.id,
         name: proveedor.nombre,
       }));
-      console.log('proveedores cargados: ', lista);
     });
+      effect(() => {
+    this.presupuesto = this._presupuestoService.presupuestos() ?? [];
+    console.log("Actualizado: ", this.presupuesto);
+  });
+
   }
   ngOnInit(): void {
     if (this.proovedores().length === 0) {
       this._proveedorService.getAllProveedores();
     }
 
-   if (this.presupuesto().length ===0){
-      this._presupuestoService.getAllPresupuestos();
-   }
+  this._presupuestoService.getAllPresupuestos().then(() => {
+    this.presupuesto = this._presupuestoService.presupuestos();
+    console.log("Presupuestos Cargados: ", this.presupuesto);
+  });
   }
 
   handleItemAdd(item: PedidoItem) {
@@ -250,6 +261,28 @@ export class OrdenCompraFormComponent implements OnInit {
 
     this.sidebarVisible = true;
   }
+ presupuestoAddOC() {
+
+    this.sidebarTitle = 'Agregar Presupuesto a la OC:';
+    this.componentToLoad = TableGenericFilterComponent
+    this.sidebarInputs = {
+      data:this._presupuestoService.presupuestos,
+      filter:this._presupuestoService.presupuestoAsignados,
+      addButton:true,
+      addButtonClick: (item:Presupuesto) => this._presupuestoService.addPresupuestoAsignado(item),
+      columns: [
+      { field: 'id', header: 'ID', width: '2rem' },
+      { field: 'proveedores', header: 'Proveedor', pipe: this.getNombreProveedor },
+      { field: 'productos', header: 'Producto', pipe: this.getNombreProducto },
+      { field: 'unidades_medida', header: 'Medida', pipe: this.getUnidadMedidaNombre },
+      { field: 'cantidad', header: 'Cantidad' },
+      { field: 'importe', header: 'Importe', pipe: this.getImporteCurrency }
+    ],
+  
+    };
+
+    this.sidebarVisible = true;
+  }
 
   handleCloseSidebar() {
     console.log('Producto guardado, cerrando sidebar...');
@@ -274,4 +307,9 @@ export class OrdenCompraFormComponent implements OnInit {
       });
     }
   }
+  //Getters functions
+  getNombreProveedor = (proveedor: Proveedor) => proveedor?.nombre;
+  getNombreProducto= (producto: Producto) => producto?.nombre;
+  getUnidadMedidaNombre= (unidad_medida:UnidadMedida) => unidad_medida?.nombre;
+  getImporteCurrency=(importe:number)=> this.currencyPipe.transform(importe,'$','symbol', '1.0-0')
 }

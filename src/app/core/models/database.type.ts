@@ -125,4 +125,8 @@ export interface Presupuesto {
   responsable_id?: number;
   importe: number;
   created_at: Time;
+
+  productos?: Producto;
+  proveedores?:Proveedor;
+  unidades_medida?:UnidadMedida;
 }

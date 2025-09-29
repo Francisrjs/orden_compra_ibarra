@@ -22,7 +22,7 @@
       [mode]="'decimal'"
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
-      placeholder="Ingrese el presupuesto"
+      placeholder="Ingrese el precio de compra"
       inputId="precioInput"
       class="mb-2"
     >
@@ -58,7 +58,25 @@
         formControlName="id"
         [required]="true"
       />
-    <div class="container-body">
+
+
+  <app-input-box
+      label="Condiciones de entrega"
+      type="text"
+      id="title"
+      placeholder="Ej: ENVIO AL TRANSPORTE"
+      formControlName="condicion_entrega"
+      [required]="true"
+    ></app-input-box>
+  <app-input-box
+      label="Condiciones de Pago"
+      type="text"
+      id="title"
+      placeholder="EJ: 30 Días, 60 días"
+      formControlName="condicion_pago"
+      [required]="true"
+    ></app-input-box>
+      <div class="container-body">
       
         <app-table-items-pedidos-card
           [itemsOC]="itemsOC"
@@ -66,11 +84,9 @@
           (messageNull)="showMessageWhenIsNull()"
           (openPresupuestoItem)="presupuestoItem($event)"
   ></app-table-items-pedidos-card>
-
-          </div>
 <p-accordion >
     <p-accordionTab header="Presupuestos" headerStyleClass="text-success">
-      <div class="d-flex align-items-center justify-content-center w-100">
+      <div class="d-flex align-items-center justify-content-center w-100 mb-2">
         <div class="w-75">
           <p class="text-center">Agregar presupuestos anteriores</p>
         </div>
@@ -78,24 +94,23 @@
         <div class="w-25">
  <app-button-with-icon
        text="Agregar"
+       (buttonClick)="presupuestoAddOC()"
        iconClass="plus"
        />
+       
         </div>
       
       </div>
-    </p-accordionTab>
-    </p-accordion>
-    <app-table-generic-ng
+        <app-table-generic-ng
   [columns]="[
     { field: 'id', header: 'id', width: '2rem' },
-    { field: 'proveedor_id.nombre', header: 'Proveedor' },
-    { field: 'producto.nombre', header: 'Producto' },
-    { field: 'unidad_medida.nombre', header: 'Medida' },
-    { field: 'cantidad', header: 'Cantidad' },
-    { field: 'importe', header: 'Importe' },
-    
+    { field: 'proveedores', header: 'Proveedor', pipe: getNombreProveedor },
+    { field: 'productos', header: 'Producto', pipe:getNombreProducto },
+    { field: 'unidades_medida', header: 'Medida', pipe:getUnidadMedidaNombre },
+    { field: 'cantidad', header: 'Cantidad'},
+    { field: 'importe', header: 'Importe', pipe: getImporteCurrency }
   ]"
-  [data]="itemsOC ?? []"
+  [data]="_presupuestoService.presupuestoAsignados"
   minWidth="40rem"
 >
   <ng-template #actions let-item>
@@ -110,6 +125,9 @@
   
   </ng-template>
 </app-table-generic-ng>
+    </p-accordionTab>
+    </p-accordion>
+          </div>
     <app-custom-button
       text="Guardar Orden de COmpra"
       type="submit"

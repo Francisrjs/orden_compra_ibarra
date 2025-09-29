@@ -5,6 +5,8 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { CategoriaService } from '../productos/service/categoria-service.service';
 import { UnidadesMedidaService } from '../productos/service/unidades-medida-service';
 import { ProductoService } from '../productos/service/producto-service.service';
+import { CurrencyPipe } from '@angular/common';
+import { Console } from 'console';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +17,7 @@ export class PresupuestoService extends StateService<Presupuesto> {
   private _unidadMedidaService = inject(UnidadesMedidaService);
   private _productoService = inject(ProductoService);
   presupuestos = signal<Presupuesto[]>([]);
-
+  presupuestoAsignados= signal<Presupuesto[]>([]);
   async getAllPresupuestos(): Promise<Presupuesto[] | null> {
     try {
       this.setLoading(true);
@@ -26,15 +28,15 @@ export class PresupuestoService extends StateService<Presupuesto> {
         .select(
           `
           *,
-          producto (
+          productos (
             id,
            nombre
           ),
-          unidad_medida (
+          unidades_medida (
           id,
           nombre
           ),
-          proveedor (
+          proveedores (
           id,
           nombre
           )
@@ -90,4 +92,14 @@ export class PresupuestoService extends StateService<Presupuesto> {
     }
     return { data, error };
   }
+addPresupuestoAsignado(presupuestoItem: Presupuesto) {
+  this.presupuestoAsignados.update((currentPresupuestos) => {
+    const exists = currentPresupuestos.some(p => p.id === presupuestoItem.id);
+    if (!exists) {
+      return [...currentPresupuestos, presupuestoItem];
+    }
+    return currentPresupuestos;
+  });
+  console.log(this.presupuestoAsignados());
+}
 }
