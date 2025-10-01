@@ -49,13 +49,14 @@
 </p-dialog>
 <div class="d-flex gap-5">
   <div class="w-75">
-    <h4>Formulario de orden de compra:</h4>
+    <h4 class="text-center">Formulario de orden de compra:</h4>
+     <form [formGroup]="ordenCompraForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <app-input-modal-selector
         label="Selecciona un Proovedor"
         id="proovedor_id"
         [data]="proveedoresData"
         placeholder="Seleccione un proveedor"
-        formControlName="id"
+        formControlName="proveedor_id"
         [required]="true"
       />
 
@@ -76,15 +77,17 @@
       formControlName="condicion_pago"
       [required]="true"
     ></app-input-box>
+    </form>
       <div class="container-body">
       
         <app-table-items-pedidos-card
           [itemsOC]="itemsOC"
+           [total]="totalOC"
           (deleteItem)="deleteItemPedido($event)"
           (messageNull)="showMessageWhenIsNull()"
           (openPresupuestoItem)="presupuestoItem($event)"
   ></app-table-items-pedidos-card>
-<p-accordion >
+<p-accordion  class="mt-4">
     <p-accordionTab header="Presupuestos" headerStyleClass="text-success">
       <div class="d-flex align-items-center justify-content-center w-100 mb-2">
         <div class="w-75">
@@ -132,13 +135,14 @@
       text="Guardar Orden de COmpra"
       type="submit"
       styleType="success"
+      (buttonClick)="onSubmit()"
     >
       ></app-custom-button
     >
   </div>
 
   <div class="">
-    <h4>Items pendientes para OC:</h4>
+    <h4 class="text-center">Items pendientes para OC:</h4>
     <app-table-ng-item-pedido
       (addItem)="handleItemAdd($event)"
     ></app-table-ng-item-pedido>

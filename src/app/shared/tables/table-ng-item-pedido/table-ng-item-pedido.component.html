@@ -1,6 +1,13 @@
 <p-toast></p-toast>
 
-<p-table [value]="items" dataKey="id" [tableStyle]="{ 'min-width': '40rem' }">
+<p-table 
+[value]="items" dataKey="id" 
+[tableStyle]="{ 'min-width': '40rem' }"
+  [paginator]="true"
+[rows]="10"
+currentPageReportTemplate="mostrando {first} de {last} del total {totalRecords} entradas"
+[rowsPerPageOptions]="[10,20,30]"
+>
   <ng-template pTemplate="header">
     <tr>
   
@@ -40,7 +47,7 @@
 
       <td>
         <p-tag
-          [value]="item.estado"
+          [value]="item.estado | uppercase"
           [severity]="getStatusSeverity(item.estado)"
         ></p-tag>
       </td>
@@ -77,6 +84,12 @@
  
       </td> 
     </tr>
+            <ng-template pTemplate="paginatorleft">
+            <p-button type="button" icon="pi pi-plus" styleClass="p-button-text"></p-button>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+            <p-button type="button" icon="pi pi-cloud" styleClass="p-button-text"></p-button>
+        </ng-template>
   </ng-template>
 
   <ng-template pTemplate="emptymessage">

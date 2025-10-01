@@ -124,7 +124,15 @@ export class InputBoxComponent implements ControlValueAccessor, OnInit {
       this.onChange(v);
     }
   }
-
+onKeyDown(event: KeyboardEvent) {
+  // Permite solo números, teclas de control y navegación
+  if (
+    !/[0-9]/.test(event.key) &&
+    !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)
+  ) {
+    event.preventDefault();
+  }
+}
   onBlur() {
     this.onTouched();
     if (this.type === 'currency') {

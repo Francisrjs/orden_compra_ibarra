@@ -28,21 +28,24 @@
   >
     <span class="currency-box">$</span>
     <input
-      [type]="'text'"
-      [id]="id"
-      [placeholder]="placeholder"
-      [required]="required"
-      [value]="displayValue"
-      (input)="onInput($event)"
-      (blur)="onBlur()"
-      [disabled]="disabled"
-      [readOnly]="readOnly"
-      class="input-with-currency align-middle"
-      [attr.maxlength]="maxLength"
-      [attr.minlength]="minLength"
-      autocomplete="off"
-      style="margin: 0"
-    />
+  [type]="type === 'currency' ? 'text' : type"
+  [attr.inputmode]="type === 'currency' ? 'numeric' : null"
+  [attr.pattern]="type === 'currency' ? '\\d*' : null"
+  [id]="id"
+  [placeholder]="placeholder"
+  [required]="required"
+  [value]="displayValue"
+  (input)="onInput($event)"
+  (keydown)="type === 'currency' ? onKeyDown($event) : null"
+  (blur)="onBlur()"
+  [disabled]="disabled"
+  [readOnly]="readOnly"
+  class="input-with-currency align-middle"
+  [attr.maxlength]="maxLength"
+  [attr.minlength]="minLength"
+  autocomplete="off"
+  style="margin: 0"
+/>
   </div>
   <div class="input-icon-container" *ngIf="type !== 'currency'">
     <ng-container *ngIf="icon">

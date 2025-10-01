@@ -6,6 +6,10 @@
     [loading]="loading"
     [tableStyle]="{ 'min-width': '40rem' }"
     [globalFilterFields]="globalFilterFields"
+      [paginator]="true"
+  [rows]="25"
+  currentPageReportTemplate="mostrando {first} de {last} del total {totalRecords} entradas"
+  [rowsPerPageOptions]="[25,50,75,100]"
   >
     <ng-template pTemplate="caption">
       <div class="flex align-items-center gap-2">
@@ -143,5 +147,11 @@
         </td>
       </tr>
     </ng-template>
+                              <ng-template pTemplate="paginatorleft">
+            
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+            
+        </ng-template>
   </p-table>
 </div>

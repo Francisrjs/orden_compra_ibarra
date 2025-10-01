@@ -53,7 +53,7 @@
                   [ngClass]="getBadgeClass(getEstado(item), true)"
                   *ngIf="pedido?.estado != 'En Creacion'"
                 >
-                  {{ getEstado(item) }}
+                  {{ getEstado(item) | uppercase }}
                 </span>
               </h6>
 
@@ -156,7 +156,7 @@
         </div>
         <p class="mt-3 text-muted">Finalizar pedido</p>
       </div>
-      <div class="no-products-placeholder" *ngIf="itemsOC && total">
+      <div class="no-products-placeholder" *ngIf="total">
         <div
           class="total-rectangle d-flex flex-column align-items-center justify-content-center mb-2"
         >

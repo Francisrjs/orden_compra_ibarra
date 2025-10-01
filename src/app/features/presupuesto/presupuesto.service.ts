@@ -24,7 +24,7 @@ export class PresupuestoService extends StateService<Presupuesto> {
       this.setError(false);
 
       const { data, error } = await this._supabaseClient
-        .from('presupuesto') // <-- Vista
+        .from('presupuesto_item') // <-- Vista
         .select(
           `
           *,
@@ -75,7 +75,7 @@ export class PresupuestoService extends StateService<Presupuesto> {
     presupuestosData: Partial<Presupuesto>
   ): Promise<{ data: Presupuesto | null; error: any }> {
     const { data, error } = await this._supabaseClient
-      .from('presupuesto')
+      .from('presupuesto_item')
       .insert({
         ...presupuestosData,
         responsable_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12',
@@ -88,6 +88,7 @@ export class PresupuestoService extends StateService<Presupuesto> {
         ...currentPresupuesto,
         data,
       ]);
+      this.addPresupuestoAsignado(data);
       this.addItem(data);
     }
     return { data, error };
@@ -101,5 +102,40 @@ addPresupuestoAsignado(presupuestoItem: Presupuesto) {
     return currentPresupuestos;
   });
   console.log(this.presupuestoAsignados());
+}
+async asignarPresupuestoOC(orden_compra_id:number){
+  try {
+    const presupuestosParaAsignar=this.presupuestoAsignados()
+    if (presupuestosParaAsignar.length===0){
+            return { data: null, error: { message: 'No hay presupuestos para asignar' } };
+    }
+    const presupuestosIds= presupuestosParaAsignar.map(p=>p.id);
+    const { data, error } = await this._supabaseClient
+      .from('presupuesto_item')
+      .update({ orden_compra_id: orden_compra_id })
+      .in('id', presupuestosIds)
+      .select('*');
+
+      if (!error && data) {
+      // Actualizar la signal de presupuestos con los datos actualizados
+      this.presupuestos.update((currentPresupuestos) => {
+        return currentPresupuestos.map(presupuesto => {
+          const updated = data.find(d => d.id === presupuesto.id);
+          return updated ? updated : presupuesto;
+        });
+      });
+
+      // Limpiar los presupuestos asignados ya que fueron procesados
+      this.clearPresupuestosAsignados();
+    }
+
+    return { data, error };
+  } catch (error) {
+    console.error('Error asignando presupuestos a OC:', error);
+    return { data: null, error: error };
+  }
+}
+clearPresupuestosAsignados() {
+  this.presupuestoAsignados.set([]);
 }
 }

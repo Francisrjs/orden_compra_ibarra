@@ -10,7 +10,8 @@ export type EstadoItemPedido =
   | 'Pendiente'
   | 'Aprobado'
   | 'Rechazado'
-  | 'Aprobado parcial';
+  | 'Aprobado parcial'
+  | 'En Envio';
 export type EstadoOC =
   | 'Borrador'
   | 'Enviada a Proveedor'
@@ -97,7 +98,7 @@ export interface PedidoItem {
 
 export interface OrdenCompra {
   id: number;
-  numero_oc: string;
+  numero_oc?: string;
   jefe_compra_id: string; // UUID del usuario
   proveedor_id?: number;
   estado: EstadoOC;
@@ -113,6 +114,8 @@ export interface OrdenCompraItem {
   orden_compra_id?: number;
   pedido_item_id?: number;
   precio_unitario?: number;
+  cantidad:number;
+  subtotal:number;
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
 }

@@ -28,6 +28,10 @@ export function getBadgeClassByPedidoItem(estado: string) {
       return 'text-bg-warning';
     case 'Rechazado':
       return 'text-bg-danger';
+    case 'Aceptado':
+      return 'text-bg-success'
+    case 'En Envio':
+      return 'text-bg-success'
     default:
       return 'text-bg-secondary';
   }

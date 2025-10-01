@@ -36,24 +36,31 @@
 
       <div class="col-12 col-md-6 d-flex flex-column">
         <label class="input_label mb-1">Unidad de Medida</label>
-        <p-autoComplete
-          formControlName="unidad_medida_id"
-          [suggestions]="filteredMedidasData"
-          (completeMethod)="filterData($event)"
-          [dropdown]="true"
-          optionLabel="nombre"
-          placeholder="Selecciona una unidad de medida"
-          dropdownIcon="pi pi-chevron-down"
-          class="w-100 responsive-input"
-          inputStyleClass="w-100"
-        ></p-autoComplete>
+                  <p-autoComplete
+              formControlName="unidad_medida"
+              [suggestions]="filteredMedidasData"
+              (completeMethod)="filterData($event)"
+              [dropdown]="true"
+              optionLabel="nombre"
+              field="nombre"
+              placeholder="Selecciona una unidad de medida"
+              dropdownIcon="pi pi-chevron-down"
+              class="w-100 responsive-input"
+              inputStyleClass="w-100"
+            ></p-autoComplete>
       </div>
     </div>
+     <small
+      *ngIf="presupuestoForm.get('importe')?.errors?.['required'] &&  presupuestoForm.get('importe')?.touched"
+      class="text-danger"
+      >El campo importe es invalido.</small
+    >
     <app-input-box
       label="Importe"
       type="currency"
       id="description"
       placeholder="1000"
+      
       [required]="false"
       formControlName="importe"
     ></app-input-box>

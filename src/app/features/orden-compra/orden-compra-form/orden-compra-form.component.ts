@@ -14,7 +14,7 @@ import {
 } from 'src/app/shared/funtions/pedidosFuntions';
 import { ButtonModule } from 'primeng/button';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
@@ -78,24 +78,24 @@ export class OrdenCompraFormComponent implements OnInit {
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() onSaveSuccess?: () => void;
-  pedidoItems: LocalPedidoItem[] = [];
-
+   private _pedidoService = inject(PedidoService);
+  private _messageService = inject(MessageService);
   private _ordenCompraService = inject(OrdenCompraService);
   private _proveedorService = inject(ProveedorService);
   public _presupuestoService= inject(PresupuestoService);
+  private fb=inject(FormBuilder)
+    pedidoItems: LocalPedidoItem[] = [];
   private currencyPipe=inject(CurrencyPipe)
   presupuesto: Presupuesto[] | null =this._presupuestoService.presupuestos();
   proovedores = this._proveedorService.proveedores;
   proveedoresData: SelectorData[] = [];
-  public itemsOC: PedidoItem[] | null = this._ordenCompraService.itemsOC();
+  public itemsOC: OrdenCompraItem[] | null = this._ordenCompraService.ordenCompraItems();
   showPriceDialog = false;
   precioAsignado: number | null = null;
   private pendingItem: PedidoItem | null = null;
-
-  private _pedidoService = inject(PedidoService);
-  private _messageService = inject(MessageService);
   public totalOC = 0;
   pedido = this._pedidoService.pedido;
+  ordenCompraForm!: FormGroup;
 
   constructor() {
     const current = this.pedido();
@@ -104,7 +104,7 @@ export class OrdenCompraFormComponent implements OnInit {
       this.pedidoItems = [...(current.pedido_items || [])] as LocalPedidoItem[];
     }
     effect(() => {
-      this.itemsOC = this._ordenCompraService.itemsOC() ?? [];
+      this.itemsOC = this._ordenCompraService.ordenCompraItems() ?? [];
       this.totalOC = this._ordenCompraService.sumProductsOC();
     });
     effect(() => {
@@ -129,6 +129,11 @@ export class OrdenCompraFormComponent implements OnInit {
     this.presupuesto = this._presupuestoService.presupuestos();
     console.log("Presupuestos Cargados: ", this.presupuesto);
   });
+  this.ordenCompraForm= this.fb.group({
+    proveedor_id: [null, Validators.required],
+    condicion_entrega: ['', Validators.required],
+    condicion_pago: ['', Validators.required],
+  })
   }
 
   handleItemAdd(item: PedidoItem) {
@@ -243,14 +248,14 @@ export class OrdenCompraFormComponent implements OnInit {
       detail: `Seleccione un item pendiente en la OC.`,
     });
   }
-  presupuestoItem(idItemProduct: OrdenCompraItem) {
+  presupuestoItem(idItemProduct:PedidoItem) {
     console.log('Abriendo producto ..', idItemProduct);
     this.sidebarTitle = 'Presupuesto:';
     this.componentToLoad = PresupuestoFormComponent;
     this.sidebarInputs = {
-      producto_id: idItemProduct.pedido_items?.id,
-      cantidad: idItemProduct.pedido_items?.cantidad,
-      unidad_medida_id: idItemProduct.pedido_items?.unidad_medida_id,
+   producto_id: idItemProduct?.producto?.id,
+    cantidad: idItemProduct?.cantidad,
+    unidad_medida_id: idItemProduct.unidad_medida?.id,
       onSaveSuccess: () => this.handleCloseSidebar(),
       formResult: (result: {
         severity?: string;
@@ -312,4 +317,111 @@ export class OrdenCompraFormComponent implements OnInit {
   getNombreProducto= (producto: Producto) => producto?.nombre;
   getUnidadMedidaNombre= (unidad_medida:UnidadMedida) => unidad_medida?.nombre;
   getImporteCurrency=(importe:number)=> this.currencyPipe.transform(importe,'$','symbol', '1.0-0')
+
+ async onSubmit() {
+  // Validaciones
+  if (!this.itemsOC || this.itemsOC.length === 0) {
+    this._messageService.add({
+      severity: 'warn',
+      summary: 'Advertencia',
+      detail: 'Debe agregar al menos un item a la orden de compra'
+    });
+    return; // ✅ Solo return, sin valor
+  }
+
+  if (this.ordenCompraForm.invalid) {
+    console.log(this.ordenCompraForm)
+    this._messageService.add({
+      severity: 'error', // ✅ Cambié de 'danger' a 'error'
+      summary: 'Formulario Inválido',
+      detail: 'Revise los primeros 3 camois'
+    });
+    return;
+  }
+
+  try {
+    // 1. Crear la OC
+    const ordenCompraData = {
+      proveedor_id: this.ordenCompraForm.value.proveedor_id, // ✅ Corregido el campo
+      condicion_entrega: this.ordenCompraForm.value.condicion_entrega,
+      condicion_pago: this.ordenCompraForm.value.condicion_pago,
+      total: this.totalOC,
+    };
+
+    const { data: newOrdenCompra, error: errorOC } = await this._ordenCompraService.createOrdenCompra(ordenCompraData);
+    
+    if (errorOC || !newOrdenCompra) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error al crear orden de compra: ' + (errorOC?.message || 'Error desconocido')
+      });
+      return;
+    }
+
+    // 2. Insertar los items en la OC
+    const { error: errorItem } = await this._ordenCompraService.addItemToOrdenCompra(newOrdenCompra.id);
+    
+  if (errorItem) {
+  this._messageService.add({
+    severity: 'error',
+    summary: 'Error',
+    detail: 'Error al agregar items: ' +
+  (errorItem && typeof errorItem === 'object' && 'message' in errorItem
+    ? (errorItem as any).message
+    : JSON.stringify(errorItem))
+  });
+  console.error('Error al agregar items:', errorItem);
+  return;
+}
+
+    // 3. Asignar presupuestos si los hay
+    const presupuestosAsignados = this._presupuestoService.presupuestoAsignados();
+    if (presupuestosAsignados.length > 0) {
+      const { error: errorPresupuesto } = await this._presupuestoService.asignarPresupuestoOC(newOrdenCompra.id);
+      
+      if (errorPresupuesto) {
+        this._messageService.add({
+          severity: 'warn',
+          summary: 'Advertencia',
+             detail: 'Error al agregar items: ' +
+  (errorItem && typeof errorItem === 'object' && 'message' in errorItem
+    ? (errorItem as any).message
+    : JSON.stringify(errorPresupuesto))
+  });
+      }
+    }
+
+    // 4. Éxito total
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Orden de compra creada correctamente'
+    });
+
+    // 5. Limpiar datos
+    this.resetForm();
+
+  } catch (error: any) {
+    console.error('Error creando orden de compra:', error);
+    this._messageService.add({
+      severity: 'error',
+      summary: 'Error Inesperado',
+      detail: 'Error al procesar la orden: ' + (JSON.stringify(error) || 'Error desconocido')
+    });
+    // ✅ Sin return aquí
+  }
+}
+
+// ✅ Método auxiliar para limpiar el formulario
+private resetForm() {
+  this.ordenCompraForm.reset();
+  this._ordenCompraService.clearOrderData();
+  this._presupuestoService.clearPresupuestosAsignados();
+  this.pedidoItems = [];
+  this.totalOC = 0;
+  
+  // Opcional: navegar a otra página o mostrar confirmación
+  // this.router.navigate(['/ordenes-compra']);
+}
 }

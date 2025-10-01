@@ -8,7 +8,7 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Pedido, PedidoItem } from 'src/app/core/models/database.type';
+import { OrdenCompraItem, Pedido, PedidoItem } from 'src/app/core/models/database.type';
 import { PedidoService } from 'src/app/features/pedidos/services/pedido.service';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -17,6 +17,7 @@ import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { RouterLink } from '@angular/router';
+import { OrdenCompraService } from 'src/app/features/orden-compra/services/orden-compra.service';
 
 @Component({
   selector: 'app-table-ng-item-pedido',
@@ -40,7 +41,8 @@ export class TableNgItemPedidoComponent implements OnInit {
 
   pedidos: Pedido[] = [];
   private _pedidoService = inject(PedidoService);
-
+  private _ordenCompraService=inject(OrdenCompraService)
+  ordenCompraItems: PedidoItem[] | null = this._ordenCompraService.itemsOC() ?? []
   items: PedidoItem[] = [];
 
   constructor() {
@@ -48,7 +50,7 @@ export class TableNgItemPedidoComponent implements OnInit {
     effect(() => {
       const p = this._pedidoService.pedidos() ?? [];
       this.pedidos = p;
-
+      this.ordenCompraItems = this._ordenCompraService.itemsOC() ?? [];
       const allItems: PedidoItem[] = this.pedidos
         .flatMap((p) => p.pedido_items ?? [])
         .filter(
@@ -59,7 +61,9 @@ export class TableNgItemPedidoComponent implements OnInit {
             it.estado !== 'Aprobado'
         );
 
-      this.items = allItems;
+      this.items = allItems.filter(
+        item=> !this.ordenCompraItems?.map(itemOC => itemOC.id).includes((item as PedidoItem).id)
+      );
     });
   }
 
@@ -79,6 +83,8 @@ export class TableNgItemPedidoComponent implements OnInit {
       case 'Aprobado parcial':
         return 'warning';
       case 'Aprobado':
+        return 'success';
+      case 'En Envio':
         return 'success';
       case 'Rechazado':
         return 'danger';

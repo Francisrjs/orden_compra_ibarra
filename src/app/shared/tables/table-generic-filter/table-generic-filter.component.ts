@@ -21,13 +21,14 @@ export class TableGenericFilterComponent <T = any> {
   @Input() trashButton: boolean=false;
   @Input() addButton: boolean=false;
   @ContentChild('actions', { static: false }) actionsTemplate?: TemplateRef<any>;
-   dataFilter = computed(() => {
-    const dataArr: T[] = typeof this.data === 'function' ? (this.data as Signal<T[]>)() ?? [] : this.data ?? [];
-    if (!this.filter || this.filter.length === 0) return dataArr;
-    // Filtra por id (puedes cambiar la lógica según tu necesidad)
-    const filterIds = this.filter.map(item => (item as any).id);
-    return dataArr.filter(item => filterIds.includes((item as any).id));
-  });
+  dataFilter = computed(() => {
+  // Soporta tanto array como signal
+  const dataArr: T[] = typeof this.data === 'function' ? (this.data as Signal<T[]>)() ?? [] : this.data ?? [];
+  const filterArr: T[] = typeof this.filter === 'function' ? (this.filter as Signal<T[]>)() ?? [] : this.filter ?? [];
+  if (!filterArr || filterArr.length === 0) return dataArr;
+  const filterIds = filterArr.map(item => (item as any).id);
+  return dataArr.filter(item => !filterIds.includes((item as any).id));
+});
   trashClick(item:any){
     if(this.trashButtonClick){
       this.trashButtonClick(item)

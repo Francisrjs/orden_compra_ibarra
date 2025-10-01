@@ -49,6 +49,10 @@
     dataKey="id"
     [tableStyle]="{ 'min-width': '60rem' }"
     [globalFilterFields]="['name', 'category', 'inventoryStatus']"
+      [paginator]="true"  
+    [rows]="15"
+    currentPageReportTemplate="mostrando {first} de {last} del total {totalRecords} entradas"
+    [rowsPerPageOptions]="[15,30,45]"
   >
     <ng-template pTemplate="caption">
       <div
@@ -309,7 +313,15 @@
       <tr>
         <td colspan="6">
           <div class="p-3 justify-content-center align-content-center">
-            <p-table [value]="pedidos.pedido_items" dataKey="id">
+            <p-table 
+            [value]="pedidos.pedido_items" 
+            dataKey="id"
+            [paginator]="true"
+          [rows]="5"
+          currentPageReportTemplate="mostrando {first} de {last} del total {totalRecords} entradas"
+          [rowsPerPageOptions]="[10,20,30]"
+            
+            >
               <ng-template pTemplate="header">
                 <tr>
                   <th pSortableColumn="id">
@@ -395,6 +407,13 @@
                   </td>
                 </tr>
               </ng-template>
+                            <ng-template pTemplate="paginatorleft">
+                            
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+            
+        </ng-template>
+
               <ng-template pTemplate="emptymessage">
                 <tr>
                   <td colspan="6">No hay productos cargados en esta orden.</td>

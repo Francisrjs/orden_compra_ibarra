@@ -52,7 +52,7 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   @Input() onSaveSuccess?: () => void;
   @Output() openCreateItem = new EventEmitter<void>();
   @Output() openEditItem = new EventEmitter<PedidoItem>();
-  @Output() openPresupuestoItem = new EventEmitter<OrdenCompraItem>();
+  @Output() openPresupuestoItem = new EventEmitter<PedidoItem>();
   @Output() deleteItem = new EventEmitter<PedidoItem>();
   @Output() finalizarPedido = new EventEmitter<void>();
   @Input() messageWhenNull: boolean = true;
@@ -90,7 +90,7 @@ export class TableItemsPedidosCardComponent implements OnChanges {
     console.log(this.pedido);
     this.openCreateItem.emit();
   }
-  openPresupuestoItemForm(item: OrdenCompraItem) {
+  openPresupuestoItemForm(item: PedidoItem) {
     this.openPresupuestoItem.emit(item);
   }
   deleteItemPedido(item: PedidoItem) {

@@ -3,7 +3,9 @@ import {
   effect,
   inject,
   Input,
+  OnChanges,
   OnInit,
+  SimpleChanges,
   WritableSignal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -47,7 +49,7 @@ import { PresupuestoService } from '../presupuesto.service';
   templateUrl: './presupuesto-form.component.html',
   styleUrls: ['./presupuesto-form.component.css'],
 })
-export class PresupuestoFormComponent implements OnInit {
+export class PresupuestoFormComponent implements OnInit,OnChanges {
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
@@ -86,11 +88,12 @@ export class PresupuestoFormComponent implements OnInit {
       proveedor_id: [null, Validators.required],
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(0)]],
-      unidad_medida_id: [null, Validators.required],
-      importe: [null, [Validators.required, Validators.min(0)]],
+      unidad_medida: [null, Validators.required],
+      importe: [0, [Validators.required, Validators.min(0)]],
     });
     await this.loadMedidas();
     await this.loadProductos();
+    this.patchValues()
     // Normalizar el valor de unidad_medida_id al id después de seleccionar
     this.presupuestoForm
       .get('unidad_medida_id')
@@ -101,6 +104,12 @@ export class PresupuestoFormComponent implements OnInit {
             ?.setValue(val.id, { emitEvent: false });
         }
       });
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    // Solo si el formulario ya está creado
+    if (this.presupuestoForm) {
+      this.patchValues();
+    }
   }
   async loadMedidas() {
     if (this.medidasData().length === 0) {
@@ -134,13 +143,16 @@ export class PresupuestoFormComponent implements OnInit {
   }
 
   patchValues(): void {
-    if (this.unidad_medida_id || this.producto_id) {
-      this.presupuestoForm.patchValue({
-        producto_id: this.producto_id,
-        unidad_medida_id: this.unidad_medida_id,
-        cantidad: this.cantidad,
-      });
+     // Busca el objeto de unidad de medida por id
+    let unidadObj: UnidadMedida | null = null;
+    if (this.unidad_medida_id) {
+      unidadObj = this.medidasData().find(m => m.id === this.unidad_medida_id) ?? null;
     }
+    this.presupuestoForm.patchValue({
+      producto_id: this.producto_id ?? null,
+      unidad_medida: unidadObj,
+      cantidad: this.cantidad ?? null,
+    });
   }
   filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
@@ -163,15 +175,15 @@ export class PresupuestoFormComponent implements OnInit {
     }
 
     // Normalizar el valor de unidad_medida_id al id si es un objeto
-    let formValue = { ...this.presupuestoForm.value };
+      let formValue = { ...this.presupuestoForm.value };
     if (
-      formValue.unidad_medida_id &&
-      typeof formValue.unidad_medida_id === 'object' &&
-      formValue.unidad_medida_id.id
+      formValue.unidad_medida &&
+      typeof formValue.unidad_medida === 'object' &&
+      formValue.unidad_medida.id
     ) {
-      formValue.unidad_medida_id = formValue.unidad_medida_id.id;
+      formValue.unidad_medida_id = formValue.unidad_medida.id;
+      delete formValue.unidad_medida;
     }
-
     console.log(formValue);
 
     // Avisar al padre que estamos guardando (opcional si querés mostrar "cargando...")
