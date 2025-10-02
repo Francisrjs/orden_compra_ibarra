@@ -26,3 +26,10 @@ body {
 .border-left-secondary {
   border-left: 0.3rem solid #858796 !important;
 }
+.card-title-nowrap {
+  white-space: nowrap;   /* evita que se corte el título */
+}
+
+.card-icon {
+  min-width: 60px;       /* ancho fijo mínimo para que el icono no se achique */
+}

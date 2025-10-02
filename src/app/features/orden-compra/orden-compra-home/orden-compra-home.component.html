@@ -1,0 +1,36 @@
+<p-toast></p-toast>
+<app-sidebar
+  [(isVisible)]="sidebarVisible"
+  [title]="sidebarTitle"
+  [componentToLoad]="componentToLoad"
+  [componentInputs]="sidebarInputs"
+></app-sidebar>
+
+<div id="indicadores" class="d-flex justify-content-center mt-3">
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="warning"
+      title="Pedidos totales"
+      value="10"
+      icon="bi bi-bag"
+    ></app-card-dashboard-icon>
+  </div>
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="info"
+      title="En proceso de Entrega"
+      value="15"
+      icon="bi bi-truck"
+      [hasCustomIconColor]="false"
+    ></app-card-dashboard-icon>
+  </div>
+  <div class="col-md-4 col-lg-3 mx-2">
+    <app-card-dashboard-icon
+      borderColor="success"
+      title="Pedidos Cerrados"
+      value="1"
+      icon="bi bi-check"
+      [hasCustomIconColor]="true"
+    ></app-card-dashboard-icon>
+  </div>
+</div>

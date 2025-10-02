@@ -1,19 +1,19 @@
-<div class="col-xl-10 col-xl-3 mb-4">
+<div class="w-100 col-md-6 mb-4">
   <div class="card border-left-{{ borderColor }} shadow h-100 py-2">
     <div class="card-body">
-      <div class="row no-gutters align-items-center">
-        <div class="col mr-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="text-start">
           <div
-            class="text-xs font-weight-bold text-{{
-              borderColor
-            }} text-uppercase mb-1"
+            class="fs-6 font-weight-bold text-{{ borderColor }} text-uppercase mb-1 card-title-nowrap text-center"
           >
             {{ title }}
           </div>
-          <div class="h5 mb-0 font-weight-bold text-gray-800">{{ value }}</div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800 fs-4 text-center">
+            {{ value }}
+          </div>
         </div>
-        <div class="col-auto">
-          <i class="bi {{ icon }} fs-2" [style.color]="iconColor"></i>
+        <div class="card-icon">
+          <i class="text-secondary bi {{ icon }} fs-1 text-opacity-50"></i>
         </div>
       </div>
     </div>
