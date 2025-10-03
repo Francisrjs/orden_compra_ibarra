@@ -5,32 +5,144 @@
   [componentToLoad]="componentToLoad"
   [componentInputs]="sidebarInputs"
 ></app-sidebar>
+<h2 class="text-center mb-2">ORDENES DE COMPRA</h2>
+<p-accordion [activeIndex]="0">
+<p-accordionTab>
+  <ng-template pTemplate="header" headerStyle="text-success"> 
+    <div class="card-header indicadores_title d-flex align-items-center">
+      <i class="bi bi-bar-chart-line-fill text-sucess mr-2 text-success"></i>
+      <span class="vertical-align-middle text-dark text-decoration-underline ">Indicadores de Ordenes de Compra:</span>
+                
+                
+    </div>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <div class="indicadores">
+      <div id=" indicadores_body" class="d-flex justify-content-center mt-3  flex-row">
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="warning"
+            title="EN PROCESO"
+            value="10"
+            icon="bi bi-bag"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="info"
+            title="ABIERTAS"
+            value="15"
+            icon="bi bi-truck"
+            [hasCustomIconColor]="false"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="success"
+            title="CERRADAS"
+            value="1"
+            icon="bi bi-check"
+            [hasCustomIconColor]="true"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="secondary"
+            title="TOTAL"
+            value="1"
+            icon="bi bi-check"
+            [hasCustomIconColor]="true"
+          ></app-card-dashboard-icon>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-accordionTab>
+<p-accordionTab>
+  <ng-template pTemplate="header" headerStyle="text-success"> 
+    <div class="card-header indicadores_title d-flex align-items-center">
+      <i class="bi bi-bag text-sucess mr-2 text-success"></i>
+      <span class="vertical-align-middle text-dark text-decoration-underline ">Indicadores de items de Pedidos:</span>
+                
+                
+    </div>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <div class="indicadores">
+      <div id=" indicadores_body" class="d-flex justify-content-center mt-3  flex-row">
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="warning"
+            title="EN VIAJE"
+            value="10"
+            icon="bi bi-bag"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="info"
+            title="PENDIENTE"
+            value="15"
+            icon="bi bi-truck"
+            [hasCustomIconColor]="false"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="danger"
+            title="DEMORADOS"
+            value="1"
+            icon="bi bi-check"
+            [hasCustomIconColor]="true"
+          ></app-card-dashboard-icon>
+        </div>
+        <div class="col-md-2 mx-2">
+          <app-card-dashboard-icon
+            borderColor="secondary"
+            title="TOTAL"
+            value="1"
+            icon="bi bi-check"
+            [hasCustomIconColor]="true"
+          ></app-card-dashboard-icon>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-accordionTab>
+</p-accordion>
+<h3 class="text-center mt-2">HISTORIAL DE ORDENES:</h3>
+<app-table-generic-ng
+  [data]="ordenesCompra"
+  [columns]="[
+    { field: 'numero_oc', header:'Numero OC' },
+    { field: 'proveedor_id.nombre', header:'Proveedor'  }, 
+    { field: 'condicion_entrega', header:'Condicion de Entrega' },
+    { field: 'total', header:'Total', pipe: getTotalCurrency }
+  ]"
+  [expansionField]="'orden_compra_items'"
+  [rowExpansionColumns]="[
+    { field: 'pedido_item_id.pedido.numero_pedido', header:'Numero de Pedido' },
+    { field: 'pedido_item_id.productos.nombre', header:'Nombre' },
+    { field: 'pedido_item_id.estado', header:'Estado' },
+    { field: 'cantidad', header:'Cantidad' },
+    { field: 'precio_unitario', header:'Precio unitario',pipe: getTotalCurrency },
+    { field: 'subtotal', header:'Subtotal',pipe: getTotalCurrency }
+  ]"
+>
+  <!-- opcional: template actions -->
+  <ng-template #actions let-row let-i="index">
+    <button pButton type="button" icon="pi pi-eye" ></button>
+  </ng-template>
+</app-table-generic-ng>
 
-<div id="indicadores" class="d-flex justify-content-center mt-3">
-  <div class="col-md-4 col-lg-3 mx-2">
-    <app-card-dashboard-icon
-      borderColor="warning"
-      title="Pedidos totales"
-      value="10"
-      icon="bi bi-bag"
-    ></app-card-dashboard-icon>
-  </div>
-  <div class="col-md-4 col-lg-3 mx-2">
-    <app-card-dashboard-icon
-      borderColor="info"
-      title="En proceso de Entrega"
-      value="15"
-      icon="bi bi-truck"
-      [hasCustomIconColor]="false"
-    ></app-card-dashboard-icon>
-  </div>
-  <div class="col-md-4 col-lg-3 mx-2">
-    <app-card-dashboard-icon
-      borderColor="success"
-      title="Pedidos Cerrados"
-      value="1"
-      icon="bi bi-check"
-      [hasCustomIconColor]="true"
-    ></app-card-dashboard-icon>
-  </div>
+
+<div class="acciones"> 
+  <h5>Menu de acciones</h5>
+  <ul>
+    <li>Lista de pedidos pendientes</li>
+    <li>Lista de Items de pedidos pendientes</li>
+    <li>Lista de Items de Ordenes de Compra</li>
+    <li>Ver presupuestos</li>
+    <li>Lista de  Proveedores</li>
+  </ul>
 </div>

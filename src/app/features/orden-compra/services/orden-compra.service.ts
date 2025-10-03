@@ -16,6 +16,7 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
   ordenCompraItems = signal<OrdenCompraItem[]>([]);
   ordenesCompra = signal<OrdenCompra[]>([]);
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
     {
       this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
@@ -94,7 +95,43 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
     }
   }
 
-  // ✅ Método para limpiar datos después de crear OC
+  async getAllOC(){
+    try{
+ const {data, error} = await this._supabaseClient
+  .from('orden_compra')
+  .select(`
+    *,
+    orden_compra_items (
+      id,
+      orden_compra_id,
+      precio_unitario,
+      cantidad,
+      subtotal,
+      pedido_item_id (
+        id,
+        productos (
+          id,
+          nombre,
+          categoria:categoria_id(id, nombre, icon_text)
+        ),
+        estado,
+        pedido: pedidos(id,numero_pedido)
+      )
+    ),
+      proveedor_id (id,nombre)   
+  `);
+     if (!error && data) {
+        // ✅ Actualizar la signal con los datos reales de la DB
+        this.ordenesCompra.set(data);
+        console.log("Ordenes: ",data)
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error agregando items a orden de compra:', err);
+      return { data: null, error: err };
+    } 
+  }
   clearOrderData() {
     this.itemsOC.set([]);
     this.ordenCompraItems.set([]);

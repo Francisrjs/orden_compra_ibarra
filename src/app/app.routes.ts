@@ -14,6 +14,7 @@ import { OrdenCompraFormComponent } from './features/orden-compra/orden-compra-f
 import { LoginComponent } from './features/auth/login/login.component';
 import { ProveedoresDetalleComponent } from './features/proveedores/proveedores-detalle/proveedores-detalle.component';
 import { ProveedoresFormComponent } from './features/proveedores/proveedores-form/proveedores-form.component';
+import { OrdenCompraHomeComponent } from './features/orden-compra/orden-compra-home/orden-compra-home.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -32,7 +33,9 @@ export const routes: Routes = [
   //Orden de compra
   { path: 'oc/pendientes', component: ConfirmacionPedidosComponent },
   { path: 'oc', component: OrdenCompraFormComponent },
+  {path: 'oc/home', component: OrdenCompraHomeComponent},
   { path: '**', redirectTo: 'pedidos' },
+  
 ];
 
 @NgModule({
