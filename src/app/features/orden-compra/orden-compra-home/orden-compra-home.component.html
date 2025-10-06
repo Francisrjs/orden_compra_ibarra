@@ -110,6 +110,14 @@
   </ng-template>
 </p-accordionTab>
 </p-accordion>
+<ng-template [ngIf]="pedidosUrgentes">
+<h3 class="text-center mt-2">ITEMS URGENTES:</h3>
+<app-carousel-cards
+ [items]="pedidosUrgentesItems"
+[pedidos]="pedidosUrgentes()"
+></app-carousel-cards>
+</ng-template>
+
 <h3 class="text-center mt-2">HISTORIAL DE ORDENES:</h3>
 <app-table-generic-ng
   [data]="ordenesCompra"

@@ -58,7 +58,8 @@ export class TableNgItemPedidoComponent implements OnInit {
             it &&
             it.estado !== 'Pendiente' &&
             it.estado !== 'Rechazado' &&
-            it.estado !== 'Aprobado'
+            it.estado !== 'Aprobado' &&
+            it.estado !== 'En Envio'
         );
 
       this.items = allItems.filter(

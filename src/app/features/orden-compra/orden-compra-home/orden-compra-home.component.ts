@@ -1,3 +1,4 @@
+
 import { Component, inject, Input, OnInit, Type } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { SidebarModule } from 'primeng/sidebar';
@@ -10,11 +11,13 @@ import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/
 import { TableGenericFilterComponent } from 'src/app/shared/tables/table-generic-filter/table-generic-filter.component';
 import { OrdenCompraService } from '../services/orden-compra.service';
 import { Proveedor } from 'src/app/core/models/database.type';
+import { CarouselCardsComponent } from "src/app/shared/cards/carousel-cards/carousel-cards.component";
+import { PedidoService } from '../../pedidos/services/pedido.service';
 
 @Component({
   selector: 'app-orden-compra-home',
   standalone: true,
-  imports: [CommonModule,SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, TableGenericNGComponent,TableGenericFilterComponent ],
+  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, TableGenericNGComponent, TableGenericFilterComponent, CarouselCardsComponent],
   templateUrl: './orden-compra-home.component.html',
   styleUrls: ['./orden-compra-home.component.css'],
   providers: [MessageService, CurrencyPipe]
@@ -25,13 +28,18 @@ export class OrdenCompraHomeComponent implements OnInit{
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record <string, unknown> | undefined; 
   @Input() onSaveSuccess?: () => void;
-  private _ordenesCompraService=inject(OrdenCompraService)
-  public ordenesCompra=  this._ordenesCompraService.ordenesCompra
+  private _ordenesCompraService=inject(OrdenCompraService);
+  private _pedidoService= inject(PedidoService)
+  public ordenesCompra=  this._ordenesCompraService.ordenesCompra;
+  public pedidosUrgentes= this._pedidoService.pedidosUrgentes;
   private currencyPipe=inject(CurrencyPipe)
     async ngOnInit(): Promise<void> {
       if(this.ordenesCompra().length===0){
         this._ordenesCompraService.getAllOC()
       }
+      
+        this._pedidoService.getAllPedidosUrgentes()
+      
   }
   
     //Getters functions
@@ -41,4 +49,8 @@ export class OrdenCompraHomeComponent implements OnInit{
       const format = hasDecimals ? '1.2-2' : '1.0-0';
       return this.currencyPipe.transform(importe, '$', 'symbol', format);
     }
+      // Getter para items de pedidos urgentes (para el carousel)
+  get pedidosUrgentesItems() {
+    return this.pedidosUrgentes().flatMap(p => p.pedido_items || []);
+  }
 }

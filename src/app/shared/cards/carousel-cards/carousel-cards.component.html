@@ -1,0 +1,23 @@
+
+<p-carousel [value]="items" [numVisible]="3" [numScroll]="3" [circular]="false" [responsiveOptions]="responsiveOptions">
+        <ng-template pTemplate="header" [ngIf]="title">
+        <p>{{title}}</p>
+    </ng-template>
+    <ng-template let-producto pTemplate="item">
+        <div class="border-1 surface-border border-round m-2 text-center py-3 px-1">
+            <div class="mb-3">
+              <i class="{{ getCategoriaIcon(producto) }} text-success fs-2"></i>
+            </div>
+            <div>
+                <h4 class="mb-1">{{ producto.producto.nombre }}</h4>
+                <h5 class="mt-0 mb-3">{{getPedido(producto)?.numero_pedido}}</h5>
+                <h6 class="mt-0 mb-3">{{ 'Cantidad: ' + producto.cantidad }}</h6>
+                <p-tag [value]="getPedido(producto)?.tiempo_item" [severity]="getSeverity(producto)"></p-tag>
+                <div class="car-buttons mt-5">
+                    <p-button type="button" styleClass="p-button-info p-button-rounded mr-2" icon="pi pi-search" [routerLink]="['/pedido', getPedido(producto)?.id]"></p-button>
+                    <p-button type="button" styleClass="p-button-success p-button-rounded mr-2" [routerLink]="['/oc']" icon="pi pi-plus"></p-button>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</p-carousel>

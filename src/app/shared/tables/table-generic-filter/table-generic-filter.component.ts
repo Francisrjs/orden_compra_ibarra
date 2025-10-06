@@ -18,8 +18,10 @@ export class TableGenericFilterComponent <T = any> {
   @Input() minWidth: string = '40rem';
 @Input() addButtonClick?: (item: any) => void;
 @Input() trashButtonClick?: (item: any) => void;
+@Input() timeButtonClick?: (item:any) => void;
   @Input() trashButton: boolean=false;
   @Input() addButton: boolean=false;
+  @Input() timeButton: boolean=false;
   @ContentChild('actions', { static: false }) actionsTemplate?: TemplateRef<any>;
   dataFilter = computed(() => {
   // Soporta tanto array como signal
@@ -36,5 +38,8 @@ export class TableGenericFilterComponent <T = any> {
   }
   addClick(item:any){
     if(this.addButtonClick) this.addButtonClick(item)
+  }
+ timeClick(item:any){
+    if(this.timeButtonClick) this.timeButtonClick(item)
   }
 }

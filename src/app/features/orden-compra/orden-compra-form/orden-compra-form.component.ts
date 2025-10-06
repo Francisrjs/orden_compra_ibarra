@@ -125,7 +125,7 @@ export class OrdenCompraFormComponent implements OnInit {
       this._proveedorService.getAllProveedores();
     }
 
-  this._presupuestoService.getAllPresupuestos().then(() => {
+  this._presupuestoService.getAllPresupuestosSinAsignar().then(() => {
     this.presupuesto = this._presupuestoService.presupuestos();
     console.log("Presupuestos Cargados: ", this.presupuesto);
   });
@@ -152,7 +152,72 @@ export class OrdenCompraFormComponent implements OnInit {
     this.precioAsignado = null;
     this.showPriceDialog = false;
   }
+  async asignarAtrasadoPresupuesto(item:Presupuesto){
+     this._messageService.add({
+        severity: 'info',
+        summary: 'Atrasando Presupuesto..',
+        detail: 'El presupuesto desaparecera de asignados',
+      });
+      try {
+          const { error: errorPresupuesto } = await this._presupuestoService.atrasarPresupuesto(item.id)
+    
+    if (errorPresupuesto) {
+      this._messageService.add({
+        severity: 'danger',
+        summary: 'Error',
+        detail: 'Error al crear orden de compra: ' + (errorPresupuesto || 'Error desconocido')
+      });
+      return;
+    }else{
+        this._messageService.add({
+        severity: 'success',
+        summary: 'Hecho',
+        detail: 'Se atraso el presupuesto'
+      });
+    } 
 
+  }
+  catch(error:any){
+     this._messageService.add({
+        severity: 'danger',
+        summary: 'Hecho',
+        detail: 'Error al asignar presupuesto ' + error.message
+      });
+  }
+  }
+  async eliminarPresupuesto(item:Presupuesto){
+     this._messageService.add({
+        severity: 'eliminar',
+        summary: 'Eliminando..',
+        detail: 'Eliminando presupuesto',
+      });
+      try {
+          const { error: errorPresupuesto } = await this._presupuestoService.deletePresupuestoOC(item.id)
+    
+    if (errorPresupuesto) {
+      this._messageService.add({
+        severity: 'danger',
+        summary: 'Error',
+        detail: 'Error al Eliminar: ' + (errorPresupuesto || 'Error desconocido')
+      });
+      return;
+    }else{
+        this._messageService.add({
+        severity: 'success',
+        summary: 'Eliminado',
+        detail: 'Se Elimino el presupuesto'
+      });
+    } 
+
+  }
+  catch(error:any){
+     this._messageService.add({
+        severity: 'danger',
+        summary: 'Hecho',
+        detail: 'Error al eliminar presupuesto ' + error.message
+      });
+  }
+  }
   confirmAddWithPrice() {
     if (!this.pendingItem) {
       this._messageService.add({
@@ -275,8 +340,11 @@ export class OrdenCompraFormComponent implements OnInit {
       filter:this._presupuestoService.presupuestoAsignados,
       addButton:true,
       addButtonClick: (item:Presupuesto) => this._presupuestoService.addPresupuestoAsignado(item),
+      trashButton:true,
+      trashButtonClick: (item:Presupuesto) => this.eliminarPresupuesto(item),
+      timeButton:true,
+      timeButtonClick: (item:Presupuesto) => this.asignarAtrasadoPresupuesto(item),
       columns: [
-      { field: 'id', header: 'ID', width: '2rem' },
       { field: 'proveedores', header: 'Proveedor', pipe: this.getNombreProveedor },
       { field: 'productos', header: 'Producto', pipe: this.getNombreProducto },
       { field: 'unidades_medida', header: 'Medida', pipe: this.getUnidadMedidaNombre },

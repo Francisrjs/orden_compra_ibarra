@@ -20,6 +20,7 @@ export class PedidoService extends StateService<Pedido> {
   private _productoService = inject(ProductoService);
   pedidos = signal<Pedido[]>([]);
   pedido = signal<Pedido | null>(null); //Pedido usuario
+  pedidosUrgentes= signal<Pedido[]>([]);
   async getAllPedidos(): Promise<Pedido[] | null> {
     try {
       this.setLoading(true);
@@ -113,6 +114,61 @@ export class PedidoService extends StateService<Pedido> {
         // La lógica de cargar categorías si están vacías sigue siendo correcta
         if (this._categoriaService.categorias().length === 0) {
           console.log('Cargando datos maestros...');
+          await this._categoriaService.getAllCategorias();
+          await this._unidadMedidaService.getAllMedidas();
+        }
+      }
+
+      return data as Pedido[] | null;
+    } catch (err) {
+      console.error(err);
+      this.setError(true);
+      return null;
+    } finally {
+      this.setLoading(false);
+    }
+  }
+   async getAllPedidosUrgentes(): Promise<Pedido[] | null> {
+    try {
+      this.setLoading(true);
+      this.setError(false);
+
+      const { data, error } = await this._supabaseClient
+        .from('pedidos_con_responsable') // <-- Vista
+        .select(
+          `
+        *,
+        pedido_items (
+          id,
+          cantidad,
+           pedido_id,
+          estado,
+          unidad_medida:unidad_medida_id (id, nombre),
+          producto:productos ( id, nombre, descripcion,categoria:categoria_id (id, nombre,icon_text)),
+          razon_pedido,
+               unidad_medida_aceptada: unidad_medida_id_aceptada(id,nombre),
+          cantidad_aceptada,
+          link_referencia
+        )
+      `
+        )
+        .in('estado', ['En Proceso de Aprobacion', 'En Proceso de Entrega'])
+        .or('urgente.eq.true,tiempo_item.eq.DEMORADO,tiempo_item.eq.POR VENCER')
+        .order('id', { ascending: false }); // <-- Opcional: ordena los pedidos del más nuevo al más viejo
+
+      if (error) {
+        console.error('Error cargando pedidos:', error);
+        this.setError(true);
+        return null;
+      }
+
+      if (data) {
+        this.setItems(data as Pedido[]); // Hacemos un cast porque la vista tiene campos extra
+        this.pedidosUrgentes.set(data as Pedido[]);
+
+        // La lógica de cargar categorías si están vacías sigue siendo correcta
+        if (this._categoriaService.categorias().length === 0) {
+          console.log('Cargando datos maestros... ',this.pedidosUrgentes());
           await this._categoriaService.getAllCategorias();
           await this._unidadMedidaService.getAllMedidas();
         }

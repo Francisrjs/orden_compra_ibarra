@@ -1,4 +1,4 @@
-import { Areas } from 'src/app/core/models/database.type';
+import { Areas, TiempoItem } from 'src/app/core/models/database.type';
 
 export function getBadgeClassByEstadoPedido(estado: string): string {
   switch (estado) {
@@ -52,5 +52,18 @@ export function getIconByArea(area: Areas): string {
       return 'bi-building';
     default:
       return 'bi-question-circle'; // Un ícono por defecto si el área no coincide
+  }
+}
+
+export function getEstadoTiempo(tiempo_item:TiempoItem){
+  switch (tiempo_item){
+    case 'DEMORADO':
+      return 'danger';
+    case 'EN PLAZO':
+      return 'success';
+    case 'POR VENCER':
+      return 'warning';
+    default:
+      return 'info';
   }
 }

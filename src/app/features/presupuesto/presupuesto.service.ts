@@ -71,6 +71,60 @@ export class PresupuestoService extends StateService<Presupuesto> {
       this.setLoading(false);
     }
   }
+    async getAllPresupuestosSinAsignar(): Promise<Presupuesto[] | null> {
+    try {
+      this.setLoading(true);
+      this.setError(false);
+
+      const { data, error } = await this._supabaseClient
+        .from('presupuesto_item') // <-- Vista
+        .select(
+          `
+          *,
+          productos (
+            id,
+           nombre
+          ),
+          unidades_medida (
+          id,
+          nombre
+          ),
+          proveedores (
+          id,
+          nombre
+          )
+        `
+        )
+        .not('orden_compra_id','is','null')
+        .order('id', { ascending: false }); // <-- Opcional: ordena los pedidos del más nuevo al más viejo
+
+      if (error) {
+        console.error('Error cargando pedidos:', error);
+        this.setError(true);
+        return null;
+      }
+
+      if (data) {
+        this.setItems(data as Presupuesto[]); // Hacemos un cast porque la vista tiene campos extra
+        this.presupuestos.set(data as Presupuesto[]);
+
+        // La lógica de cargar categorías si están vacías sigue siendo correcta
+        if (this._categoriaService.categorias().length === 0) {
+          console.log('Cargando datos maestros...');
+          await this._categoriaService.getAllCategorias();
+          await this._unidadMedidaService.getAllMedidas();
+        }
+      }
+
+      return data as Presupuesto[] | null;
+    } catch (err) {
+      console.error(err);
+      this.setError(true);
+      return null;
+    } finally {
+      this.setLoading(false);
+    }
+  }
   async addPresupuesto(
     presupuestosData: Partial<Presupuesto>
   ): Promise<{ data: Presupuesto | null; error: any }> {
@@ -137,5 +191,64 @@ async asignarPresupuestoOC(orden_compra_id:number){
 }
 clearPresupuestosAsignados() {
   this.presupuestoAsignados.set([]);
+}
+async deletePresupuestoOC(presupuesto_id: number) {
+  try {
+    const { data, error } = await this._supabaseClient
+      .from('presupuesto_item')
+      .delete()
+      .eq('id', presupuesto_id)
+      .select('*');
+
+    if (error) {
+      console.error('Error eliminando presupuesto:', error);
+      return { data: null, error };
+    }
+
+    // Elimina el presupuesto de la señal local
+    this.presupuestos.update((currentPresupuestos) =>
+      currentPresupuestos.filter(p => p.id !== presupuesto_id)
+    );
+    this.presupuestoAsignados.update((currentPresupuestos) =>
+      currentPresupuestos.filter(p => p.id !== presupuesto_id)
+    );
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error eliminando presupuesto:', error);
+    return { data: null, error };
+  }
+}
+async atrasarPresupuesto(presupuesto_id: number) {
+  try {
+    const { data, error } = await this._supabaseClient
+      .from('presupuesto_item')
+      .update({ atrasado: true })
+      .eq('id', presupuesto_id)
+      .select('*');
+
+    if (!error && data) {
+      // Actualizar la señal de presupuestos con el campo atrasado actualizado
+      this.presupuestos.update((currentPresupuestos) =>
+        currentPresupuestos.map(p =>
+          p.id === presupuesto_id
+            ? { ...p, atrasado: true }
+            : p
+        )
+      );
+      this.presupuestoAsignados.update((currentPresupuestos) =>
+        currentPresupuestos.map(p =>
+          p.id === presupuesto_id
+            ? { ...p, atrasado: true }
+            : p
+        )
+      );
+    }
+
+    return { data, error };
+  } catch (error) {
+    console.error('Error atrasando presupuesto:', error);
+    return { data: null, error };
+  }
 }
 }

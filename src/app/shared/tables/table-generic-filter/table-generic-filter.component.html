@@ -16,7 +16,7 @@
       [text]="true"
       severity="danger"
       (onClick)="trashClick(item)"
-      label="Eliminar"
+     
     ></p-button>
      <p-button
     *ngIf="addButton"
@@ -26,7 +26,16 @@
       [text]="true"
       severity="sucess"
       (onClick)="addClick(item)"
-      label="Agregar"
+      
+    ></p-button>
+      <p-button
+    *ngIf="timeButton"
+      icon="pi pi-clock"
+      styleClass="p-button-rounded p-button-outlined"
+      [rounded]="true"
+      [text]="true"
+      severity="info"
+      (onClick)="timeButtonClick && timeButtonClick(item)"
     ></p-button>
     <ng-container
   *ngTemplateOutlet="actionsTemplate || null; context: { $implicit: item, index: i }"
