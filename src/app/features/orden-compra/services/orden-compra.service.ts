@@ -16,7 +16,7 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
   ordenCompraItems = signal<OrdenCompraItem[]>([]);
   ordenesCompra = signal<OrdenCompra[]>([]);
   private _supabaseClient = inject(SupabaseService).supabaseClient;
-
+  public ordenCompra=signal<OrdenCompra | null>(null);
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
     {
       this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
@@ -101,6 +101,27 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
   .from('orden_compra')
   .select(`
     *,
+    
+      proveedor_id (id,nombre)   
+  `);
+     if (!error && data) {
+        // ✅ Actualizar la signal con los datos reales de la DB
+        this.ordenesCompra.set(data);
+        console.log("Ordenes: ",data)
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error agregando items a orden de compra:', err);
+      return { data: null, error: err };
+    } 
+  }
+   async getOCById(oc_id:number): Promise<{ data: OrdenCompra | null; error: any }> {
+    try{
+ const {data, error} = await this._supabaseClient
+  .from('orden_compra')
+  .select(`
+    *,
     orden_compra_items (
       id,
       orden_compra_id,
@@ -119,10 +140,12 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
       )
     ),
       proveedor_id (id,nombre)   
-  `);
+  `)
+  .eq('id', oc_id)
+  .single();
      if (!error && data) {
         // ✅ Actualizar la signal con los datos reales de la DB
-        this.ordenesCompra.set(data);
+        this.ordenCompra.set(data);
         console.log("Ordenes: ",data)
       }
 

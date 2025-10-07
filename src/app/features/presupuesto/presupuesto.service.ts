@@ -96,6 +96,7 @@ export class PresupuestoService extends StateService<Presupuesto> {
         `
         )
         .not('orden_compra_id','is','null')
+        .eq('atrasado',false)
         .order('id', { ascending: false }); // <-- Opcional: ordena los pedidos del más nuevo al más viejo
 
       if (error) {
@@ -229,20 +230,12 @@ async atrasarPresupuesto(presupuesto_id: number) {
 
     if (!error && data) {
       // Actualizar la señal de presupuestos con el campo atrasado actualizado
-      this.presupuestos.update((currentPresupuestos) =>
-        currentPresupuestos.map(p =>
-          p.id === presupuesto_id
-            ? { ...p, atrasado: true }
-            : p
-        )
-      );
-      this.presupuestoAsignados.update((currentPresupuestos) =>
-        currentPresupuestos.map(p =>
-          p.id === presupuesto_id
-            ? { ...p, atrasado: true }
-            : p
-        )
-      );
+        this.presupuestos.update((currentPresupuestos) =>
+      currentPresupuestos.filter(p => p.id !== presupuesto_id)
+    );
+    this.presupuestoAsignados.update((currentPresupuestos) =>
+      currentPresupuestos.filter(p => p.id !== presupuesto_id)
+    );
     }
 
     return { data, error };

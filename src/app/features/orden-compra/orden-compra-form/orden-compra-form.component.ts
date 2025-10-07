@@ -78,6 +78,7 @@ export class OrdenCompraFormComponent implements OnInit {
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() onSaveSuccess?: () => void;
+  
    private _pedidoService = inject(PedidoService);
   private _messageService = inject(MessageService);
   private _ordenCompraService = inject(OrdenCompraService);
@@ -120,7 +121,15 @@ export class OrdenCompraFormComponent implements OnInit {
   });
 
   }
+  onEnterPrecio() {
+  if (this.isPrecioValid()) {
+    this.confirmAddWithPrice();
+  }
+}
   ngOnInit(): void {
+    this._presupuestoService.presupuestoAsignados.set([]);
+    this._ordenCompraService.ordenCompraItems.set([]);
+    
     if (this.proovedores().length === 0) {
       this._proveedorService.getAllProveedores();
     }
@@ -187,7 +196,7 @@ export class OrdenCompraFormComponent implements OnInit {
   }
   async eliminarPresupuesto(item:Presupuesto){
      this._messageService.add({
-        severity: 'eliminar',
+        severity: 'danger',
         summary: 'Eliminando..',
         detail: 'Eliminando presupuesto',
       });
@@ -272,7 +281,7 @@ export class OrdenCompraFormComponent implements OnInit {
       summary: 'Item agregado',
       detail: `${
         itemWithPrice.producto?.nombre || 'Producto'
-      } agregado con precio ${itemWithPrice.precio_asignado}`,
+      } agregado con precio  ${this.currencyPipe.transform(itemWithPrice.precio_asignado,'$','symbol', '1.0-0')} `,
     });
 
     this.cancelAdd();

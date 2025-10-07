@@ -139,4 +139,5 @@ export interface Presupuesto {
   productos?: Producto;
   proveedores?:Proveedor;
   unidades_medida?:UnidadMedida;
+  atrasado?:boolean;
 }

@@ -1,4 +1,3 @@
-
 import { Component, inject, Input, OnInit, Type } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { SidebarModule } from 'primeng/sidebar';
@@ -10,14 +9,16 @@ import { AccordionModule } from 'primeng/accordion';
 import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/table-generic-ng.component';
 import { TableGenericFilterComponent } from 'src/app/shared/tables/table-generic-filter/table-generic-filter.component';
 import { OrdenCompraService } from '../services/orden-compra.service';
-import { Proveedor } from 'src/app/core/models/database.type';
+import { OrdenCompra, Proveedor } from 'src/app/core/models/database.type';
 import { CarouselCardsComponent } from "src/app/shared/cards/carousel-cards/carousel-cards.component";
 import { PedidoService } from '../../pedidos/services/pedido.service';
+import { TableGenericNgBigDataComponent } from "src/app/shared/tables/table-generic-ng-big-data/table-generic-ng-big-data.component";
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-orden-compra-home',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, TableGenericNGComponent, TableGenericFilterComponent, CarouselCardsComponent],
+  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, TableGenericNGComponent, TableGenericFilterComponent, CarouselCardsComponent, TableGenericNgBigDataComponent, ButtonModule],
   templateUrl: './orden-compra-home.component.html',
   styleUrls: ['./orden-compra-home.component.css'],
   providers: [MessageService, CurrencyPipe]
@@ -52,5 +53,16 @@ export class OrdenCompraHomeComponent implements OnInit{
       // Getter para items de pedidos urgentes (para el carousel)
   get pedidosUrgentesItems() {
     return this.pedidosUrgentes().flatMap(p => p.pedido_items || []);
+  }
+
+  onRowExpansion (row:OrdenCompra){
+    this._ordenesCompraService.getOCById(row.id).then(result=>{
+      if(result.data){
+        this.ordenesCompra.update(current=>
+          current.map(oc => oc.id == row.id ? result.data! : oc)
+        )
+      }
+      
+    })
   }
 }

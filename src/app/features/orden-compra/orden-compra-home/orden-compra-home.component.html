@@ -119,7 +119,7 @@
 </ng-template>
 
 <h3 class="text-center mt-2">HISTORIAL DE ORDENES:</h3>
-<app-table-generic-ng
+<app-table-generic-ng-big-data
   [data]="ordenesCompra"
   [columns]="[
     { field: 'numero_oc', header:'Numero OC' },
@@ -128,6 +128,7 @@
     { field: 'total', header:'Total', pipe: getTotalCurrency }
   ]"
   [expansionField]="'orden_compra_items'"
+   (rowExpansionInfo)="onRowExpansion($event)"
   [rowExpansionColumns]="[
     { field: 'pedido_item_id.pedido.numero_pedido', header:'Numero de Pedido' },
     { field: 'pedido_item_id.productos.nombre', header:'Nombre' },
@@ -141,7 +142,7 @@
   <ng-template #actions let-row let-i="index">
     <button pButton type="button" icon="pi pi-eye" ></button>
   </ng-template>
-</app-table-generic-ng>
+</app-table-generic-ng-big-data>
 
 
 <div class="acciones"> 
