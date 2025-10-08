@@ -123,8 +123,10 @@ export interface OrdenCompraItem {
   precio_unitario?: number;
   cantidad:number;
   subtotal:number;
+  estado?:EstadoItemPedido;
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
+  producto_id?:number;
 }
 
 export interface Presupuesto {

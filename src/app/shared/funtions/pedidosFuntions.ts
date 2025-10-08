@@ -3,7 +3,7 @@ import { Areas, TiempoItem } from 'src/app/core/models/database.type';
 export function getBadgeClassByEstadoPedido(estado: string): string {
   switch (estado) {
     case 'En Creacion':
-      return 'text-bg-secondary';
+      return 'text-bg-warning';
     case 'En Proceso de Aprobacion':
       return 'text-bg-info';
     case 'Aprobado':
@@ -14,6 +14,8 @@ export function getBadgeClassByEstadoPedido(estado: string): string {
       return 'text-bg-success';
     case 'Rechazado':
       return 'text-bg-danger';
+    case 'En Proceso de Entrega':
+      return 'text-bg-info'
     default:
       return 'text-bg-secondary';
   }
@@ -24,14 +26,14 @@ export function getBadgeClassByPedidoItem(estado: string) {
       return 'text-bg-warning';
     case 'Aprobado':
       return 'text-bg-primary';
-    case 'Aprobado parcialmente':
-      return 'text-bg-warning';
+    case 'Aprobado parcial':
+      return 'text-bg-success';
     case 'Rechazado':
       return 'text-bg-danger';
     case 'Aceptado':
       return 'text-bg-success'
     case 'En Envio':
-      return 'text-bg-success'
+      return 'text-bg-warning'
     default:
       return 'text-bg-secondary';
   }

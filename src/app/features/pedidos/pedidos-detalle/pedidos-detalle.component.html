@@ -70,6 +70,7 @@
             'fw-bold': isEventCompleted(event.value),
             'text-muted': !isEventCompleted(event.value)
           }"
+          *ngIf="event.show"
         >
           {{ event.status }}
         </div>

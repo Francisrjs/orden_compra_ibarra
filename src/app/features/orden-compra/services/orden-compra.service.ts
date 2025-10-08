@@ -94,7 +94,29 @@ export class OrdenCompraService extends StateService<OrdenCompra>{
       return { data: null, error: err };
     }
   }
+  async getOrdenDeCompra(item:PedidoItem){
+    if(this.ordenesCompra().length===0) this.getAllItemsEnvio()
+    return this.ordenCompraItems().filter(p=>p.pedido_item_id==item.id)
+  }
+   async getAllItemsEnvio(){
+    try{
+ const {data, error} = await this._supabaseClient
+  .from('orden_compra_items_envio')
+  .select(`
+    *
+  `);
+     if (!error && data) {
+        // ✅ Actualizar la signal con los datos reales de la DB
+        this.ordenCompraItems.set(data);
+        console.log("Envio: ",data)
+      }
 
+      return { data, error };
+    } catch (err) {
+      console.error('Error agregando items a orden de compra:', err);
+      return { data: null, error: err };
+    } 
+  }
   async getAllOC(){
     try{
  const {data, error} = await this._supabaseClient

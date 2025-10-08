@@ -35,6 +35,7 @@ import { ButtonWithIconComponent } from "src/app/shared/buttons/button-with-icon
 import { PresupuestoService } from '../../presupuesto/presupuesto.service';
 import { TableGenericFilterComponent } from 'src/app/shared/tables/table-generic-filter/table-generic-filter.component';
 import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
+import { PopUpNgComponent } from "src/app/shared/modal/pop-up-ng/pop-up-ng.component";
 
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
@@ -52,14 +53,15 @@ export interface LocalPedidoItem extends PedidoItem {
     ConfirmDialogModule,
     TableNgItemPedidoComponent,
     ButtonElegantComponent,
-     InputBoxComponent,
+    InputBoxComponent,
     TableItemsPedidosCardComponent,
     InputModalSelectorComponent,
     ReactiveFormsModule,
     SidebarComponent,
     AccordionModule,
     TableGenericNGComponent,
-    ButtonWithIconComponent
+    ButtonWithIconComponent,
+    PopUpNgComponent
 ],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
@@ -97,7 +99,11 @@ export class OrdenCompraFormComponent implements OnInit {
   public totalOC = 0;
   pedido = this._pedidoService.pedido;
   ordenCompraForm!: FormGroup;
-
+  title_pop_up: string='title';
+  description_pop_up: string='descripcion';
+  show_pop_up:boolean=false;
+  popup_type: 'default' | 'danger' | 'warning' = 'default';
+  onAcceptPopUp: (() => void) | null = null;
   constructor() {
     const current = this.pedido();
     if (current?.pedido_items?.length) {
@@ -125,7 +131,10 @@ export class OrdenCompraFormComponent implements OnInit {
   if (this.isPrecioValid()) {
     this.confirmAddWithPrice();
   }
+  
 }
+
+
   ngOnInit(): void {
     this._presupuestoService.presupuestoAsignados.set([]);
     this._ordenCompraService.ordenCompraItems.set([]);
@@ -161,6 +170,18 @@ export class OrdenCompraFormComponent implements OnInit {
     this.precioAsignado = null;
     this.showPriceDialog = false;
   }
+
+      atrasarPresupuestoPopUp(item:Presupuesto){
+    console.log("click")
+    this.title_pop_up="Atrasar";
+    this.description_pop_up="El presupuesto no va a aparecer en la tabla pero se va a almacenar, ¿Estas seguro?"
+    this.popup_type = 'warning';
+      this.onAcceptPopUp = () => {
+           this.asignarAtrasadoPresupuesto(item)
+    this.show_pop_up = false;
+  };
+   this.show_pop_up = true;
+  }
   async asignarAtrasadoPresupuesto(item:Presupuesto){
      this._messageService.add({
         severity: 'info',
@@ -193,6 +214,18 @@ export class OrdenCompraFormComponent implements OnInit {
         detail: 'Error al asignar presupuesto ' + error.message
       });
   }
+  }
+
+    eliminarPresupuestoPopUp(item:Presupuesto){
+    console.log("click")
+    this.title_pop_up="Eliminar";
+    this.description_pop_up="Se va a eliminar el presupuesto, ¿Estas seguro?"
+    this.popup_type = 'danger';
+      this.onAcceptPopUp = () => {
+           this.eliminarPresupuesto(item)
+    this.show_pop_up = false;
+  };
+   this.show_pop_up = true;
   }
   async eliminarPresupuesto(item:Presupuesto){
      this._messageService.add({
@@ -340,6 +373,7 @@ export class OrdenCompraFormComponent implements OnInit {
 
     this.sidebarVisible = true;
   }
+
  presupuestoAddOC() {
 
     this.sidebarTitle = 'Agregar Presupuesto a la OC:';
@@ -350,9 +384,9 @@ export class OrdenCompraFormComponent implements OnInit {
       addButton:true,
       addButtonClick: (item:Presupuesto) => this._presupuestoService.addPresupuestoAsignado(item),
       trashButton:true,
-      trashButtonClick: (item:Presupuesto) => this.eliminarPresupuesto(item),
+      trashButtonClick: (item:Presupuesto) => this.eliminarPresupuestoPopUp(item),
       timeButton:true,
-      timeButtonClick: (item:Presupuesto) => this.asignarAtrasadoPresupuesto(item),
+      timeButtonClick: (item:Presupuesto) => this.atrasarPresupuestoPopUp(item),
       columns: [
       { field: 'proveedores', header: 'Proveedor', pipe: this.getNombreProveedor },
       { field: 'productos', header: 'Producto', pipe: this.getNombreProducto },

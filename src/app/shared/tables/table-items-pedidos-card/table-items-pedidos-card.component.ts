@@ -9,6 +9,7 @@ import {
   EventEmitter,
   OnChanges,
   SimpleChanges,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -30,6 +31,7 @@ import {
 import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-with-icon.component';
 import { SidebarComponent } from '../../sidebar/sidebar/sidebar.component';
 import { FormsModule } from '@angular/forms';
+import { OrdenCompraService } from 'src/app/features/orden-compra/services/orden-compra.service';
 
 @Component({
   selector: 'app-table-items-pedidos-card',
@@ -61,13 +63,15 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   @Input() pedido: Pedido | null = null;
   @Input() itemsOC: OrdenCompraItem[] | null = null;
   private listaCompletaItems: Array<PedidoItem | OrdenCompraItem> = [];
+  ordenCompraItems = signal<OrdenCompraItem[]>([]);
   public pedidoItems: Array<PedidoItem | OrdenCompraItem> = [];
   public searchTerm: string = ''; // El texto del input de búsqueda
-
+  private _ordenesCompraService=inject(OrdenCompraService)
   ngOnChanges(changes: SimpleChanges): void {
     // Verifica si la propiedad 'pedido' ha cambiado
     if (changes['pedido'] && this.pedido) {
       // Asigna los items del pedido a la variable local
+      this._ordenesCompraService.getAllItemsEnvio();
       this.pedidoItems = this.pedido.pedido_items ?? [];
       this.listaCompletaItems = this.pedido.pedido_items ?? [];
       this.filterItems(); // Llama al filtro para mostrar la lista inicial
@@ -206,4 +210,8 @@ export class TableItemsPedidosCardComponent implements OnChanges {
     }
     return null;
   }
+getOrdenCompra(item: PedidoItem | OrdenCompraItem): string {
+  const ocItem = this._ordenesCompraService.ordenCompraItems().find(oc => oc.pedido_item_id === item.id);
+  return ocItem ? ocItem.id.toString() : '';
+}
 }

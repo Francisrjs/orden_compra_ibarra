@@ -142,18 +142,6 @@ export class TableNGPedidos implements OnInit {
         id: p.id ?? p.numero_pedido ?? i,
       })) ?? [];
   }
-  getSeverity(status: string) {
-    switch (status) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warning';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default:
-        return undefined;
-    }
-  }
 
   getStatusSeverity(status: EstadoItemPedido) {
     switch (status) {
@@ -165,6 +153,7 @@ export class TableNGPedidos implements OnInit {
         return 'danger';
       case 'Pendiente':
         return 'info';
+   
       default:
         return undefined;
     }

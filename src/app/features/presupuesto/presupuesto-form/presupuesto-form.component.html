@@ -69,6 +69,7 @@
       type="submit"
       [disabled]="presupuestoForm.invalid"
       (click)="onSubmit()"
+      (keydown.enter)="onSubmit()"
       styleType="success"
     >
       ></app-custom-button

@@ -69,7 +69,6 @@ export class TableNgItemPedidoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
    this._pedidoService.getAllPedidosPendientes();
   }
 
@@ -98,7 +97,7 @@ export class TableNgItemPedidoComponent implements OnInit {
   getNumeroPedido(idItem:PedidoItem){
     return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.numero_pedido;
   }
-    getPedido_id(idItem:PedidoItem){
+  getPedido_id(idItem:PedidoItem){
     return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.id;
   }
   

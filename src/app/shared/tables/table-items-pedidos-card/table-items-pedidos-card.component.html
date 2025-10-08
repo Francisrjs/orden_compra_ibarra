@@ -55,6 +55,14 @@
                 >
                   {{ getEstado(item) | uppercase }}
                 </span>
+                 <span
+                  class="mx-2 badge"
+                  class="text-bg-danger"
+                  *ngIf="item.estado=='En Envio'"
+                >
+                
+                  {{ getOrdenCompra(item) | uppercase }}
+                </span>
               </h6>
 
               <div class="d-flex row">
@@ -67,7 +75,7 @@
                   class="product-description mb-1"
                   *ngIf="getDescripcion(item)"
                 >
-                  {{ getDescripcion(item) }}
+                 Descripción:  {{ getDescripcion(item) }}
                 </p>
 
                 <small

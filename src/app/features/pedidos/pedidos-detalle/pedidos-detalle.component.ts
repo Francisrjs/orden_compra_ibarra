@@ -32,6 +32,7 @@ interface EventItem {
   status?: string;
   color?: string;
   value?: string;
+  show?:boolean;
   showNumeroPedido?: boolean;
 }
 @Component({
@@ -90,28 +91,33 @@ export class PedidosDetalleComponent implements OnInit {
         status: 'Pedido en Creación',
         value: 'En Creacion',
         color: 'text-secondary',
+        show:true,
       },
       {
-        status: 'En Proceso de Aprobacion',
+        status: 'En Proceso de Aprobación',
         value: 'En Proceso de Aprobacion',
         showNumeroPedido: true,
         color: 'text-warning',
+        show:true,
       },
 
       {
         status: 'Rechazado',
         value: 'Rechazado',
+        show:this.pedido()?.estado=="Rechazado",
         color: 'text-danger',
       },
       {
         status: 'En Proceso de Entrega',
         value: 'En Proceso de Entrega',
         color: 'text-info',
+        show:true,
       },
       {
         status: 'Pedido Cerrado',
         value: 'Cerrado',
         color: 'text-dark',
+        show:true,
       },
     ];
   }

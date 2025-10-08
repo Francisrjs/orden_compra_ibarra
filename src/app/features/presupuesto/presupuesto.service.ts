@@ -193,6 +193,11 @@ async asignarPresupuestoOC(orden_compra_id:number){
 clearPresupuestosAsignados() {
   this.presupuestoAsignados.set([]);
 }
+deleteAsignado(presupuesto_item:Presupuesto){
+  this.presupuestoAsignados.update((currentPresupuestos) =>
+    currentPresupuestos.filter(p => p.id !== presupuesto_item.id)
+  );
+}
 async deletePresupuestoOC(presupuesto_id: number) {
   try {
     const { data, error } = await this._supabaseClient
