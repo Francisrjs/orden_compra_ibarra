@@ -26,11 +26,7 @@ export type Areas =
   | 'TALLER'
   | 'PREDIO';
 
-export type TiempoItem =
-  |'EN PLAZO'
-  |'POR VENCER'
-  |'DEMORADO'
-
+export type TiempoItem = 'EN PLAZO' | 'POR VENCER' | 'DEMORADO';
 
 // Ahora, las interfaces para cada tabla de la base de datos
 export interface UnidadMedida {
@@ -79,7 +75,7 @@ export interface Pedido {
   estado: EstadoPedido;
   fecha_creacion: string; // Formato ISO 8601
   usuario: string;
-  tiempo_item: TiempoItem; 
+  tiempo_item: TiempoItem;
   //relaciones opcionales
   pedido_items?: PedidoItem[];
   nombre_responsable?: string; // Campo opcional que viene de la vista
@@ -118,15 +114,15 @@ export interface OrdenCompra {
 
 export interface OrdenCompraItem {
   id: number;
-  orden_compra_id?: number;
+  orden_compra_id?: OrdenCompra;
   pedido_item_id?: number;
   precio_unitario?: number;
-  cantidad:number;
-  subtotal:number;
-  estado?:EstadoItemPedido;
+  cantidad: number;
+  subtotal: number;
+  estado?: EstadoItemPedido;
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
-  producto_id?:number;
+  producto_id?: number;
 }
 
 export interface Presupuesto {
@@ -137,9 +133,9 @@ export interface Presupuesto {
   responsable_id?: number;
   importe: number;
   created_at: Time;
-  orden_compra_id?:number | null;
+  orden_compra_id?: number | null;
   productos?: Producto;
-  proveedores?:Proveedor;
-  unidades_medida?:UnidadMedida;
-  atrasado?:boolean;
+  proveedores?: Proveedor;
+  unidades_medida?: UnidadMedida;
+  atrasado?: boolean;
 }

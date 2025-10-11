@@ -66,7 +66,7 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   ordenCompraItems = signal<OrdenCompraItem[]>([]);
   public pedidoItems: Array<PedidoItem | OrdenCompraItem> = [];
   public searchTerm: string = ''; // El texto del input de búsqueda
-  private _ordenesCompraService=inject(OrdenCompraService)
+  private _ordenesCompraService = inject(OrdenCompraService);
   ngOnChanges(changes: SimpleChanges): void {
     // Verifica si la propiedad 'pedido' ha cambiado
     if (changes['pedido'] && this.pedido) {
@@ -210,8 +210,10 @@ export class TableItemsPedidosCardComponent implements OnChanges {
     }
     return null;
   }
-getOrdenCompra(item: PedidoItem | OrdenCompraItem): string {
-  const ocItem = this._ordenesCompraService.ordenCompraItems().find(oc => oc.pedido_item_id === item.id);
-  return ocItem ? ocItem.id.toString() : '';
-}
+  getOrdenCompra(item: PedidoItem | OrdenCompraItem): string {
+    const ocItem = this._ordenesCompraService
+      .ordenCompraItems()
+      .find((oc) => oc.pedido_item_id === item.id) as OrdenCompraItem;
+    return ocItem.orden_compra_id?.numero_oc ?? '';
+  }
 }

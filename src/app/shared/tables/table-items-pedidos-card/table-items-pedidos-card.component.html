@@ -55,12 +55,11 @@
                 >
                   {{ getEstado(item) | uppercase }}
                 </span>
-                 <span
+                <span
                   class="mx-2 badge"
-                  class="text-bg-danger"
-                  *ngIf="item.estado=='En Envio'"
+                  class="text-bg-secondary text-white"
+                  *ngIf="item.estado == 'En Envio'"
                 >
-                
                   {{ getOrdenCompra(item) | uppercase }}
                 </span>
               </h6>
@@ -75,7 +74,7 @@
                   class="product-description mb-1"
                   *ngIf="getDescripcion(item)"
                 >
-                 Descripción:  {{ getDescripcion(item) }}
+                  Descripción: {{ getDescripcion(item) }}
                 </p>
 
                 <small

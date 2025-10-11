@@ -8,7 +8,11 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OrdenCompraItem, Pedido, PedidoItem } from 'src/app/core/models/database.type';
+import {
+  OrdenCompraItem,
+  Pedido,
+  PedidoItem,
+} from 'src/app/core/models/database.type';
 import { PedidoService } from 'src/app/features/pedidos/services/pedido.service';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -29,7 +33,7 @@ import { OrdenCompraService } from 'src/app/features/orden-compra/services/orden
     TagModule,
     RippleModule,
     ToastModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './table-ng-item-pedido.component.html',
   styleUrls: ['./table-ng-item-pedido.component.css'],
@@ -41,12 +45,12 @@ export class TableNgItemPedidoComponent implements OnInit {
 
   pedidos: Pedido[] = [];
   private _pedidoService = inject(PedidoService);
-  private _ordenCompraService=inject(OrdenCompraService)
-  ordenCompraItems: PedidoItem[] | null = this._ordenCompraService.itemsOC() ?? []
+  private _ordenCompraService = inject(OrdenCompraService);
+  ordenCompraItems: PedidoItem[] | null =
+    this._ordenCompraService.itemsOC() ?? [];
   items: PedidoItem[] = [];
-
+  balanceFrozen: boolean = false;
   constructor() {
-    
     effect(() => {
       const p = this._pedidoService.pedidos() ?? [];
       this.pedidos = p;
@@ -63,13 +67,16 @@ export class TableNgItemPedidoComponent implements OnInit {
         );
 
       this.items = allItems.filter(
-        item=> !this.ordenCompraItems?.map(itemOC => itemOC.id).includes((item as PedidoItem).id)
+        (item) =>
+          !this.ordenCompraItems
+            ?.map((itemOC) => itemOC.id)
+            .includes((item as PedidoItem).id)
       );
     });
   }
 
   ngOnInit(): void {
-   this._pedidoService.getAllPedidosPendientes();
+    this._pedidoService.getAllPedidosPendientes();
   }
 
   onAdd(item: PedidoItem) {
@@ -94,11 +101,14 @@ export class TableNgItemPedidoComponent implements OnInit {
         return undefined;
     }
   }
-  getNumeroPedido(idItem:PedidoItem){
-    return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.numero_pedido;
+  getNumeroPedido(idItem: PedidoItem) {
+    return this.pedidos.find((p) =>
+      p.pedido_items?.some((i) => i.id === idItem.id)
+    )?.numero_pedido;
   }
-  getPedido_id(idItem:PedidoItem){
-    return this.pedidos.find(p=>p.pedido_items?.some(i=>i.id===idItem.id))?.id;
+  getPedido_id(idItem: PedidoItem) {
+    return this.pedidos.find((p) =>
+      p.pedido_items?.some((i) => i.id === idItem.id)
+    )?.id;
   }
-  
 }
