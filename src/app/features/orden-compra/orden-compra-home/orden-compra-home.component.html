@@ -140,7 +140,13 @@
 >
   <!-- opcional: template actions -->
   <ng-template #actions let-row let-i="index">
-    <button pButton type="button" icon="pi pi-eye" ></button>
+     <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              
+            />
   </ng-template>
 </app-table-generic-ng-big-data>
 

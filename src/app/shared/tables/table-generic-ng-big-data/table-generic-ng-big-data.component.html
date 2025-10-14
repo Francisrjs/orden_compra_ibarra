@@ -1,9 +1,9 @@
 <p-table 
   #dt
-  [value]="dataSignal()" 
+  [value]="filteredData.length ? filteredData : dataSignal()" 
   dataKey="id" 
   [tableStyle]="{ 'min-width': minWidth }"
-  [paginator]="dataSignal().length>=5"
+  [paginator]="(filteredData.length ? filteredData : dataSignal()).length>=5"
   [rows]="10"
   currentPageReportTemplate="mostrando {first} de {last} del total {totalRecords} entradas"
   [rowsPerPageOptions]="[10,20,30]"
@@ -19,6 +19,29 @@
       <th *ngFor="let col of columns" [pSortableColumn]="col.field" [style.width]="col.width">
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
+        <ng-container *ngIf="col.filterable !== false">
+          <button
+            type="button"
+            pButton
+            icon="pi pi-filter"
+            class="p-button-text p-button-sm ms-1"
+            (click)="toggleFilterInput(col.field)"
+            tabindex="-1"
+            style="vertical-align: middle;"
+          ></button>
+          <ng-container *ngIf="filterInputVisible[col.field]">
+            <input
+              type="text"
+              pInputText
+              class="w-100 mt-1"
+              (input)="onFilter(getInputValue($event), col.field)"
+              [placeholder]="'Filtrar ' + col.header"
+              (keydown.enter)="$event.stopPropagation()"
+              (click)="$event.stopPropagation()"
+              style="position: relative; z-index: 2;"
+            />
+          </ng-container>
+        </ng-container>
       </th>
       <th *ngIf="actionsTemplate">Acción</th>
     </tr>
