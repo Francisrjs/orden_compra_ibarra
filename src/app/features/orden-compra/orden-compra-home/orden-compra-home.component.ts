@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, Type } from '@angular/core';
+import { Component, effect, inject, Input, OnInit, Type } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { SidebarModule } from 'primeng/sidebar';
 import { ToastModule } from 'primeng/toast';
@@ -14,6 +14,8 @@ import { CarouselCardsComponent } from "src/app/shared/cards/carousel-cards/caro
 import { PedidoService } from '../../pedidos/services/pedido.service';
 import { TableGenericNgBigDataComponent } from "src/app/shared/tables/table-generic-ng-big-data/table-generic-ng-big-data.component";
 import { ButtonModule } from 'primeng/button';
+import { OrdenCompraDetailComponent } from '../orden-compra-detail/orden-compra-detail.component';
+import { getBadgeClassByOC } from 'src/app/shared/funtions/pedidosFuntions';
 
 @Component({
   selector: 'app-orden-compra-home',
@@ -31,8 +33,10 @@ export class OrdenCompraHomeComponent implements OnInit{
   @Input() onSaveSuccess?: () => void;
   private _ordenesCompraService=inject(OrdenCompraService);
   private _pedidoService= inject(PedidoService)
+  public ordenCompra= this._ordenesCompraService.ordenCompra
   public ordenesCompra=  this._ordenesCompraService.ordenesCompra;
   public pedidosUrgentes= this._pedidoService.pedidosUrgentes;
+  private _messageService= inject(MessageService)
   private currencyPipe=inject(CurrencyPipe)
     async ngOnInit(): Promise<void> {
       if(this.ordenesCompra().length===0){
@@ -42,7 +46,11 @@ export class OrdenCompraHomeComponent implements OnInit{
         this._pedidoService.getAllPedidosUrgentes()
       
   }
-  
+  constructor(){
+  effect(() => {
+      const ordenCompraSignal=this.ordenCompra()
+    });
+  }
     //Getters functions
     getNombreProveedor = (proveedor_id: Proveedor) => proveedor_id?.nombre;
     getTotalCurrency=(importe:number)=> {
@@ -50,6 +58,13 @@ export class OrdenCompraHomeComponent implements OnInit{
       const format = hasDecimals ? '1.2-2' : '1.0-0';
       return this.currencyPipe.transform(importe, '$', 'symbol', format);
     }
+    
+    // Método para obtener la clase del badge según el estado de OC
+    getEstadoBadge = (estado: string, row?: any) => {
+      const badgeClass = getBadgeClassByOC(estado);
+      return `<span class="badge ${badgeClass}">${estado}</span>`;
+    }
+    
       // Getter para items de pedidos urgentes (para el carousel)
   get pedidosUrgentesItems() {
     return this.pedidosUrgentes().flatMap(p => p.pedido_items || []);
@@ -64,5 +79,44 @@ export class OrdenCompraHomeComponent implements OnInit{
       }
       
     })
+  }
+  async openOrdenCompra(OrdenCompraItem:OrdenCompra){
+    await this._ordenesCompraService.getOCById(OrdenCompraItem.id)
+    console.log("click",this.ordenCompra())
+    this.openOrdenCompraSidebar()
+  }
+   openOrdenCompraSidebar(): void {
+    console.log('abriendo');
+    this.sidebarTitle = 'Detalle de la Orden de Compra';
+    this.componentToLoad = OrdenCompraDetailComponent;
+    this.sidebarInputs = {
+      dataOrden: this.ordenCompra(),
+      formResult: (result: {
+        severity?: string;
+        success: boolean;
+        message: string;
+      }) => this.handleFormResult(result),
+    };
+
+    this.sidebarVisible = true;
+  }
+  handleFormResult(result: {
+    severity?: string;
+    success?: boolean;
+    message: string;
+  }): void {
+    if (!result.severity) {
+      this._messageService.add({
+        severity: result.success ? 'success' : 'error',
+        summary: result.success ? 'Éxito' : 'Error',
+        detail: result.message,
+      });
+    } else {
+      this._messageService.add({
+        severity: result.severity,
+        summary: 'Info',
+        detail: result.message,
+      });
+    }
   }
 }

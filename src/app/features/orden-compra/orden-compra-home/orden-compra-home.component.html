@@ -123,6 +123,7 @@
   [data]="ordenesCompra"
   [columns]="[
     { field: 'numero_oc', header:'Numero OC' },
+    { field: 'estado', header:'Estado', pipe: getEstadoBadge, isHtml: true },
     { field: 'proveedor_id.nombre', header:'Proveedor'  }, 
     { field: 'condicion_entrega', header:'Condicion de Entrega' },
     { field: 'total', header:'Total', pipe: getTotalCurrency }
@@ -140,13 +141,13 @@
 >
   <!-- opcional: template actions -->
   <ng-template #actions let-row let-i="index">
-     <p-button
-              icon="pi pi-eye"
-              [rounded]="true"
-              [text]="true"
-              severity="info"
-              
-            />
+<p-button
+  icon="pi pi-eye"
+  [rounded]="true"
+  [text]="true"
+  severity="info"
+  (onClick)="openOrdenCompra(row)"
+/>
   </ng-template>
 </app-table-generic-ng-big-data>
 

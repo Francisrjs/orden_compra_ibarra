@@ -23,6 +23,12 @@ export class ButtonElegantComponent {
   @Input() text: string = 'Click me';
 
   /**
+   * @Input(): Clase de icono de Bootstrap para mostrar en el botón.
+   * Ejemplo: 'bi-plus', 'bi-trash', 'bi-pencil', etc.
+   */
+  @Input() icon?: string;
+
+  /**
    * @Input(): Si se provee una URL, el componente se renderizará como una etiqueta <a>.
    * Es opcional (?).
    */
@@ -32,7 +38,7 @@ export class ButtonElegantComponent {
    * @Input(): Permite definir el tipo de botón para aplicar diferentes estilos.
    * Por ahora solo 'primary', pero podrías añadir 'secondary', 'danger', etc.
    */
-  @Input() styleType: 'primary' | 'success' | 'danger' | 'info' = 'primary';
+  @Input() styleType: 'primary' | 'success' | 'danger' | 'warning' |'info' = 'primary';
 
   /**
    * @Output(): Emite un evento cuando se hace clic en el botón (solo si no es un link).

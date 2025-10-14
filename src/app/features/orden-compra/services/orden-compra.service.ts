@@ -163,10 +163,11 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           categoria:categoria_id(id, nombre, icon_text)
         ),
         estado,
+        unidad_medida_id(id,nombre),
         pedido: pedidos(id,numero_pedido)
       )
     ),
-      proveedor_id (id,nombre)   
+      proveedor_id (id,nombre,cuit)   
   `
         )
         .eq('id', oc_id)

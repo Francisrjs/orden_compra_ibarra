@@ -38,6 +38,22 @@ export function getBadgeClassByPedidoItem(estado: string) {
       return 'text-bg-secondary';
   }
 }
+export function getBadgeClassByOC(estado: string) {
+  switch (estado) {
+    case 'Borrador':
+      return 'text-bg-secondary';
+    case 'EN PROCESO':
+      return 'text-bg-warning';
+    case 'CERRADA':
+      return 'text-bg-success';
+    case 'ABIERTA':
+      return 'text-bg-primary';
+    case 'CANCELADA':
+      return 'text-bg-danger';
+    default:
+      return 'text-bg-secondary';
+  }
+}
 export function getIconByArea(area: Areas): string {
   switch (area) {
     case 'LOGISTICA':

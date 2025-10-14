@@ -84,10 +84,30 @@
       </div>
     </td>
   </tr>
-</ng-template>
+  </ng-template>
   
-
-
+  <!-- FOOTER -->
+  <ng-template pTemplate="footer" *ngIf="showFooter">
+    <tr>
+      <!-- Columna toggler vacía si hay expansión -->
+      <td *ngIf="rowExpansionColumns?.length"></td>
+      
+      <!-- Columnas normales -->
+      <td *ngFor="let col of columns; let i = index" 
+          [class.text-end]="shouldShowTotal(col.field)"
+          [class.fw-bold]="shouldShowTotal(col.field)">
+        <ng-container *ngIf="i === 0">
+          {{ footerLabel }}
+        </ng-container>
+        <ng-container *ngIf="shouldShowTotal(col.field)">
+          {{ applyPipe(col.pipe, calculateTotal(col.field), null) }}
+        </ng-container>
+      </td>
+      
+      <!-- Columna de acciones vacía -->
+      <td *ngIf="actionsTemplate"></td>
+    </tr>
+  </ng-template>
 
   <ng-template pTemplate="emptymessage">
     <tr>

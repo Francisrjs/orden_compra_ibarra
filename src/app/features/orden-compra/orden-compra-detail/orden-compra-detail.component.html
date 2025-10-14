@@ -1,1 +1,127 @@
-<p>orden-compra-detail works!</p>
+<div *ngIf="dataOrden; else noInfo">
+  <h2 class="text-center mb-4 d-flex align-items-center justify-content-center">
+    <span>{{dataOrden.numero_oc}}</span>
+    <span class="badge ms-2 fs-6" [ngClass]="getBadgeClass(dataOrden.estado)">
+      {{dataOrden.estado}}
+    </span>
+  </h2>
+   <div class="row justify-content-center mb-3">
+        <div class="col-md-5 mb-2">
+                  <app-custom-button
+      text="Agregar Factura"
+        icon="bi-paperclip"
+      type="submit"
+      styleType="warning"
+      
+    />
+        </div>
+        <div class="col-md-5 mb-2">
+                    <app-custom-button
+      text="Cancelar"
+        icon="bi-ban"
+      type="submit"
+      styleType="danger"
+      
+    />
+        </div>
+        <div class="col-md-5 mb-2">
+    <app-custom-button
+      text="Cerrar"
+      icon="bi-check2"
+      type="submit"
+      styleType="success"
+      
+    />
+        </div>
+   </div>
+  <p-divider></p-divider>
+  <div class="row justify-content-center mb-3">
+    <div class="col-md-3 mb-2">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-calendar" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"><b>Creación:</b> <br> {{dataOrden.fecha_creacion | date:'shortDate'}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-2">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-truck" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"> <b>Entrega:</b> <br> {{dataOrden.condicion_entrega}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-2">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-wallet" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"><b>Pago:</b> <br> {{dataOrden.condicion_pago}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-md-5 mb-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-person-circle me-2" style="font-size: 2rem;"></i>
+          <span class="fs-5">Proveedor</span>
+        </div>
+        <div class="card-body">
+          <p class="mb-2">
+            <i class="bi bi-person-fill text-primary me-2"></i>
+            <strong>Nombre:</strong> {{dataOrden.proveedor_id?.nombre || 'Sin nombre'}}
+          </p>
+          <p class="mb-2">
+            <i class="bi bi-credit-card-2-front text-primary me-2"></i>
+            <strong>CUIT:</strong> {{dataOrden.proveedor_id?.cuit || 'Sin CUIT'}}
+          </p>
+          <p class="mb-0">
+            <i class="bi bi-envelope-fill text-primary me-2"></i>
+            <strong>Email:</strong> {{dataOrden.proveedor_id?.email || 'Sin email'}}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5 mb-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-secondary text-white d-flex align-items-center">
+          <i class="bi bi-person-badge me-2" style="font-size: 2rem;"></i>
+          <span class="fs-5">Jefe de Compras</span>
+        </div>
+        <div class="card-body">
+          <p class="mb-2">
+            <i class="bi bi-person-fill text-secondary me-2"></i>
+            <strong>Nombre:</strong> {{dataOrden.jefe_compra_id?.user_metadata || dataOrden.jefe_compra_id || 'Sin nombre'}}
+          </p>
+          <p class="mb-0">
+            <i class="bi bi-envelope-fill text-secondary me-2"></i>
+            <strong>Email:</strong> {{dataOrden.jefe_compra_id?.email || 'Sin email'}}
+          </p>
+        </div>
+      </div>
+    </div>
+    <h4 class="text-center">Items de la orden:</h4>
+    <p-divider></p-divider>
+          <app-table-generic-ng
+  [columns]="[
+  { field: 'pedido_item_id.pedido.numero_pedido', header: 'Numero de Pedido' },
+  { field: 'pedido_item_id.productos.nombre', header: 'Producto' },
+  { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
+  { field: 'cantidad', header: 'Cantidad' },
+  { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+
+  ]"
+  [data]="dataOrden.orden_compra_items ?? []"
+  [showFooter]="true"
+  [footerColumns]="[ 'subtotal']"
+  [footerLabel]="'Total General'"
+  minWidth="40rem"
+>
+</app-table-generic-ng>
+  </div>
+</div>
+<ng-template #noInfo>
+  <h1>Sin Información a mostrar</h1>
+</ng-template>

@@ -20,6 +20,11 @@ export class TableGenericNGComponent<T = any> {
 
   @Input() expansionField: string = 'orden_compra_items';
   @Input() rowExpansionColumns: Array<{ field: string; header: string; pipe?: (value: any, row?: any) => any }> = [];
+  
+  // Footer totals
+  @Input() showFooter: boolean = false;
+  @Input() footerColumns: string[] = [];
+  @Input() footerLabel: string = 'Total';
 
   dataSignal = computed(() => {
     if (typeof this.data === 'function') {
@@ -44,6 +49,20 @@ export class TableGenericNGComponent<T = any> {
   applyPipe(pipe: ((v: any, row?: any) => any) | undefined, value: any, row?: any) {
     return pipe ? pipe(value, row) : value;
   }
+  
+  // Método para calcular el total de una columna
+  calculateTotal(field: string): number {
+    return this.dataSignal().reduce((sum, row) => {
+      const value = this.getFieldValue(row, field);
+      return sum + (typeof value === 'number' ? value : 0);
+    }, 0);
+  }
+
+  // Método para verificar si una columna debe mostrar total
+  shouldShowTotal(field: string): boolean {
+    return this.footerColumns.includes(field);
+  }
+  
   onToggle(row: any, dt: any) {
     // Depuración al expandir/cerrar fila
     console.log('Row expansion toggled:', row);

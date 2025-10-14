@@ -1,4 +1,5 @@
 import { Time } from '@angular/common';
+import { User } from '@supabase/supabase-js';
 
 export type EstadoPedido =
   | 'En Creacion'
@@ -14,10 +15,10 @@ export type EstadoItemPedido =
   | 'En Envio';
 export type EstadoOC =
   | 'Borrador'
-  | 'Enviada a Proveedor'
-  | 'Recibida Parcialmente'
-  | 'Recibida Completa'
-  | 'Cancelada';
+  | 'EN PROCESO'
+  | 'CERRADA'
+  | 'ABIERTA'
+  | 'CANCELADA';
 export type Areas =
   | 'LOGISTICA'
   | 'ADMINISTRACION'
@@ -102,13 +103,16 @@ export interface PedidoItem {
 export interface OrdenCompra {
   id: number;
   numero_oc?: string;
-  jefe_compra_id: string; // UUID del usuario
-  proveedor_id?: number;
+  jefe_compra_id: User; // UUID del usuario
+  proveedor_id?: Proveedor;
   estado: EstadoOC;
   fecha_creacion: string;
   notas?: string;
-
-  // Opcional: para mostrar datos relacionados
+  condicion_entrega:string;
+  factura:number;
+  total:number;
+  condicion_pago:string;
+  orden_compra_items?:OrdenCompraItem[];
   proveedores?: Proveedor;
 }
 
@@ -120,6 +124,7 @@ export interface OrdenCompraItem {
   cantidad: number;
   subtotal: number;
   estado?: EstadoItemPedido;
+
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
   producto_id?: number;

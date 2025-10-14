@@ -60,7 +60,11 @@
 
       <!-- celdas normales -->
       <td *ngFor="let col of columns">
-        {{ applyPipe(col.pipe, getFieldValue(row, col.field), row) }}
+        <span *ngIf="!col.isHtml">
+          {{ applyPipe(col.pipe, getFieldValue(row, col.field), row) }}
+        </span>
+        <span *ngIf="col.isHtml" [innerHTML]="applyPipe(col.pipe, getFieldValue(row, col.field), row)">
+        </span>
       </td>
 
       <td *ngIf="actionsTemplate" class="actions-col d-flex">

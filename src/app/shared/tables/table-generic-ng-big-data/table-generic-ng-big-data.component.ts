@@ -18,7 +18,7 @@ export class TableGenericNgBigDataComponent  <T = any> implements OnInit{
   toggleFilterInput(field: string) {
     this.filterInputVisible[field] = !this.filterInputVisible[field];
   }
-  @Input() columns: Array<{ field: string; header: string; width?: string; pipe?: (value: any, row?: T) => any; filterable?: boolean }> = [];
+  @Input() columns: Array<{ field: string; header: string; width?: string; pipe?: (value: any, row?: T) => any; filterable?: boolean; isHtml?: boolean }> = [];
   @Input() data: T[] | Signal<T[]> = [];
   @Input() minWidth: string = '40rem';
   @ContentChild('actions', { static: false }) actionsTemplate?: TemplateRef<any>;
