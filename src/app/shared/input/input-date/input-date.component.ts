@@ -21,10 +21,10 @@ import {
   ],
 })
 export class InputDateComponent implements ControlValueAccessor {
-  @Input() label: string = '';
+  @Input() label?: string = '';
   @Input() id: string = '';
   @Input() name: string = '';
-  @Input() required: boolean = false;
+  @Input() required?: boolean = false;
 
   value: string = ''; // Guarda la fecha seleccionada
   disabled = false;

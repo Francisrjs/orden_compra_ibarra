@@ -7,6 +7,10 @@ export type EstadoPedido =
   | 'En Proceso de Entrega'
   | 'Cerrado'
   | 'Rechazado';
+export type tipoOC=
+  | 'FIJADO'
+  | 'LIMITADO'
+  | 'SIN ESPECIFICAR'
 export type EstadoItemPedido =
   | 'Pendiente'
   | 'Aprobado'
@@ -109,13 +113,20 @@ export interface OrdenCompra {
   fecha_creacion: string;
   notas?: string;
   condicion_entrega:string;
-  factura:number;
+  fecha_pago?:Date;
   total:number;
   condicion_pago:string;
   orden_compra_items?:OrdenCompraItem[];
   proveedores?: Proveedor;
+  tipo?:tipoOC
 }
 
+export interface Remito{
+  id:number;
+  numero_remito:string;
+  factura_id:Factura;
+  fecha:Date;
+}
 export interface OrdenCompraItem {
   id: number;
   orden_compra_id?: OrdenCompra;
@@ -128,8 +139,16 @@ export interface OrdenCompraItem {
   // Opcional: para mostrar datos relacionados
   pedido_items?: PedidoItem;
   producto_id?: number;
-}
+  factura_id?: Factura;
 
+}
+export interface Factura{
+  id:number;
+  numero_factura:string;
+  proveedor_id:Proveedor;
+  orden_compra_id:OrdenCompra;
+  fecha_pago:Date;
+}
 export interface Presupuesto {
   id: number;
   producto_id: number;

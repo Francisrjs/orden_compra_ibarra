@@ -5,14 +5,211 @@
       {{dataOrden.estado}}
     </span>
   </h2>
+  <p-dialog
+  header="Agregar/Editar factura y remito"
+  [(visible)]="showAddFactura"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '550px' }"
+>
+  <div class="p-fluid" [formGroup]="facturaForm">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+        <label class="mb-0">Numero de Factura</label>
+      </div>
+      <span class="badge bg-info text-dark">
+        <i class="bi bi-info-circle me-1"></i>
+        Ejemplo: 0001-111133
+      </span>
+    </div>
+    
+
+    <!-- Usamos p-inputNumber (si lo importaste) -->
+    <p-inputNumber
+      formControlName="primerosDigitosFactura"
+      [min]="1"
+      [mode]="'decimal'"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="0"
+      placeholder="0001 (Punto de venta)"
+      inputId="primerDigitoFactura"
+      class="mb-2"
+      (keydown.enter)="onEnterPrecio()"
+    />
+    <small class="text-muted d-block mb-2">
+      <i class="bi bi-arrow-return-right me-1"></i>
+      Punto de venta: primeros dígitos antes del guión
+    </small>
+    
+    <div class="d-flex">
+      <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+      <label class="mb-2 ">Últimos dígitos</label>
+    </div>
+    
+       <p-inputNumber
+      formControlName="ultimosDigitosFactura"
+      [min]="1"
+      [mode]="'decimal'"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="0"
+      placeholder="111133 (Número de factura)"
+      inputId="segundoDigitoFacturas"
+      class="mb-2"
+      (keydown.enter)="onEnterPrecio()"
+    />
+    <small class="text-muted d-block mb-3">
+      <i class="bi bi-arrow-return-right me-1"></i>
+      Número de factura: últimos dígitos después del guión
+    </small>
+    
+     <div class="d-flex justify-content-between align-items-center mb-2">
+      <label class="mb-0">Remitos:</label>
+      <button 
+        type="button" 
+        class="btn btn-success btn-sm"
+        (click)="openAddRemito()"
+      >
+        <i class="bi bi-plus me-1"></i>
+        Agregar
+      </button>
+    </div>
+      
+      <app-table-generic-ng
+      [columns]="[
+      {field: 'id', header:'ID',width: '2rem'},
+      {field: 'numero_remito', header:'NRO REMITO',width: '20rem'}]"
+      [data]="_remitoService.remitos"
+      
+      
+      > <ng-template #actions let-item>
+    <p-button
+      icon="pi pi-trash"
+      (onClick)="this._remitoService.deleteItemRemito(item)"
+      styleClass="p-button-rounded p-button-outlined"
+      [rounded]="true"
+      [text]="true"
+      severity="danger"
+    ></p-button>
+  
+  </ng-template></app-table-generic-ng>
+    
+     <div class="d-flex justify-center text-center my-2">
+      <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+      <label class="mb-2 ">Campos Obligatorios</label>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        class="p-button-text"
+        (click)="cancelAdd()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Aceptar"
+        (click)="addEditFactura()"
+        [disabled]="!isPrecioValid()"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Modal para agregar remito -->
+<p-dialog
+  header="Agregar Remito"
+  [(visible)]="showAddRemito"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }"
+>
+  <div class="p-fluid" [formGroup]="remitoForm">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+        <label class="mb-0">Número de Remito</label>
+      </div>
+      <span class="badge bg-info text-dark">
+        <i class="bi bi-info-circle me-1"></i>
+        Ejemplo: 0001-111133
+      </span>
+    </div>
+    
+    <p-inputNumber
+      formControlName="puntoVentaRemito"
+      [min]="1"
+      [mode]="'decimal'"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="0"
+      placeholder="0001 (Punto de venta)"
+      class="mb-2"
+    />
+    <small class="text-muted d-block mb-2">
+      <i class="bi bi-arrow-return-right me-1"></i>
+      Punto de venta: primeros dígitos antes del guión
+    </small>
+    
+    <div class="d-flex">
+      <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+      <label class="mb-2">Número de remito</label>
+    </div>
+    
+    <p-inputNumber
+      formControlName="numeroRemito"
+      [min]="1"
+      [mode]="'decimal'"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="0"
+      placeholder="111133 (Número de remito)"
+      class="mb-2"
+    />
+    <small class="text-muted d-block mb-3">
+      <i class="bi bi-arrow-return-right me-1"></i>
+      Número de remito: últimos dígitos después del guión
+    </small>
+        <div class="d-flex">
+      <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+      <label class="mb-2">Fecha del remito:</label>
+    </div>
+    <app-input-date
+      
+      id="fecha_remito"
+      formControlName="fecha"
+    ></app-input-date>
+    <div class="d-flex justify-center text-center my-2">
+      <i class="bi bi-asterisk text-danger fs-6 mx-1" style="font-size: 0.85rem"></i>
+      <label class="mb-2">Campos Obligatorios</label>
+    </div>
+    
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        class="p-button-text"
+        (click)="cancelAddRemito()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Agregar"
+        (click)="agregarRemito()"
+        [disabled]="!remitoForm.valid"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
    <div class="row justify-content-center mb-3">
         <div class="col-md-5 mb-2">
                   <app-custom-button
-      text="Agregar Factura"
+      text="Agregar factura"
         icon="bi-paperclip"
       type="submit"
       styleType="warning"
-      
+      (buttonClick)="showAddFactura=true"
     />
         </div>
         <div class="col-md-5 mb-2">
@@ -35,6 +232,7 @@
         </div>
    </div>
   <p-divider></p-divider>
+  <!-- Estado: Abierto -->
   <div class="row justify-content-center mb-3">
     <div class="col-md-3 mb-2">
       <div class="card text-center border-0 shadow-sm">
@@ -61,6 +259,34 @@
       </div>
     </div>
   </div>
+  <!-- Estado: EN PROCESO -->
+     <!-- <div class="row justify-content-center mb-3">
+    <div class="col-md-3 mb-2" *ngIf="dataOrden.factura">
+      <div class="card text-center border-0 shadow-sm" >
+        <div class="card-body">
+          <i class="bi bi-file" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"><b>Factura:</b> <br> {{dataOrden.factura}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-2" *ngIf="dataOrden.remito" >
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-file" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"> <b>Remito:</b> <br> {{dataOrden.remito}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-2" *ngIf="dataOrden.fecha_pago">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-wallet" style="font-size: 1.5rem;"></i>
+          <div class="mt-2"><b>Fecha pago:</b> <br> {{dataOrden.fecha_pago}}</div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <!-- Estado: Información -->
   <div class="row justify-content-center">
     <div class="col-md-5 mb-3">
       <div class="card shadow-sm border-0">
