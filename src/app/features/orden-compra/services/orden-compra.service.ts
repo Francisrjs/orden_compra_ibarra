@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import {
+  Factura,
   OrdenCompra,
   OrdenCompraItem,
   Pedido,
@@ -17,17 +18,13 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   ordenesCompra = signal<OrdenCompra[]>([]);
   private _supabaseClient = inject(SupabaseService).supabaseClient;
   public ordenCompra = signal<OrdenCompra | null>(null);
-  ordenCompraItemsSignal = computed(() => 
-      this.ordenCompra()?.orden_compra_items ?? []
-    );
-    
-    facturas = computed(() => 
-      this.ordenCompra()?.facturas ?? []
-    );
-    
-    presupuestos = computed(() => 
-      this.ordenCompra()?.presupuesto ?? []
-    );
+  ordenCompraItemsSignal = computed(
+    () => this.ordenCompra()?.orden_compra_items ?? []
+  );
+
+  facturas = computed(() => this.ordenCompra()?.facturas ?? []);
+
+  presupuestos = computed(() => this.ordenCompra()?.presupuesto ?? []);
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
     {
       this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
@@ -168,6 +165,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     cantidad,
     subtotal,
     recibido,
+    factura_id(id,numero_factura),
     pedido_item_id (
       id,
       productos (
@@ -178,6 +176,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       estado,
       unidad_medida_id(id,nombre),
       pedido: pedidos(id,numero_pedido)
+      
       
     )
   ),
@@ -197,14 +196,14 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
         )
         .eq('id', oc_id)
         .single();
-        
+
       if (!error && data) {
         // ✅ Actualizar la signal de la orden individual
         this.ordenCompra.set(data);
-        
+
         // ✅ Actualizar también en la lista de órdenes si existe
-        this.ordenesCompra.update(ordenes => {
-          const index = ordenes.findIndex(o => o.id === oc_id);
+        this.ordenesCompra.update((ordenes) => {
+          const index = ordenes.findIndex((o) => o.id === oc_id);
           if (index !== -1) {
             const newOrdenes = [...ordenes];
             newOrdenes[index] = data;
@@ -212,7 +211,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           }
           return ordenes;
         });
-        
+
         console.log('Orden de compra cargada:', data);
       }
 
@@ -264,9 +263,10 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           if (!ordenActual) return ordenActual;
 
           // Crear un nuevo array completo para forzar la detección de cambios
-          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
-            i.id === item.id ? { ...i, recibido: true } : { ...i }
-          ) ?? [];
+          const nuevosItems =
+            ordenActual.orden_compra_items?.map((i) =>
+              i.id === item.id ? { ...i, recibido: true } : { ...i }
+            ) ?? [];
 
           return {
             ...ordenActual,
@@ -281,8 +281,11 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data: null, error: err };
     }
   }
-    async editPriceItem(item:OrdenCompraItem,newPrice:number): Promise<{ data: any; error: any }> {
-        try {
+  async editPriceItem(
+    item: OrdenCompraItem,
+    newPrice: number
+  ): Promise<{ data: any; error: any }> {
+    try {
       const { data, error } = await this._supabaseClient
         .from('orden_compra_items')
         .update({ subtotal: newPrice })
@@ -296,9 +299,10 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           if (!ordenActual) return ordenActual;
 
           // Crear un nuevo array completo para forzar la detección de cambios
-          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
-            i.id === item.id ? { ...i, subtotal: newPrice } : { ...i }
-          ) ?? [];
+          const nuevosItems =
+            ordenActual.orden_compra_items?.map((i) =>
+              i.id === item.id ? { ...i, subtotal: newPrice } : { ...i }
+            ) ?? [];
 
           return {
             ...ordenActual,
@@ -313,11 +317,61 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data: null, error: err };
     }
   }
-  async relacionarItemConFactura(itemId: number, facturaId: number) {
+  async actualizarFechaPagoFactura(itemId: number, newDate: string | Date) {
+    try {
+      // Formatear a YYYY-MM-DD para evitar problemas de zona horaria con columnas tipo DATE
+      let fechaFormatted: string;
+      if (newDate instanceof Date) {
+        const y = newDate.getFullYear();
+        const m = String(newDate.getMonth() + 1).padStart(2, '0');
+        const d = String(newDate.getDate()).padStart(2, '0');
+        fechaFormatted = `${y}-${m}-${d}`;
+      } else {
+        fechaFormatted = newDate;
+      }
+
+      const { data, error } = await this._supabaseClient
+        .from('facturas')
+        .update({ fecha_pago: fechaFormatted })
+        .eq('id', itemId)
+        .select()
+        .single();
+
+      if (!error && data) {
+        // Para el estado local (TypeScript), conservar un objeto Date
+        const valueDate = new Date(fechaFormatted);
+        this.ordenCompra.update((ordenActual) => {
+          if (!ordenActual) return ordenActual;
+
+          const nuevasFacturas =
+            ordenActual.facturas?.map((factura) =>
+              factura.id === itemId
+                ? {
+                    ...factura,
+                    fecha_pago: valueDate,
+                  }
+                : { ...factura }
+            ) ?? [];
+
+          return {
+            ...ordenActual,
+            facturas: nuevasFacturas,
+          };
+        });
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error actualizando fecha de pago de factura:', err);
+      return { data: null, error: err };
+    }
+  }
+
+  async relacionarItemConFactura(itemId: number, factura: Factura) {
     try {
       const { data, error } = await this._supabaseClient
         .from('orden_compra_items')
-        .update({ factura_id: facturaId })
+        .update({ factura_id: factura.id })
         .eq('id', itemId)
         .select()
         .single();
@@ -328,14 +382,15 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           if (!ordenActual) return ordenActual;
 
           // Crear un nuevo array completo para forzar la detección de cambios
-          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
-            i.id === itemId 
-              ? { 
-                  ...i, 
-                  factura_id: facturaId as any // Cast para evitar error de tipos
-                } 
-              : { ...i }
-          ) ?? [];
+          const nuevosItems =
+            ordenActual.orden_compra_items?.map((i) =>
+              i.id === itemId
+                ? {
+                    ...i,
+                    factura_id: factura as Factura, // Cast para evitar error de tipos
+                  }
+                : { ...i }
+            ) ?? [];
 
           return {
             ...ordenActual,

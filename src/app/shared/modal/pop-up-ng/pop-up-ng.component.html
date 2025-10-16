@@ -1,8 +1,8 @@
 <p-dialog
   [modal]="true"
   [closable]="false"
-  [style]="{ width: '450px' }"
-  [contentStyle]="{ 'text-align': 'center', 'padding': '2rem' }"
+  [style]="{ height: modalWidth, width: '450px' }"
+  [contentStyle]="{ 'text-align': 'center', padding: '2rem' }"
   [(visible)]="show"
   (onHide)="cancel()"
   [position]="'center'"
@@ -15,18 +15,21 @@
   </ng-template>
 
   <!-- Contenido principal -->
-  <div #popupContainer class="p-fluid text-center w-100" tabindex="0"
+  <div
+    #popupContainer
+    class="p-fluid text-center w-100"
+    tabindex="0"
     (keydown.enter)="accept()"
     (keydown.escape)="cancel()"
   >
     <!-- Icono principal centrado -->
-    <div class="mb-3">
-      <i [class]="popupIcon + ' ' + popupIconColor" style="font-size: 3rem;"></i>
+    <div class="mb-3" *ngIf="this.inputType != 'dropdown'">
+      <i [class]="popupIcon + ' ' + popupIconColor" style="font-size: 3rem"></i>
     </div>
-    
+
     <!-- Mensaje -->
     <p class="mb-3 text-600">{{ description }}</p>
-    
+
     <!-- Input Number (legacy - mantener compatibilidad) -->
     <p-inputNumber
       *ngIf="includeInput && inputType === 'none'"
@@ -43,7 +46,7 @@
       (keydown.enter)="onEnterPrecio()"
     >
     </p-inputNumber>
-    
+
     <!-- Input Number (nuevo tipo) -->
     <p-inputNumber
       *ngIf="inputType === 'number'"
@@ -60,7 +63,7 @@
       (keydown.enter)="onEnterPrecio()"
     >
     </p-inputNumber>
-    
+
     <!-- Input Date -->
     <app-input-date
       *ngIf="inputType === 'date'"
@@ -70,7 +73,7 @@
       [max]="maxDate"
       class="mb-3"
     ></app-input-date>
-    
+
     <!-- Dropdown -->
     <p-dropdown
       *ngIf="inputType === 'dropdown'"
@@ -81,7 +84,14 @@
       [placeholder]="dropdownPlaceholder"
       class="mb-3"
       inputId="dropdownInput"
-      [style]="{'width': '100%, height'}"
+      [style]="{ width: '100%' }"
+      [scrollHeight]="'250px'"
+      [filter]="true"
+      filterBy="label"
+      [showClear]="true"
+      filterPlaceholder="Buscar factura..."
+      emptyFilterMessage="No se encontraron facturas"
+      emptyMessage="No hay facturas disponibles"
     ></p-dropdown>
   </div>
 

@@ -433,7 +433,7 @@
     <app-table-generic-ng
       [columns]="[
         {
-          field: 'numero_factura',
+          field: 'factura_id.numero_factura',
           header: 'Factura Relacionada',
           pipe: getFactura
         },
@@ -441,7 +441,7 @@
         { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
         { field: 'cantidad', header: 'Cantidad' },
         { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency },
-        {field:'recibido',header:'Recibido'}
+        { field: 'recibido', header: 'Recibido', pipe: getRecibido }
       ]"
       [data]="_ordenCompraService.ordenCompraItemsSignal"
       [showFooter]="true"
@@ -467,7 +467,7 @@
           tooltipPosition="left"
           [text]="true"
           pTooltip="Relacionar el item con una factura"
-              (onClick)="openRelacionarFacturaModal(item)"
+          (onClick)="openRelacionarFacturaModal(item)"
           severity="info"
         ></p-button>
         <p-button
@@ -491,10 +491,10 @@
     <p-divider></p-divider>
     <app-table-generic-ng
       [columns]="[
-        { field: 'fecha', header: 'Fecha', pipe: formatDate },
+        { field: 'fecha', header: 'Fecha', pipe: formatDateString },
         { field: 'numero_factura', header: 'Factura Relacionada' },
         { field: 'importe', header: 'Importe', pipe: getTotalCurrency },
-        { field: 'fecha_pago', header: 'Fecha de pago', pipe: formatDate }
+        { field: 'fecha_pago', header: 'Fecha de pago', pipe: formatDateString }
       ]"
       [data]="_ordenCompraService.facturas"
       [showFooter]="true"
@@ -504,13 +504,14 @@
     >
       <ng-template #actions let-item>
         <p-button
-          icon="bi-calendar2-check-fill"
+          icon="pi pi-calendar"
           styleClass="p-button-rounded p-button-outlined"
           [rounded]="true"
           [text]="true"
           tooltipPosition="left"
           severity="success"
-          pTooltip="Factura Pagada"
+          pTooltip="Actualizar Fecha de Pago"
+          (onClick)="openActualizarFechaPago(item)"
         ></p-button>
         <p-button
           icon="pi pi-pencil"
@@ -520,6 +521,7 @@
           tooltipPosition="left"
           pTooltip="Editar Factura"
           severity="warning"
+          (onClick)="editarFactura(item)"
         ></p-button>
         <p-button
           icon="pi pi-trash"

@@ -1,4 +1,11 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumber, InputNumberModule } from 'primeng/inputnumber';
@@ -10,9 +17,17 @@ import { InputDateComponent } from '../../input/input-date/input-date.component'
 @Component({
   selector: 'app-pop-up-ng',
   standalone: true,
-  imports: [CommonModule, DialogModule, InputNumberModule, ButtonModule, DropdownModule, FormsModule, InputDateComponent],
+  imports: [
+    CommonModule,
+    DialogModule,
+    InputNumberModule,
+    ButtonModule,
+    DropdownModule,
+    FormsModule,
+    InputDateComponent,
+  ],
   templateUrl: './pop-up-ng.component.html',
-  styleUrls: ['./pop-up-ng.component.css']
+  styleUrls: ['./pop-up-ng.component.css'],
 })
 export class PopUpNgComponent {
   @Input() titleModal: string = 'titulo';
@@ -23,45 +38,59 @@ export class PopUpNgComponent {
   @Input() headerIcon: string = 'pi pi-exclamation-triangle';
   @Input() includeInput: boolean = false;
   @Input() inputType: 'number' | 'date' | 'dropdown' | 'none' = 'none';
-  @Input() type: 'default' | 'danger' | 'warning' = 'default';
-  @Input() prefix: '$' | '' ='';
+  @Input() type: 'default' | 'danger' | 'warning' | 'done' = 'default';
+  @Input() prefix: '$' | '' = '';
   // Inputs para dropdown
   @Input() dropdownOptions: any[] = [];
   @Input() dropdownPlaceholder: string = 'Seleccione una opción';
   @Input() dropdownOptionLabel: string = 'label';
   @Input() dropdownOptionValue: string = 'value';
-  
+
   // Inputs para date
   @Input() minDate?: string;
   @Input() maxDate?: string;
-  
+
   // Inputs para number
   @Input() numberMin: number = 0;
   @Input() numberMax?: number;
   @Input() numberPlaceholder: string = 'Ingrese un número';
-  
+
   // Valores de los inputs
   inputNumberValue?: number;
   inputDateValue?: string;
   inputDropdownValue?: any;
 
   get popupIcon(): string {
-  switch(this.type) {
-    case 'danger':
-      return 'pi pi-times-circle';
-    case 'warning':
-      return 'pi pi-exclamation-triangle';
-    default:
-      return 'pi pi-question-circle';
+    // Si es un input de fecha, mostrar ícono de calendario
+    if (this.inputType === 'date') {
+      return 'pi pi-calendar';
+    }
+
+    switch (this.type) {
+      case 'danger':
+        return 'pi pi-times-circle';
+      case 'warning':
+        return 'pi pi-exclamation-triangle';
+      case 'done':
+        return 'pi pi-check-circle';
+      default:
+        return 'pi pi-question-circle';
+    }
   }
-}
 
   get popupIconColor(): string {
+    // Si es un input de fecha, usar color específico para calendario
+    if (this.inputType === 'date') {
+      return 'text-primary';
+    }
+
     switch (this.type) {
       case 'danger':
         return 'text-red';
       case 'warning':
         return 'text-yellow';
+      case 'done':
+        return 'text-green';
       default:
         return 'text-blue';
     }
@@ -85,7 +114,9 @@ export class PopUpNgComponent {
   onEscCancel() {
     this.onCancel.emit();
   }
-
+  get modalWidth() {
+    return this.inputType === 'dropdown' ? '500px' : '450px';
+  }
   accept() {
     // Emitir el valor según el tipo de input
     let value;
@@ -102,7 +133,7 @@ export class PopUpNgComponent {
       default:
         value = null;
     }
-    
+
     this.inputValue.emit(value);
     this.onAccept.emit(value);
   }
