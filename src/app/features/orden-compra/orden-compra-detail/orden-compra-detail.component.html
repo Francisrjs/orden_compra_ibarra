@@ -78,7 +78,8 @@
       <app-table-generic-ng
       [columns]="[
       {field: 'id', header:'ID',width: '2rem'},
-      {field: 'numero_remito', header:'NRO REMITO',width: '20rem'}]"
+      {field: 'numero_remito', header:'NRO REMITO',width: '20rem'},
+      {field: 'fecha',header:'Fecha', pipe: formatDate}]"
       [data]="_remitoService.remitos"
       
       
@@ -174,7 +175,6 @@
       <label class="mb-2">Fecha del remito:</label>
     </div>
     <app-input-date
-      
       id="fecha_remito"
       formControlName="fecha"
     ></app-input-date>
