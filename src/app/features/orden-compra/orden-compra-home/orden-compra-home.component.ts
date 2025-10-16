@@ -20,7 +20,7 @@ import { getBadgeClassByOC } from 'src/app/shared/funtions/pedidosFuntions';
 @Component({
   selector: 'app-orden-compra-home',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, TableGenericNGComponent, TableGenericFilterComponent, CarouselCardsComponent, TableGenericNgBigDataComponent, ButtonModule],
+  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, CarouselCardsComponent, TableGenericNgBigDataComponent, ButtonModule],
   templateUrl: './orden-compra-home.component.html',
   styleUrls: ['./orden-compra-home.component.css'],
   providers: [MessageService, CurrencyPipe]
@@ -70,20 +70,31 @@ export class OrdenCompraHomeComponent implements OnInit{
     return this.pedidosUrgentes().flatMap(p => p.pedido_items || []);
   }
 
-  onRowExpansion (row:OrdenCompra){
-    this._ordenesCompraService.getOCById(row.id).then(result=>{
-      if(result.data){
-        this.ordenesCompra.update(current=>
-          current.map(oc => oc.id == row.id ? result.data! : oc)
-        )
+  onRowExpansion(row: OrdenCompra) {
+    this._ordenesCompraService.getOCById(row.id).then((result) => {
+      if (result.data) {
+        this.ordenesCompra.update((current) =>
+          current.map((oc) => (oc.id == row.id ? result.data! : oc))
+        );
       }
-      
-    })
+    });
   }
-  async openOrdenCompra(OrdenCompraItem:OrdenCompra){
-    await this._ordenesCompraService.getOCById(OrdenCompraItem.id)
-    console.log("click",this.ordenCompra())
-    this.openOrdenCompraSidebar()
+  
+  async openOrdenCompra(OrdenCompraItem: OrdenCompra) {
+    const result = await this._ordenesCompraService.getOCById(OrdenCompraItem.id);
+    
+    if (result.error) {
+      console.error('Error al cargar orden de compra:', result.error);
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo cargar la orden de compra',
+      });
+      return;
+    }
+    
+    console.log('Orden cargada:', this.ordenCompra());
+    this.openOrdenCompraSidebar();
   }
    openOrdenCompraSidebar(): void {
     console.log('abriendo');

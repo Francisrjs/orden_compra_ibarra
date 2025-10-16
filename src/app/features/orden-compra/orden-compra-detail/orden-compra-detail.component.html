@@ -23,6 +23,7 @@
       <app-input-date
         id="fecha_factura"
         formControlName="fecha"
+        [max]="maxDate"
       ></app-input-date>
       <div class="d-flex align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center">
@@ -226,6 +227,7 @@
       <app-input-date
         id="fecha_remito"
         formControlName="fecha"
+        [max]="maxDate"
       ></app-input-date>
       <div class="d-flex justify-center text-center my-2">
         <i
@@ -474,7 +476,7 @@
         { field: 'importe', header: 'Importe', pipe: getTotalCurrency },
         { field: 'fecha_pago', header: 'Fecha de pago', pipe: formatDate }
       ]"
-      [data]="dataOrden.orden_compra_items ?? []"
+      [data]="dataOrden.facturas ?? []"
       [showFooter]="true"
       [footerColumns]="['subtotal']"
       [footerLabel]="'Total General'"
@@ -525,10 +527,7 @@
       { field: 'cantidad', header: 'Cantidad' },
       { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
     ]"
-    [data]="dataOrden.orden_compra_items ?? []"
-    [showFooter]="true"
-    [footerColumns]="['subtotal']"
-    [footerLabel]="'Total General'"
+    [data]="dataOrden.presupuesto ?? []"
     minWidth="40rem"
   >
   </app-table-generic-ng>

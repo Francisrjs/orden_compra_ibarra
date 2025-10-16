@@ -27,19 +27,60 @@
     <!-- Mensaje -->
     <p class="mb-3 text-600">{{ description }}</p>
     
-    <!-- Input opcional -->
+    <!-- Input Number (legacy - mantener compatibilidad) -->
     <p-inputNumber
-      *ngIf="includeInput"
-      [min]="0"
+      *ngIf="includeInput && inputType === 'none'"
+      [(ngModel)]="inputNumberValue"
+      [min]="numberMin"
+      [max]="numberMax"
       [mode]="'decimal'"
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
-      placeholder="Ingrese el precio de compra"
+      [placeholder]="numberPlaceholder"
       inputId="precioInput"
       class="mb-3"
       (keydown.enter)="onEnterPrecio()"
     >
     </p-inputNumber>
+    
+    <!-- Input Number (nuevo tipo) -->
+    <p-inputNumber
+      *ngIf="inputType === 'number'"
+      [(ngModel)]="inputNumberValue"
+      [min]="numberMin"
+      [max]="numberMax"
+      [mode]="'decimal'"
+      [minFractionDigits]="0"
+      [maxFractionDigits]="2"
+      [placeholder]="numberPlaceholder"
+      inputId="numberInput"
+      class="mb-3"
+      (keydown.enter)="onEnterPrecio()"
+    >
+    </p-inputNumber>
+    
+    <!-- Input Date -->
+    <app-input-date
+      *ngIf="inputType === 'date'"
+      [(ngModel)]="inputDateValue"
+      id="dateInput"
+      [min]="minDate"
+      [max]="maxDate"
+      class="mb-3"
+    ></app-input-date>
+    
+    <!-- Dropdown -->
+    <p-dropdown
+      *ngIf="inputType === 'dropdown'"
+      [(ngModel)]="inputDropdownValue"
+      [options]="dropdownOptions"
+      [optionLabel]="dropdownOptionLabel"
+      [optionValue]="dropdownOptionValue"
+      [placeholder]="dropdownPlaceholder"
+      class="mb-3"
+      inputId="dropdownInput"
+      [style]="{'width': '100%'}"
+    ></p-dropdown>
   </div>
 
   <!-- Footer personalizado -->

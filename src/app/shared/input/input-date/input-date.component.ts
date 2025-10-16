@@ -25,6 +25,8 @@ export class InputDateComponent implements ControlValueAccessor {
   @Input() id: string = '';
   @Input() name: string = '';
   @Input() required?: boolean = false;
+  @Input() min?: string; // Fecha mínima permitida
+  @Input() max?: string; // Fecha máxima permitida
 
   value: string = ''; // Guarda la fecha seleccionada
   disabled = false;

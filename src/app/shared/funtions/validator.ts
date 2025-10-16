@@ -45,3 +45,19 @@ export function futureDateValidator(
   }
   return null;
 }
+
+export function notFutureDateValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  const selected = toLocalDateOnly(control.value);
+  if (!selected) return null; // 'required' se encarga de vacío
+
+  const now = new Date();
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // 📌 Regla: no permite fechas futuras, pero sí hoy y pasadas
+  if (selected > todayLocal) {
+    return { futureDate: true };
+  }
+  return null;
+}

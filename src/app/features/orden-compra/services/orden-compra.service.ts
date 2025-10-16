@@ -148,45 +148,76 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
         .from('orden_compra')
         .select(
           `
-    *,
-    orden_compra_items (
+  *,
+  orden_compra_items (
+    id,
+    orden_compra_id,
+    precio_unitario,
+    cantidad,
+    subtotal,
+    pedido_item_id (
       id,
-      orden_compra_id,
-      precio_unitario,
-      cantidad,
-      subtotal,
-      pedido_item_id (
+      productos (
         id,
-        productos (
-          id,
-          nombre,
-          categoria:categoria_id(id, nombre, icon_text)
-        ),
-        estado,
-        unidad_medida_id(id,nombre),
-        pedido: pedidos(id,numero_pedido)
+        nombre,
+        categoria:categoria_id(id, nombre, icon_text)
+      ),
+      estado,
+      unidad_medida_id(id,nombre),
+      pedido: pedidos(id,numero_pedido)
+    )
+  ),
+    proveedor_id (id,nombre,cuit,email),
+    jefe_compra_id,
+    facturas (id,fecha,numero_factura,importe,fecha_pago, remitos(id,numero_remito,fecha)),
+    presupuesto_item(
+        id,
+      productos (
+        id,
+        nombre,
+        categoria:categoria_id(id, nombre, icon_text)
+      ),
+      unidad_medida_id(id,nombre)
       )
-    ),
-      proveedor_id (id,nombre,cuit)   
-  `
+`
         )
         .eq('id', oc_id)
         .single();
+        
       if (!error && data) {
-        // ✅ Actualizar la signal con los datos reales de la DB
+        // ✅ Actualizar la signal de la orden individual
         this.ordenCompra.set(data);
-        console.log('Ordenes: ', data);
+        
+        // ✅ Actualizar también en la lista de órdenes si existe
+        this.ordenesCompra.update(ordenes => {
+          const index = ordenes.findIndex(o => o.id === oc_id);
+          if (index !== -1) {
+            const newOrdenes = [...ordenes];
+            newOrdenes[index] = data;
+            return newOrdenes;
+          }
+          return ordenes;
+        });
+        
+        console.log('Orden de compra cargada:', data);
       }
 
       return { data, error };
     } catch (err) {
-      console.error('Error agregando items a orden de compra:', err);
+      console.error('Error obteniendo orden de compra:', err);
       return { data: null, error: err };
     }
   }
   clearOrderData() {
     this.itemsOC.set([]);
     this.ordenCompraItems.set([]);
+  }
+
+  /**
+   * Limpia la signal de orden individual
+   */
+  clearOrdenCompra() {
+    this.ordenCompra.set(null);
   }
 
   // ✅ Método para obtener el total con formato

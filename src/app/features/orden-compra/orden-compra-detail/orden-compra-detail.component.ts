@@ -19,9 +19,11 @@ import {
 import { ButtonModule } from 'primeng/button';
 import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
+import { OrdenCompraService } from '../services/orden-compra.service';
 import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.component';
 import { AccordionModule } from 'primeng/accordion';
 import { TooltipModule } from 'primeng/tooltip';
+import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -45,23 +47,26 @@ import { TooltipModule } from 'primeng/tooltip';
   styleUrls: ['./orden-compra-detail.component.css'],
 })
 export class OrdenCompraDetailComponent implements OnInit {
-  sidebarVisible = false;
-  sidebarTitle = '';
-  componentToLoad: Type<any> | null = null;
-  sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() dataOrden: OrdenCompra | null = null;
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
     message: string;
   }) => void;
+  
   showAddFactura: boolean = false;
   showAddRemito: boolean = false;
   facturaForm!: FormGroup;
   remitoForm!: FormGroup;
+  
   public _remitoService = inject(RemitoService);
   public _facturaService = inject(FacturaService);
+  private _ordenCompraService = inject(OrdenCompraService);
   public remitos: Remito[] | null = this._remitoService.remitos();
+  
+  // Fecha máxima para remitos y facturas (hoy)
+  public maxDate: string = new Date().toISOString().split('T')[0];
+  
   constructor(private fb: FormBuilder) {
     effect(() => {
       this.remitos = this._remitoService.remitos() ?? [];
@@ -69,17 +74,17 @@ export class OrdenCompraDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.initForm();
+    this.initFacturaForm();
     this.initRemitoForm();
   }
 
-  initForm(): void {
+  initFacturaForm(): void {
     this.facturaForm = this.fb.group({
+      id: [null], // Para edición
       primerosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
       ultimosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
-      numeroRemito: [''],
-      fecha: [null, Validators.required],
-      importe: [null, [Validators.required, Validators.min(0)]],
+      fecha: [null, [Validators.required, notFutureDateValidator]],
+      importe: [null, [Validators.required, Validators.min(0.01)]],
     });
   }
 
@@ -87,7 +92,7 @@ export class OrdenCompraDetailComponent implements OnInit {
     this.remitoForm = this.fb.group({
       puntoVentaRemito: [null, [Validators.required, Validators.min(1)]],
       numeroRemito: [null, [Validators.required, Validators.min(1)]],
-      fecha: [null, [Validators.required]],
+      fecha: [null, [Validators.required, notFutureDateValidator]],
     });
   }
 
@@ -128,12 +133,87 @@ export class OrdenCompraDetailComponent implements OnInit {
     }
   }
 
+  // ==================== FACTURA ====================
+
+  async addEditFactura() {
+    if (!this.facturaForm.valid || !this.dataOrden) {
+      return;
+    }
+
+    const facturaId = this.facturaForm.get('id')?.value;
+    const primerosDigitos = this.facturaForm.get('primerosDigitosFactura')?.value;
+    const ultimosDigitos = this.facturaForm.get('ultimosDigitosFactura')?.value;
+    const fecha = this.facturaForm.get('fecha')?.value;
+    const importe = this.facturaForm.get('importe')?.value;
+
+    const numeroFactura = `${String(primerosDigitos).padStart(4, '0')}-${String(ultimosDigitos).padStart(8, '0')}`;
+
+    let result;
+
+    if (facturaId) {
+      // EDITAR factura existente
+      result = await this._facturaService.updateFactura(facturaId, {
+        numero_factura: numeroFactura,
+        fecha: fecha,
+        importe: importe
+      });
+    } else {
+      // CREAR nueva factura
+      result = await this._facturaService.createFactura({
+        orden_compra_id: this.dataOrden.id,
+        numero_factura: numeroFactura,
+        fecha: fecha,
+        importe: importe
+      });
+    }
+
+    // Mostrar resultado
+    if (this.formResult) {
+      this.formResult({
+        success: result.success,
+        message: result.message
+      });
+    }
+
+    if (result.success) {
+      this.cancelAdd();
+      // Recargar la orden de compra para ver los cambios
+      await this._ordenCompraService.getOCById(this.dataOrden.id);
+    }
+  }
+
   cancelAdd() {
     this.facturaForm.reset();
+    this._facturaService.clearFactura();
     this.showAddFactura = false;
   }
 
-  // Métodos para el modal de remito
+  deleteItemRemito(item: Remito) {
+    this._remitoService.deleteItemRemito(item);
+  }
+
+  async editarFactura(factura: any) {
+    // Cargar la factura y sus remitos
+    await this._facturaService.loadFacturaForEdit(factura.id);
+
+    // Parsear el número de factura
+    const [puntoVenta, numeroFactura] = factura.numero_factura.split('-');
+
+    // Llenar el formulario
+    this.facturaForm.patchValue({
+      id: factura.id,
+      primerosDigitosFactura: parseInt(puntoVenta),
+      ultimosDigitosFactura: parseInt(numeroFactura),
+      fecha: new Date(factura.fecha),
+      importe: factura.importe
+    });
+
+    // Abrir el modal
+    this.showAddFactura = true;
+  }
+
+  // ==================== REMITO ====================
+
   openAddRemito(): void {
     this.showAddRemito = true;
   }
@@ -149,60 +229,25 @@ export class OrdenCompraDetailComponent implements OnInit {
       const numero = this.remitoForm.get('numeroRemito')?.value;
       const fechaValue = this.remitoForm.get('fecha')?.value;
 
-      const numeroRemito = `${String(puntoVenta).padStart(4, '0')}-${String(
-        numero
-      ).padStart(8, '0')}`;
+      const numeroRemito = `${String(puntoVenta).padStart(4, '0')}-${String(numero).padStart(8, '0')}`;
 
-      // Convertir fecha string a Date
+      // Convertir fecha
       let fecha: Date | undefined;
       if (fechaValue) {
-        if (typeof fechaValue === 'string') {
-          fecha = new Date(fechaValue);
-        } else if (fechaValue instanceof Date) {
-          fecha = fechaValue;
-        }
+        fecha = typeof fechaValue === 'string' ? new Date(fechaValue) : fechaValue;
       }
 
-      // Crear objeto Remito temporal (sin guardar en BD aún)
+      // Crear remito temporal
       const nuevoRemito: Partial<Remito> = {
-        id: this._remitoService.remitos().length, // ID temporal para la tabla
+        id: `temp-${Date.now()}` as any, // ID temporal único
         numero_remito: numeroRemito,
         fecha: fecha,
-        // factura_id se asignará cuando se guarde la factura
       };
 
-      console.log('Agregando remito:', nuevoRemito);
-
-      // Agregar al servicio
       this._remitoService.addItemRemito(nuevoRemito as Remito);
-
-      console.log('REMITOS SIGNAL', this._remitoService.remitos());
       this.cancelAddRemito();
     }
   }
 
-  addEditFactura() {
-    if (this.facturaForm.valid) {
-      const primerosDigitos = this.facturaForm.get(
-        'primerosDigitosFactura'
-      )?.value;
-      const ultimosDigitos = this.facturaForm.get(
-        'ultimosDigitosFactura'
-      )?.value;
-      const numeroRemito = this.facturaForm.get('numeroRemito')?.value;
-
-      const numeroFactura = `${primerosDigitos}-${ultimosDigitos}`;
-
-      console.log('Número de factura:', numeroFactura);
-      console.log('Número de remito:', numeroRemito);
-
-      // Aquí puedes agregar la lógica para guardar los datos
-
-      this.cancelAdd();
-    }
-  }
-  deleteItemRemito(item: Remito) {
-    this._remitoService.deleteItemRemito(item);
-    //me falta agregar  para eliminar el servicio
-  }
+ 
 }

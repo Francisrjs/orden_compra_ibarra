@@ -8,7 +8,7 @@ import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-w
 @Component({
   selector: 'app-table-generic-ng-big-data',
   standalone: true,
-  imports: [CommonModule,TableModule,ButtonModule,ButtonWithIconComponent],
+  imports: [CommonModule,TableModule,ButtonModule ],
   templateUrl: './table-generic-ng-big-data.component.html',
   styleUrls: ['./table-generic-ng-big-data.component.css']
 })
