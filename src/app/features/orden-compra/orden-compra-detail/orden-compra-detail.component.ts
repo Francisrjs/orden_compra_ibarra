@@ -9,17 +9,38 @@ import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/bu
 import { DialogModule } from 'primeng/dialog';
 import { InputNumber, InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
 import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.component';
+import { AccordionModule } from 'primeng/accordion';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
-  imports: [CommonModule, CardModule, TableGenericNGComponent, DividerModule, ButtonElegantComponent, DialogModule, InputNumberModule, InputTextModule, FormsModule, ReactiveFormsModule, ButtonModule, InputDateComponent],
+  imports: [
+    CommonModule,
+    CardModule,
+    TableGenericNGComponent,
+    DividerModule,
+    ButtonElegantComponent,
+    DialogModule,
+    InputNumberModule,
+    InputTextModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    InputDateComponent,
+    AccordionModule,
+  ],
   templateUrl: './orden-compra-detail.component.html',
-  styleUrls: ['./orden-compra-detail.component.css']
+  styleUrls: ['./orden-compra-detail.component.css'],
 })
 export class OrdenCompraDetailComponent implements OnInit {
   sidebarVisible = false;
@@ -27,7 +48,11 @@ export class OrdenCompraDetailComponent implements OnInit {
   componentToLoad: Type<any> | null = null;
   sidebarInputs: Record<string, unknown> | undefined; // Para los inputs del componente dinámico
   @Input() dataOrden: OrdenCompra | null = null;
-  @Input() formResult?: (result: { severity?: string; success: boolean; message: string }) => void;
+  @Input() formResult?: (result: {
+    severity?: string;
+    success: boolean;
+    message: string;
+  }) => void;
   showAddFactura: boolean = false;
   showAddRemito: boolean = false;
   facturaForm!: FormGroup;
@@ -50,7 +75,9 @@ export class OrdenCompraDetailComponent implements OnInit {
     this.facturaForm = this.fb.group({
       primerosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
       ultimosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
-      numeroRemito: ['']
+      numeroRemito: [''],
+      fecha: [null, Validators.required],
+      importe: [null, [Validators.required, Validators.min(0)]],
     });
   }
 
@@ -58,7 +85,7 @@ export class OrdenCompraDetailComponent implements OnInit {
     this.remitoForm = this.fb.group({
       puntoVentaRemito: [null, [Validators.required, Validators.min(1)]],
       numeroRemito: [null, [Validators.required, Validators.min(1)]],
-      fecha: [null, [Validators.required]]
+      fecha: [null, [Validators.required]],
     });
   }
 
@@ -69,18 +96,20 @@ export class OrdenCompraDetailComponent implements OnInit {
   getImporteCurrency(value: number): string {
     return value ? '$' + value.toFixed(2) : '$0.00';
   }
-
+  getFactura(value: string): string {
+    return value ? value : 'Sin Factura';
+  }
   formatDate(value: Date | string | null | undefined): string {
     if (!value) return '-';
-    
+
     const date = typeof value === 'string' ? new Date(value) : value;
-    
+
     if (!(date instanceof Date) || isNaN(date.getTime())) return '-';
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     return `${day}/${month}/${year}`;
   }
   getBadgeClass(estado: string) {
@@ -118,7 +147,9 @@ export class OrdenCompraDetailComponent implements OnInit {
       const numero = this.remitoForm.get('numeroRemito')?.value;
       const fechaValue = this.remitoForm.get('fecha')?.value;
 
-      const numeroRemito = `${String(puntoVenta).padStart(4, '0')}-${String(numero).padStart(8, '0')}`;
+      const numeroRemito = `${String(puntoVenta).padStart(4, '0')}-${String(
+        numero
+      ).padStart(8, '0')}`;
 
       // Convertir fecha string a Date
       let fecha: Date | undefined;
@@ -134,7 +165,7 @@ export class OrdenCompraDetailComponent implements OnInit {
       const nuevoRemito: Partial<Remito> = {
         id: this._remitoService.remitos().length, // ID temporal para la tabla
         numero_remito: numeroRemito,
-        fecha: fecha
+        fecha: fecha,
         // factura_id se asignará cuando se guarde la factura
       };
 
@@ -143,15 +174,19 @@ export class OrdenCompraDetailComponent implements OnInit {
       // Agregar al servicio
       this._remitoService.addItemRemito(nuevoRemito as Remito);
 
-      console.log("REMITOS SIGNAL", this._remitoService.remitos())
+      console.log('REMITOS SIGNAL', this._remitoService.remitos());
       this.cancelAddRemito();
     }
   }
 
   addEditFactura() {
     if (this.facturaForm.valid) {
-      const primerosDigitos = this.facturaForm.get('primerosDigitosFactura')?.value;
-      const ultimosDigitos = this.facturaForm.get('ultimosDigitosFactura')?.value;
+      const primerosDigitos = this.facturaForm.get(
+        'primerosDigitosFactura'
+      )?.value;
+      const ultimosDigitos = this.facturaForm.get(
+        'ultimosDigitosFactura'
+      )?.value;
       const numeroRemito = this.facturaForm.get('numeroRemito')?.value;
 
       const numeroFactura = `${primerosDigitos}-${ultimosDigitos}`;

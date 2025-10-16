@@ -13,21 +13,21 @@
   [style]="{ width: '350px' }"
 >
   <div class="p-fluid">
-    <label class="mb-2 ">Precio</label>
+    <label class="mb-2">Precio</label>
 
     <!-- Usamos p-inputNumber (si lo importaste) -->
     <p-inputNumber
       [(ngModel)]="precioAsignado"
       [min]="0"
-      [mode]="'decimal'"
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
       placeholder="Ingrese el precio de compra"
       inputId="precioInput"
       class="mb-2"
       (keydown.enter)="onEnterPrecio()"
+      mode="decimal"
+      prefix="$"
     >
-    
     </p-inputNumber>
 
     <div class="d-flex justify-content-end gap-2 mt-3">
@@ -49,7 +49,7 @@
   </div>
 </p-dialog>
 <app-pop-up-ng
-*ngIf="onAcceptPopUp"
+  *ngIf="onAcceptPopUp"
   [titleModal]="title_pop_up"
   [description]="description_pop_up"
   [show]="show_pop_up"
@@ -63,8 +63,12 @@
 <div class="row">
   <div class="col-lg-12 col-xl-5 mb-3">
     <h4 class="text-center">Formulario de orden de compra:</h4>
-     <form [formGroup]="ordenCompraForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <app-input-modal-selector
+    <form
+      [formGroup]="ordenCompraForm"
+      (ngSubmit)="onSubmit()"
+      class="space-y-6"
+    >
+      <app-input-modal-selector
         label="Selecciona un Proovedor"
         id="proovedor_id"
         [data]="proveedoresData"
@@ -73,77 +77,86 @@
         [required]="true"
       />
 
-
-  <app-input-box
-      label="Condiciones de entrega"
-      type="text"
-      id="title"
-      placeholder="Ej: ENVIO AL TRANSPORTE"
-      formControlName="condicion_entrega"
-      [required]="true"
-    ></app-input-box>
-  <app-input-box
-      label="Condiciones de Pago"
-      type="text"
-      id="title"
-      placeholder="EJ: 30 Días, 60 días"
-      formControlName="condicion_pago"
-      [required]="true"
-    ></app-input-box>
+      <app-input-box
+        label="Condiciones de entrega"
+        type="text"
+        id="title"
+        placeholder="Ej: ENVIO AL TRANSPORTE"
+        formControlName="condicion_entrega"
+        [required]="true"
+      ></app-input-box>
+      <app-input-box
+        label="Condiciones de Pago"
+        type="text"
+        id="title"
+        placeholder="EJ: 30 Días, 60 días"
+        formControlName="condicion_pago"
+        [required]="true"
+      ></app-input-box>
     </form>
-      <div class="container-body">
-      
-        <app-table-items-pedidos-card
-          [itemsOC]="itemsOC"
-           [total]="totalOC"
-          (deleteItem)="deleteItemPedido($event)"
-          (messageNull)="showMessageWhenIsNull()"
-          (openPresupuestoItem)="presupuestoItem($event)"
-  ></app-table-items-pedidos-card>
-<p-accordion  class="mt-4">
-    <p-accordionTab header="Presupuestos" headerStyleClass="text-success">
-      <div class="d-flex align-items-center justify-content-center w-100 mb-2">
-        <div class="w-75">
-          <p class="text-center">Agregar presupuestos anteriores</p>
-        </div>
-        
-        <div class="w-25">
- <app-button-with-icon
-       text="Agregar"
-       (buttonClick)="presupuestoAddOC()"
-       iconClass="plus"
-       />
-       
-        </div>
-      
-      </div>
-        <app-table-generic-ng
-  [columns]="[
-    { field: 'id', header: 'id', width: '2rem' },
-    { field: 'proveedores', header: 'Proveedor', pipe: getNombreProveedor },
-    { field: 'productos', header: 'Producto', pipe:getNombreProducto },
-    { field: 'unidades_medida', header: 'Medida', pipe:getUnidadMedidaNombre },
-    { field: 'cantidad', header: 'Cantidad'},
-    { field: 'importe', header: 'Importe', pipe: getImporteCurrency }
-  ]"
-  [data]="_presupuestoService.presupuestoAsignados"
-  minWidth="40rem"
->
-  <ng-template #actions let-item>
-    <p-button
-      icon="pi pi-trash"
-      (onClick)="this._presupuestoService.deleteAsignado(item)"
-      styleClass="p-button-rounded p-button-outlined"
-      [rounded]="true"
-      [text]="true"
-      severity="success"
-    ></p-button>
-  
-  </ng-template>
-</app-table-generic-ng>
-    </p-accordionTab>
-    </p-accordion>
+    <div class="container-body">
+      <app-table-items-pedidos-card
+        [itemsOC]="itemsOC"
+        [total]="totalOC"
+        (deleteItem)="deleteItemPedido($event)"
+        (messageNull)="showMessageWhenIsNull()"
+        (openPresupuestoItem)="presupuestoItem($event)"
+      ></app-table-items-pedidos-card>
+      <p-accordion class="mt-4">
+        <p-accordionTab header="Presupuestos" headerStyleClass="text-success">
+          <div
+            class="d-flex align-items-center justify-content-center w-100 mb-2"
+          >
+            <div class="w-75">
+              <p class="text-center">Agregar presupuestos anteriores</p>
+            </div>
+
+            <div class="w-25">
+              <app-button-with-icon
+                text="Agregar"
+                (buttonClick)="presupuestoAddOC()"
+                iconClass="plus"
+              />
+            </div>
           </div>
+          <app-table-generic-ng
+            [columns]="[
+              { field: 'id', header: 'id', width: '2rem' },
+              {
+                field: 'proveedores',
+                header: 'Proveedor',
+                pipe: getNombreProveedor
+              },
+              {
+                field: 'productos',
+                header: 'Producto',
+                pipe: getNombreProducto
+              },
+              {
+                field: 'unidades_medida',
+                header: 'Medida',
+                pipe: getUnidadMedidaNombre
+              },
+              { field: 'cantidad', header: 'Cantidad' },
+              { field: 'importe', header: 'Importe', pipe: getImporteCurrency }
+            ]"
+            [data]="_presupuestoService.presupuestoAsignados"
+            minWidth="40rem"
+          >
+            <ng-template #actions let-item>
+              <p-button
+                icon="pi pi-trash"
+                (onClick)="this._presupuestoService.deleteAsignado(item)"
+                styleClass="p-button-rounded p-button-outlined"
+                [rounded]="true"
+                [text]="true"
+                severity="success"
+              ></p-button>
+            </ng-template>
+          </app-table-generic-ng>
+        </p-accordionTab>
+      </p-accordion>
+    </div>
     <app-custom-button
       text="Guardar Orden de COmpra"
       type="submit"
