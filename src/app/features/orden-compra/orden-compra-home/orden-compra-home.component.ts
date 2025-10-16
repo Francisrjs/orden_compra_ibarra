@@ -96,7 +96,7 @@ export class OrdenCompraHomeComponent implements OnInit{
     console.log('Orden cargada:', this.ordenCompra());
     this.openOrdenCompraSidebar();
   }
-  openOrdenCompraSidebar(): void {
+   openOrdenCompraSidebar(): void {
     console.log('abriendo');
     this.sidebarTitle = 'Detalle de la Orden de Compra';
     this.componentToLoad = OrdenCompraDetailComponent;

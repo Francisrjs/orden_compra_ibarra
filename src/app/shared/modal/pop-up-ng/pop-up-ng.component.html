@@ -15,7 +15,7 @@
   </ng-template>
 
   <!-- Contenido principal -->
-  <div #popupContainer class="p-fluid text-center" tabindex="0"
+  <div #popupContainer class="p-fluid text-center w-100" tabindex="0"
     (keydown.enter)="accept()"
     (keydown.escape)="cancel()"
   >
@@ -37,6 +37,7 @@
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
       [placeholder]="numberPlaceholder"
+      [prefix]="prefix"
       inputId="precioInput"
       class="mb-3"
       (keydown.enter)="onEnterPrecio()"
@@ -53,6 +54,7 @@
       [minFractionDigits]="0"
       [maxFractionDigits]="2"
       [placeholder]="numberPlaceholder"
+      [prefix]="prefix"
       inputId="numberInput"
       class="mb-3"
       (keydown.enter)="onEnterPrecio()"
@@ -79,7 +81,7 @@
       [placeholder]="dropdownPlaceholder"
       class="mb-3"
       inputId="dropdownInput"
-      [style]="{'width': '100%'}"
+      [style]="{'width': '100%, height'}"
     ></p-dropdown>
   </div>
 

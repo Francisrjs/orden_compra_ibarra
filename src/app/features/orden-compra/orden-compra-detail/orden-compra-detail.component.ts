@@ -85,10 +85,18 @@ export class OrdenCompraDetailComponent implements OnInit {
   titleModal: string = '';
   descriptionModal: string = '';
   typeModal: 'number' | 'date' | 'dropdown' | 'none' = 'none';
+  type: 'default' | 'danger' | 'warning' ='default';
+  estados: any[]=[]
+  prefix: '$' | ''=''
   numberPlaceHolder: string = '';
   currentAction: string = '';
   currentItem: any = null;
-  
+  //propiedades dropdwon
+  dropdownOptions: any[] = [];
+dropdownPlaceholder: string = 'Seleccione una opción';
+dropdownOptionLabel: string = 'label';
+dropdownOptionValue: string = 'value';
+
   constructor(private fb: FormBuilder) {
     effect(() => {
       this.remitos = this._remitoService.remitos() ?? [];
@@ -285,14 +293,20 @@ export class OrdenCompraDetailComponent implements OnInit {
   /**
    * Maneja la confirmación del modal
    */
-  handleAccept(value?: any) {
+  async handleAccept(value?: any) {
     console.log('Acción aceptada:', this.currentAction, 'Valor:', value);
     
     switch (this.currentAction) {
       case 'itemRecibido':
-        this.confirmarItemRecibido(this.currentItem);
+        await this.confirmarItemRecibido(this.currentItem);
         break;
-      // Agregar más casos según necesites
+      case 'editPriceItem':
+        await this.editarPrecioItem(this.currentItem, value);
+        break;
+      case 'relacionarFactura':
+        await this.relacionarFactura(this.currentItem, value);
+        break;
+
       default:
         console.log('Acción no manejada');
     }
@@ -328,9 +342,39 @@ export class OrdenCompraDetailComponent implements OnInit {
     this.titleModal = 'Confirmar recepción';
     this.descriptionModal = `¿Confirma que recibió el producto "${item.pedido_item_id?.productos?.nombre}"?`;
     this.typeModal = 'none';
+        this.prefix=""
+    this.type="default"
     this.showModal = true;
   }
-
+    openEditOrdenCompraItem(item: any) {
+    this.currentAction = 'editPriceItem';
+    this.currentItem = item;
+    this.type="warning"
+    this.prefix="$"
+    this.titleModal =  `Cambiando el SUBTOTAL del item  `;
+    this.descriptionModal = `Usted va a cambiar el subtotal del item  "${item.pedido_item_id?.productos?.nombre}, ${item.cantidad}  ${item.pedido_item_id?.unidad_medida_id.nombre}"`;
+    this.typeModal='number';
+    this.showModal = true;
+  }
+  openRelacionarFacturaModal(item:any){
+    this.currentAction= 'relacionarFactura' ;
+    this.currentItem=item;
+    this.type="default"
+    this.prefix="";
+    this.titleModal=`Relacionar item" `
+      this.descriptionModal = `Seleccione la factura para el item "${item.pedido_item_id?.productos?.nombre}"`;
+    this.typeModal="dropdown"
+     this.dropdownOptions = this.dataOrden?.facturas?.map(factura => ({
+    label: `${factura.numero_factura} - $${factura.importe.toFixed(2)} - ${this.formatDate(factura.fecha)}`,
+    value: factura.id
+  })) || [];
+  
+  this.dropdownPlaceholder = 'Seleccione una factura';
+  this.dropdownOptionLabel = 'label';
+  this.dropdownOptionValue = 'value';
+  
+  this.showModal = true;
+  }
   /**
    * Confirma que el item fue recibido
    */
@@ -370,6 +414,99 @@ export class OrdenCompraDetailComponent implements OnInit {
       }
     }
   }
+  async editarPrecioItem(item:any,nuevoPrecio:number){
+ try {
+    if (!nuevoPrecio || nuevoPrecio <= 0) {
+      if (this.formResult) {
+        this.formResult({
+          success: false,
+          message: 'Debe ingresar un precio válido mayor a 0'
+        });
+      }
+      return;
+    }
 
+
+    console.log('Editando precio del item:', item, 'Nuevo precio:', nuevoPrecio);
+    
+    const { data, error } = await this._ordenCompraService.editPriceItem(item, nuevoPrecio);
+    
+    if (error) {
+      console.error('Error al editar precio del item:', error);
+      if (this.formResult) {
+        this.formResult({
+          success: false,
+          message: 'Error al actualizar el precio del item'
+        });
+      }
+      return;
+    }
+    
+    // Si todo salió bien
+    if (this.formResult) {
+      this.formResult({
+        success: true,
+        message: 'Precio del item actualizado correctamente'
+      });
+    }
+    
+    // ✅ No es necesario recargar, la signal se actualiza automáticamente en el servicio
+  } catch (error) {
+    console.error('Error inesperado al editar precio:', error);
+    if (this.formResult) {
+      this.formResult({
+        success: false,
+        message: 'Error inesperado al actualizar el precio'
+      });
+    }
+  }
  
+}
+async relacionarFactura(item: any, facturaId: number) {
+  try {
+    if (!facturaId) {
+      if (this.formResult) {
+        this.formResult({
+          success: false,
+          message: 'Debe seleccionar una factura'
+        });
+      }
+      return;
+    }
+
+    console.log('Relacionando item con factura:', item, 'Factura ID:', facturaId);
+    
+    // Llamar al servicio para relacionar (implementarás esto después)
+    const { data, error } = await this._ordenCompraService.relacionarItemConFactura(item.id, facturaId);
+    
+    if (error) {
+      console.error('Error al relacionar item con factura:', error);
+      if (this.formResult) {
+        this.formResult({
+          success: false,
+          message: 'Error al relacionar el item con la factura'
+        });
+      }
+      return;
+    }
+    
+    // Si todo salió bien
+    if (this.formResult) {
+      this.formResult({
+        success: true,
+        message: 'Item relacionado con la factura correctamente'
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error inesperado al relacionar item con factura:', error);
+    if (this.formResult) {
+      this.formResult({
+        success: false,
+        message: 'Error inesperado al relacionar el item'
+      });
+    }
+  }
+}
+
 }

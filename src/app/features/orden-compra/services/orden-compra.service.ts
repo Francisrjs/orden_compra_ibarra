@@ -131,6 +131,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data: null, error: err };
     }
   }
+
   async getAllOC() {
     try {
       const { data, error } = await this._supabaseClient.from('orden_compra')
@@ -280,5 +281,73 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data: null, error: err };
     }
   }
-      
+    async editPriceItem(item:OrdenCompraItem,newPrice:number): Promise<{ data: any; error: any }> {
+        try {
+      const { data, error } = await this._supabaseClient
+        .from('orden_compra_items')
+        .update({ subtotal: newPrice })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        // ✅ Actualizar la signal de la orden individual
+        this.ordenCompra.update((ordenActual) => {
+          if (!ordenActual) return ordenActual;
+
+          // Crear un nuevo array completo para forzar la detección de cambios
+          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
+            i.id === item.id ? { ...i, subtotal: newPrice } : { ...i }
+          ) ?? [];
+
+          return {
+            ...ordenActual,
+            orden_compra_items: nuevosItems,
+          };
+        });
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error marcando item como recibido:', err);
+      return { data: null, error: err };
+    }
+  }
+  async relacionarItemConFactura(itemId: number, facturaId: number) {
+    try {
+      const { data, error } = await this._supabaseClient
+        .from('orden_compra_items')
+        .update({ factura_id: facturaId })
+        .eq('id', itemId)
+        .select()
+        .single();
+
+      if (!error && data) {
+        // ✅ Actualizar la signal de la orden individual
+        this.ordenCompra.update((ordenActual) => {
+          if (!ordenActual) return ordenActual;
+
+          // Crear un nuevo array completo para forzar la detección de cambios
+          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
+            i.id === itemId 
+              ? { 
+                  ...i, 
+                  factura_id: facturaId as any // Cast para evitar error de tipos
+                } 
+              : { ...i }
+          ) ?? [];
+
+          return {
+            ...ordenActual,
+            orden_compra_items: nuevosItems,
+          };
+        });
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error relacionando item con factura:', err);
+      return { data: null, error: err };
+    }
+  }
 }

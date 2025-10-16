@@ -24,7 +24,7 @@ export class PopUpNgComponent {
   @Input() includeInput: boolean = false;
   @Input() inputType: 'number' | 'date' | 'dropdown' | 'none' = 'none';
   @Input() type: 'default' | 'danger' | 'warning' = 'default';
-  
+  @Input() prefix: '$' | '' ='';
   // Inputs para dropdown
   @Input() dropdownOptions: any[] = [];
   @Input() dropdownPlaceholder: string = 'Seleccione una opción';
