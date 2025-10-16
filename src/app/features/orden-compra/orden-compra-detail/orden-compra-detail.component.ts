@@ -21,6 +21,7 @@ import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
 import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.component';
 import { AccordionModule } from 'primeng/accordion';
+import { TooltipModule } from 'primeng/tooltip';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -38,6 +39,7 @@ import { AccordionModule } from 'primeng/accordion';
     ButtonModule,
     InputDateComponent,
     AccordionModule,
+    TooltipModule,
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],

@@ -262,6 +262,8 @@
         type="submit"
         styleType="warning"
         (buttonClick)="showAddFactura = true"
+        pTooltip="Agregar una nueva factura a esta orden de compra"
+        tooltipPosition="top"
       />
     </div>
     <div class="col-md-5 mb-2">
@@ -270,6 +272,8 @@
         icon="bi-ban"
         type="submit"
         styleType="danger"
+        pTooltip="Cancelar la orden de compra actual"
+        tooltipPosition="top"
       />
     </div>
     <div class="col-md-5 mb-2">
@@ -278,6 +282,8 @@
         icon="bi-check2"
         type="submit"
         styleType="success"
+        pTooltip="Cerrar y finalizar la orden de compra"
+        tooltipPosition="top"
       />
     </div>
   </div>
@@ -424,6 +430,35 @@
       [footerLabel]="'Total General'"
       minWidth="40rem"
     >
+      <ng-template #actions let-item>
+        <p-button
+          icon="pi pi-check"
+          styleClass="p-button-rounded p-button-outlined"
+          [rounded]="true"
+          [text]="true"
+          pTooltip="Item recibido"
+          severity="success"
+          tooltipPosition="left"
+        ></p-button>
+        <p-button
+          icon="pi pi-file"
+          styleClass="p-button-rounded p-button-outlined"
+          [rounded]="true"
+          tooltipPosition="left"
+          [text]="true"
+          pTooltip="Relacionar el item con una factura"
+          severity="info"
+        ></p-button>
+        <p-button
+          icon="pi pi-pencil"
+          styleClass="p-button-rounded p-button-outlined"
+          pTooltip="Editar precio del item"
+          tooltipPosition="left"
+          [rounded]="true"
+          [text]="true"
+          severity="warning"
+        ></p-button>
+      </ng-template>
     </app-table-generic-ng>
 
     <div class="d-flex justify-content-center align-items-center">
@@ -445,6 +480,35 @@
       [footerLabel]="'Total General'"
       minWidth="40rem"
     >
+      <ng-template #actions let-item>
+        <p-button
+          icon="bi-calendar2-check-fill"
+          styleClass="p-button-rounded p-button-outlined"
+          [rounded]="true"
+          [text]="true"
+          tooltipPosition="left"
+          severity="success"
+          pTooltip="Factura Pagada"
+        ></p-button>
+        <p-button
+          icon="pi pi-pencil"
+          styleClass="p-button-rounded p-button-outlined"
+          [rounded]="true"
+          [text]="true"
+          tooltipPosition="left"
+          pTooltip="Editar Factura"
+          severity="warning"
+        ></p-button>
+        <p-button
+          icon="pi pi-trash"
+          styleClass="p-button-rounded p-button-outlined"
+          [rounded]="true"
+          tooltipPosition="left"
+          [text]="true"
+          pTooltip="Eliminar Factura"
+          severity="danger"
+        ></p-button>
+      </ng-template>
     </app-table-generic-ng>
   </div>
 
