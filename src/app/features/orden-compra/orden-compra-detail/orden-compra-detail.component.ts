@@ -1,6 +1,6 @@
-import { Component, Input, Type, OnInit, inject, effect } from '@angular/core';
+import { Component, Input, Type, OnInit, inject, effect, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OrdenCompra, Remito } from 'src/app/core/models/database.type';
+import { Factura, OrdenCompra, Remito } from 'src/app/core/models/database.type';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/table-generic-ng.component';
@@ -24,6 +24,7 @@ import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.c
 import { AccordionModule } from 'primeng/accordion';
 import { TooltipModule } from 'primeng/tooltip';
 import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
+import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.component';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -42,12 +43,13 @@ import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
     InputDateComponent,
     AccordionModule,
     TooltipModule,
+    PopUpNgComponent,
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],
 })
 export class OrdenCompraDetailComponent implements OnInit {
-  @Input() dataOrden: OrdenCompra | null = null;
+
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
@@ -61,15 +63,44 @@ export class OrdenCompraDetailComponent implements OnInit {
   
   public _remitoService = inject(RemitoService);
   public _facturaService = inject(FacturaService);
-  private _ordenCompraService = inject(OrdenCompraService);
+  
+  public _ordenCompraService = inject(OrdenCompraService);
+  private cdr = inject(ChangeDetectorRef);
+  
+  // ✅ Getter para acceso más fácil en el template
+  get dataOrden() {
+    return this._ordenCompraService.ordenCompra();
+  }
+  
+  // ✅ Computed signals para las tablas (se actualizan automáticamente)
+  
+  
   public remitos: Remito[] | null = this._remitoService.remitos();
   
   // Fecha máxima para remitos y facturas (hoy)
   public maxDate: string = new Date().toISOString().split('T')[0];
   
+  // Propiedades del modal pop-up
+  showModal: boolean = false;
+  titleModal: string = '';
+  descriptionModal: string = '';
+  typeModal: 'number' | 'date' | 'dropdown' | 'none' = 'none';
+  numberPlaceHolder: string = '';
+  currentAction: string = '';
+  currentItem: any = null;
+  
   constructor(private fb: FormBuilder) {
     effect(() => {
       this.remitos = this._remitoService.remitos() ?? [];
+    });
+    
+    // ✅ Effect para forzar detección cuando cambia la orden
+    effect(() => {
+      this._ordenCompraService.ordenCompra();
+      this._ordenCompraService.facturas();
+      this._ordenCompraService.presupuestos();
+      this._ordenCompraService.ordenCompraItemsSignal();
+      this.cdr.markForCheck();
     });
   }
 
@@ -246,6 +277,97 @@ export class OrdenCompraDetailComponent implements OnInit {
 
       this._remitoService.addItemRemito(nuevoRemito as Remito);
       this.cancelAddRemito();
+    }
+  }
+
+  // ==================== MODAL POP-UP ====================
+
+  /**
+   * Maneja la confirmación del modal
+   */
+  handleAccept(value?: any) {
+    console.log('Acción aceptada:', this.currentAction, 'Valor:', value);
+    
+    switch (this.currentAction) {
+      case 'itemRecibido':
+        this.confirmarItemRecibido(this.currentItem);
+        break;
+      // Agregar más casos según necesites
+      default:
+        console.log('Acción no manejada');
+    }
+    
+    this.closeModal();
+  }
+
+  /**
+   * Maneja la cancelación del modal
+   */
+  handleCancel() {
+    console.log('Acción cancelada');
+    this.closeModal();
+  }
+
+  /**
+   * Cierra el modal y limpia las propiedades
+   */
+  closeModal() {
+    this.showModal = false;
+    this.currentAction = '';
+    this.currentItem = null;
+  }
+
+  // ==================== ACCIONES DE ITEMS ====================
+
+  /**
+   * Abre el modal de confirmación para marcar un item como recibido
+   */
+  openItemRecibidoModal(item: any) {
+    this.currentAction = 'itemRecibido';
+    this.currentItem = item;
+    this.titleModal = 'Confirmar recepción';
+    this.descriptionModal = `¿Confirma que recibió el producto "${item.pedido_item_id?.productos?.nombre}"?`;
+    this.typeModal = 'none';
+    this.showModal = true;
+  }
+
+  /**
+   * Confirma que el item fue recibido
+   */
+  async confirmarItemRecibido(item: any) {
+    try {
+      console.log('Marcando item como recibido:', item);
+      
+      const { data, error } = await this._ordenCompraService.itemRecibido(item);
+      
+      if (error) {
+        console.error('Error al marcar item como recibido:', error);
+        if (this.formResult) {
+          this.formResult({
+            success: false,
+            message: 'Error al marcar el item como recibido'
+          });
+        }
+        return;
+      }
+      
+      // Si todo salió bien
+      if (this.formResult) {
+        this.formResult({
+          success: true,
+          message: 'Item marcado como recibido correctamente'
+        });
+      }
+      
+      // ✅ No es necesario recargar, la signal se actualiza automáticamente en el servicio
+    } catch (error) {
+      console.error('Error inesperado al marcar item como recibido:', error);
+      if (this.formResult) {
+        this.formResult({
+          success: false,
+          message: 'Error inesperado al marcar el item como recibido'
+        });
+      }
     }
   }
 

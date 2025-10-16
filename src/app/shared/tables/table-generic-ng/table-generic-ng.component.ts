@@ -30,8 +30,13 @@ export class TableGenericNGComponent<T = any> {
     if (typeof this.data === 'function') {
       return (this.data as Signal<T[]>)() ?? [];
     }
-    return this.data ?? [];
+    return (this.data as T[]) ?? [];
   });
+
+  // TrackBy function para optimizar el renderizado
+  trackByFn(index: number, item: any): any {
+    return item?.id ?? index;
+  }
 
   // Helper para resolver campos con dot notation (p.ej. 'pedido_item_id.id')
   getFieldValue(obj: any, field?: string) {

@@ -1,3 +1,14 @@
+<app-pop-up-ng
+  [show]="showModal"
+  [titleModal]="titleModal"
+  [description]="descriptionModal"
+  [inputType]="typeModal"
+  [numberMin]="0"
+  [numberMax]="10000"
+  [numberPlaceholder]="numberPlaceHolder"
+  (onAccept)="handleAccept($event)"
+  (onCancel)="handleCancel()"
+></app-pop-up-ng>
 <div *ngIf="dataOrden; else noInfo">
   <h2 class="text-center mb-4 d-flex align-items-center justify-content-center">
     <span>{{ dataOrden.numero_oc }}</span>
@@ -424,9 +435,10 @@
         { field: 'pedido_item_id.productos.nombre', header: 'Producto' },
         { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
         { field: 'cantidad', header: 'Cantidad' },
-        { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+        { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency },
+        {field:'recibido',header:'Recibido'}
       ]"
-      [data]="dataOrden.orden_compra_items ?? []"
+      [data]="_ordenCompraService.ordenCompraItemsSignal"
       [showFooter]="true"
       [footerColumns]="['subtotal']"
       [footerLabel]="'Total General'"
@@ -441,6 +453,7 @@
           pTooltip="Item recibido"
           severity="success"
           tooltipPosition="left"
+          (onClick)="openItemRecibidoModal(item)"
         ></p-button>
         <p-button
           icon="pi pi-file"
@@ -476,7 +489,7 @@
         { field: 'importe', header: 'Importe', pipe: getTotalCurrency },
         { field: 'fecha_pago', header: 'Fecha de pago', pipe: formatDate }
       ]"
-      [data]="dataOrden.facturas ?? []"
+      [data]="_ordenCompraService.facturas"
       [showFooter]="true"
       [footerColumns]="['subtotal']"
       [footerLabel]="'Total General'"
@@ -527,7 +540,7 @@
       { field: 'cantidad', header: 'Cantidad' },
       { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
     ]"
-    [data]="dataOrden.presupuesto ?? []"
+    [data]="_ordenCompraService.presupuestos"
     minWidth="40rem"
   >
   </app-table-generic-ng>

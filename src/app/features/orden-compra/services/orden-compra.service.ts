@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   OrdenCompra,
   OrdenCompraItem,
@@ -17,6 +17,17 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   ordenesCompra = signal<OrdenCompra[]>([]);
   private _supabaseClient = inject(SupabaseService).supabaseClient;
   public ordenCompra = signal<OrdenCompra | null>(null);
+  ordenCompraItemsSignal = computed(() => 
+      this.ordenCompra()?.orden_compra_items ?? []
+    );
+    
+    facturas = computed(() => 
+      this.ordenCompra()?.facturas ?? []
+    );
+    
+    presupuestos = computed(() => 
+      this.ordenCompra()?.presupuesto ?? []
+    );
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
     {
       this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
@@ -155,6 +166,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     precio_unitario,
     cantidad,
     subtotal,
+    recibido,
     pedido_item_id (
       id,
       productos (
@@ -165,6 +177,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       estado,
       unidad_medida_id(id,nombre),
       pedido: pedidos(id,numero_pedido)
+      
     )
   ),
     proveedor_id (id,nombre,cuit,email),
@@ -233,4 +246,39 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   canCreateOrder(): boolean {
     return this.itemsOC().length > 0;
   }
+  async itemRecibido(
+    item: OrdenCompraItem
+  ): Promise<{ data: any; error: any }> {
+    try {
+      const { data, error } = await this._supabaseClient
+        .from('orden_compra_items')
+        .update({ recibido: true })
+        .eq('id', item.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        // ✅ Actualizar la signal de la orden individual
+        this.ordenCompra.update((ordenActual) => {
+          if (!ordenActual) return ordenActual;
+
+          // Crear un nuevo array completo para forzar la detección de cambios
+          const nuevosItems = ordenActual.orden_compra_items?.map((i) =>
+            i.id === item.id ? { ...i, recibido: true } : { ...i }
+          ) ?? [];
+
+          return {
+            ...ordenActual,
+            orden_compra_items: nuevosItems,
+          };
+        });
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error marcando item como recibido:', err);
+      return { data: null, error: err };
+    }
+  }
+      
 }
