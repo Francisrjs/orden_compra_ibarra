@@ -1,7 +1,7 @@
 <div class="container mx-auto my-auto form p-4">
   <p-toast position="top-right"></p-toast>
   <form [formGroup]="productoPedidoForm" (ngSubmit)="onSubmit()">
-    <div>
+    <div *ngIf="!OCform">
       <app-input-box
         label="ID del Pedido"
         type="text"
@@ -21,8 +21,9 @@
         [required]="true"
         [disabled]="modeUser ? false : true"
       ></app-input-modal-selector>
-      <div *ngIf="modeUser">
-        <p class="mt-0 mb-2 text-secondary fs-6">
+      <!-- Campos de cantidad y unidad de medida para modeUser O OCform -->
+      <div *ngIf="modeUser || OCform">
+        <p class="mt-0 mb-2 text-secondary fs-6" *ngIf="modeUser && !OCform">
           ¿no te aparece el producto que buscas ?
           <a
             (click)="onNavigateToCreateProduct()"
@@ -33,7 +34,14 @@
 
         <div class="row g-2">
           <div class="col-12 col-md-6 d-flex flex-column">
-            <label class="input_label">Cantidad</label>
+            <div class="d-flex align-items-center">
+              <i
+                class="bi bi-asterisk text-danger fs-6 mb-0 mx-1"
+                style="font-size: 0.85rem"
+              ></i>
+              <label class="input_label">Cantidad</label>
+            </div>
+
             <p-inputNumber
               formControlName="cantidad"
               [min]="0"
@@ -48,11 +56,19 @@
           </div>
 
           <div class="col-12 col-md-6 d-flex flex-column">
-            <label class="input_label mb-1">Unidad de Medida</label>
+            <div class="d-flex align-items-center">
+              <i
+                class="bi bi-asterisk text-danger fs-6 mb-0 mx-1"
+                style="font-size: 0.85rem"
+              ></i>
+              <label class="input_label mb-1">Unidad de Medida</label>
+            </div>
+
             <p-autoComplete
               formControlName="unidad_medida_id"
               [suggestions]="filteredMedidasData"
               (completeMethod)="filterData($event)"
+              (onSelect)="onUnidadMedidaSelect($event)"
               [dropdown]="true"
               optionLabel="nombre"
               placeholder="Selecciona una unidad de medida"
@@ -63,33 +79,60 @@
           </div>
         </div>
 
-        <app-input-box
-          label="Razon del pedido"
-          type="text"
-          id="razon_pedido"
-          placeholder="Ej: Este pedido es urgente por.."
-          [required]="false"
-          [isTextarea]="false"
-          [disabled]="false"
-          formControlName="razon_pedido"
-        ></app-input-box>
-        <app-input-box
-          label="Link de Pedido (opcional)"
-          type="text"
-          id="link_referencia"
-          placeholder="www.mercadolibre.com.ar/.."
-          [required]="false"
-          [isTextarea]="false"
-          [disabled]="false"
-          formControlName="link_referencia"
-        ></app-input-box>
+        <!-- Campos adicionales solo para modo usuario normal (no OCform) -->
+        <div *ngIf="modeUser && !OCform">
+          <app-input-box
+            label="Razon del pedido"
+            type="text"
+            id="razon_pedido"
+            placeholder="Ej: Este pedido es urgente por.."
+            [required]="false"
+            [isTextarea]="false"
+            [disabled]="false"
+            formControlName="razon_pedido"
+          ></app-input-box>
+          <app-input-box
+            label="Link de Pedido (opcional)"
+            type="text"
+            id="link_referencia"
+            placeholder="www.mercadolibre.com.ar/.."
+            [required]="false"
+            [isTextarea]="false"
+            [disabled]="false"
+            formControlName="link_referencia"
+          ></app-input-box>
+        </div>
       </div>
     </div>
+    <div class="d-flex row w-100" *ngIf="OCform">
+      <div class="d-flex align-items-center">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mb-0 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="input_label">Total (Precio de compra):</label>
+      </div>
+
+      <p-inputNumber
+        formControlName="total"
+        [min]="0"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="2"
+        placeholder="Ingrese el precio de compra"
+        inputId="total"
+        inputStyleClass="w-100 h-30"
+        *ngIf="OCform"
+        mode="decimal"
+        prefix="$"
+      >
+      </p-inputNumber>
+    </div>
+
     <!-- Modo jefe de compras -->
     <div *ngIf="!modeUser">
       <div class="row g-2">
         <div class="col-12 col-md-6 d-flex flex-column">
-            <label class="input_label">Cantidad Aceptada</label>
+          <label class="input_label">Cantidad Aceptada</label>
           <p-inputNumber
             formControlName="cantidad_aceptada"
             [min]="0"
@@ -128,9 +171,9 @@
     <div style="max-width: 400px; margin: 50px auto; display: grid; gap: 20px">
       <!-- Cambiamos el botón para que sea de tipo 'submit' -->
       <app-custom-button
-        text="Guardar Pedido"
+        [text]="OCform ? 'Agregar Item' : 'Guardar Pedido'"
         type="submit"
-        [disabled]="productoPedidoForm.invalid"
+        [disabled]="isFormInvalid()"
         (click)="onSubmit()"
         styleType="success"
       >

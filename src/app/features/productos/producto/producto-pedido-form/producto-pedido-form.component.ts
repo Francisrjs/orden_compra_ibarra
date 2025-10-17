@@ -2,6 +2,8 @@ import {
   Component,
   inject,
   Input,
+  Output,
+  EventEmitter,
   OnChanges,
   OnInit,
   SimpleChanges,
@@ -61,7 +63,7 @@ interface AutoCompleteCompleteEvent {
   ],
   templateUrl: './producto-pedido-form.component.html',
   styleUrls: ['./producto-pedido-form.component.css'],
-  providers: [],
+  providers: [MessageService],
 })
 export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   @Input() onSaveSuccess?: () => void;
@@ -70,6 +72,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   @Input() idMedida?: UnidadMedida | null = null;
   @Input() razonPedido?: string = '';
   @Input() idPedidoItem?: number | undefined;
+  @Input() OCform?: boolean = false;
+
   @Input() onNavigateToCreateProduct: () => void = () => {};
   @Input() formResult?: (result: {
     severity?: string;
@@ -81,6 +85,13 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
 
   @Input() modeUser?: boolean = true;
   @Input() pedidoItemOC?: PedidoItem;
+
+  // Output para comunicar con el componente padre (orden-compra-form)
+  @Output() itemCreatedForOC = new EventEmitter<{
+    item: PedidoItem;
+    precio: number;
+  }>();
+
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
 
@@ -88,6 +99,8 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   private _productoService = inject(ProductoService);
   private _unididadMedidas = inject(UnidadesMedidaService);
   private _pedidoService = inject(PedidoService);
+  private _messageService = inject(MessageService);
+
   constructor() {}
   productoPedidoForm!: FormGroup;
   pedidoId!: number;
@@ -107,16 +120,34 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   }
 
   async ngOnInit(): Promise<void> {
-    this.productoPedidoForm = this.fb.group({
-      pedido_id: [this.pedidoId ?? null, Validators.required],
+    // ✅ Configurar validaciones dinámicamente según el modo
+    const formConfig: any = {
       producto_id: [null, Validators.required],
       cantidad: [null, [Validators.required, Validators.min(1)]],
       unidad_medida_id: [null, Validators.required],
-      razon_pedido: [null, [Validators.maxLength(30)]],
       cantidad_aceptada: [null],
       unidad_medida_id_aceptada: [null],
-      link_referencia: [null, [Validators.maxLength(300)]],
-    });
+    };
+
+    // Campos opcionales que dependen del modo
+    if (this.modeUser || this.OCform) {
+      formConfig.razon_pedido = [null, [Validators.maxLength(30)]];
+      formConfig.link_referencia = [null, [Validators.maxLength(300)]];
+    }
+
+    // Campo total solo para modo OC
+    if (this.OCform) {
+      formConfig.total = [null, [Validators.required, Validators.min(0.01)]];
+    }
+
+    // Solo agregar pedido_id como requerido si NO estamos en modo OC
+    if (!this.OCform) {
+      formConfig.pedido_id = [this.pedidoId ?? null, Validators.required];
+    } else {
+      formConfig.pedido_id = [null]; // Sin validación para modo OC
+    }
+
+    this.productoPedidoForm = this.fb.group(formConfig);
     if (!this.pedidoItemOC) {
       this.route.paramMap.subscribe((params) => {
         const id = params.get('id');
@@ -168,7 +199,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       this.pedidoId = this.pedidoItemOC.pedido_id;
 
       this.productoPedidoForm.patchValue({
-        pedido_id: this.pedidoId, 
+        pedido_id: this.pedidoId,
         producto_id: this.pedidoItemOC.producto?.id ?? null,
         razon_pedido: (this.pedidoItemOC as any).razon_pedido ?? '',
         cantidad: this.pedidoItemOC.cantidad ?? null,
@@ -205,6 +236,13 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       }
     );
   }
+
+  // ✅ Método para manejar la selección de unidad de medida
+  onUnidadMedidaSelect(event: any) {
+    console.log('Unidad de medida seleccionada:', event);
+    // El evento ya actualiza el formControl automáticamente
+    // Este método es principalmente para debug o lógica adicional si necesario
+  }
   async onSubmit() {
     console.log(
       this.productoPedidoForm.value,
@@ -213,12 +251,19 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     );
     this.productoPedidoForm.markAllAsTouched();
 
-    if (this.productoPedidoForm.invalid) {
+    // En modo normal (no OC), validar el formulario tradicional
+    if (!this.OCform && this.productoPedidoForm.invalid) {
       const msg = !this.pedidoId
         ? 'No se pudo identificar el pedido.'
         : 'Revisá los campos obligatorios ❌';
 
       this.formResult?.({ success: false, message: msg });
+      return;
+    }
+
+    // ✅ CASO ESPECIAL: Si estamos en modo OC, crear PedidoItem temporal y enviarlo al padre
+    if (this.OCform) {
+      this.handleOCFormSubmit();
       return;
     }
 
@@ -306,6 +351,132 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
         this.onSaveSuccess();
       }
       this.productoPedidoForm.reset();
+    }
+  }
+
+  // ✅ Método para manejar el submit cuando está en modo OC
+  private handleOCFormSubmit() {
+    let formValues = { ...this.productoPedidoForm.value };
+
+    // ✅ PRIMERO: Procesar unidad de medida si es objeto (antes de validaciones)
+    if (
+      formValues.unidad_medida_id &&
+      typeof formValues.unidad_medida_id === 'object'
+    ) {
+      formValues.unidad_medida_id = formValues.unidad_medida_id.id;
+    }
+
+    // Usar el total del formulario
+    const totalValue = formValues.total;
+
+    // ---- INICIO DE LA MODIFICACIÓN ----
+    // 1. Obtenemos el ID del producto, sin importar si el valor del formulario
+    //    es el objeto completo o solo el número del ID.
+    const productoId =
+      formValues.producto_id && typeof formValues.producto_id === 'object'
+        ? (formValues.producto_id as Producto).id
+        : formValues.producto_id;
+
+    // 2. Con el ID asegurado, buscamos el objeto completo en la señal de productos.
+    const productoSeleccionado = this.productos().find(
+      (p) => p.id === productoId
+    );
+    // ---- FIN DE LA MODIFICACIÓN ----
+
+    // 3. Validamos que tengamos el producto encontrado y los demás datos.
+    if (
+      !productoSeleccionado || // Usamos la variable que contiene el objeto completo
+      !formValues.cantidad ||
+      !formValues.unidad_medida_id ||
+      !totalValue
+    ) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Campos requeridos',
+        detail:
+          'Complete todos los campos obligatorios (Producto, Cantidad, Unidad de Medida y Total)',
+      });
+      return;
+    }
+
+    // Validar que el total sea mayor a 0
+    if (totalValue <= 0) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Precio inválido',
+        detail: 'El precio debe ser mayor a 0',
+      });
+      return;
+    }
+
+    // Buscamos la unidad de medida completa
+    const unidadMedidaSeleccionada = this.medidasData().find(
+      (um) => um.id === formValues.unidad_medida_id
+    );
+
+    // Si llegamos aquí, es porque tenemos el productoSeleccionado completo.
+    // Crear un PedidoItem temporal para enviar al componente padre
+    const pedidoItemTemporal: PedidoItem = {
+      id: Date.now(), // ID temporal único
+      pedido_id: 0, // No necesario para OC
+      producto_id: productoSeleccionado.id, // Asignamos el ID
+      productos: productoSeleccionado, // Y aquí asignamos el OBJETO COMPLETO
+      cantidad: formValues.cantidad,
+      unidad_medida_id: formValues.unidad_medida_id,
+      unidad_medida: unidadMedidaSeleccionada,
+      estado: 'Pendiente',
+      razon_pedido: formValues.razon_pedido || '',
+      link_referencia: formValues.link_referencia || '',
+      cantidad_aceptada: undefined,
+      unidad_medida_id_aceptada: undefined,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      producto: productoSeleccionado,
+    } as PedidoItem;
+
+    // Emitir el evento al componente padre con el item y el precio
+    this.itemCreatedForOC.emit({
+      item: pedidoItemTemporal,
+      precio: totalValue,
+    });
+
+    // Mostrar mensaje de éxito
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Item agregado',
+      detail: `${productoSeleccionado.nombre} agregado correctamente ✅`,
+    });
+
+    // Resetear el formulario
+    this.productoPedidoForm.reset();
+  }
+
+  // ✅ Método para validar si el formulario es inválido según el modo
+  isFormInvalid(): boolean {
+    if (this.OCform) {
+      // En modo OC, usar las validaciones del FormGroup que ya incluyen el campo total
+      const formInvalid = this.productoPedidoForm.invalid;
+
+      // Debug solo cuando hay errores
+      if (formInvalid) {
+        const formValues = this.productoPedidoForm.value;
+        console.log('Validación OCform - Formulario inválido:', {
+          formErrors: this.productoPedidoForm.errors,
+          controlsInvalid: Object.keys(this.productoPedidoForm.controls)
+            .filter((key) => this.productoPedidoForm.get(key)?.invalid)
+            .map((key) => ({
+              control: key,
+              errors: this.productoPedidoForm.get(key)?.errors,
+              value: this.productoPedidoForm.get(key)?.value,
+            })),
+          formValues,
+        });
+      }
+
+      return formInvalid;
+    } else {
+      // Modo normal, solo validar formulario
+      return this.productoPedidoForm.invalid;
     }
   }
 }

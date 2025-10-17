@@ -8,6 +8,7 @@ import {
 } from 'src/app/core/models/database.type';
 import { StateService } from 'src/app/core/services/state-service';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { PedidoService } from '../../pedidos/services/pedido.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   ordenCompraItems = signal<OrdenCompraItem[]>([]);
   ordenesCompra = signal<OrdenCompra[]>([]);
   private _supabaseClient = inject(SupabaseService).supabaseClient;
+  private _pedidoService = inject(PedidoService);
   public ordenCompra = signal<OrdenCompra | null>(null);
   ordenCompraItemsSignal = computed(
     () => this.ordenCompra()?.orden_compra_items ?? []
@@ -463,6 +465,170 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data, error };
     } catch (err) {
       console.error('Error cerrando orden de compra:', err);
+      return { data: null, error: err };
+    }
+  }
+
+  /**
+   * Crea una OC tipo "abierta": primero crea un pedido temporal,
+   * luego los pedido_items y finalmente los orden_compra_items
+   */
+  async createOrdenCompraAbierta(ordenCompraData: Partial<OrdenCompra>) {
+    try {
+      // Verificar que tenemos items para procesar
+      const currentItems = this.itemsOC();
+      if (currentItems.length === 0) {
+        return {
+          data: null,
+          error: { message: 'No hay items para agregar a la OC abierta' },
+        };
+      }
+
+      // 1. Crear pedido temporal usando el servicio existente (con campos correctos)
+      const pedidoData = {
+        titulo: 'Pedido temporal para OC Abierta',
+        descripcion: `Pedido temporal para OC Abierta - ${new Date().toLocaleDateString(
+          'es-AR'
+        )}`,
+        estado: 'En Proceso de Entrega' as const,
+        plazo_entrega: new Date().toISOString().split('T')[0], // ✅ CAMPO CORRECTO
+        urgente: false,
+        area: 'LOGISTICA' as const,
+      };
+
+      console.log('🔄 Creando pedido temporal con datos:', pedidoData);
+
+      const { data: pedidoTemporal, error: pedidoError } =
+        await this._pedidoService.addPedido(pedidoData);
+
+      if (pedidoError || !pedidoTemporal) {
+        console.error('❌ Error creando pedido temporal:', pedidoError);
+        return { data: null, error: pedidoError };
+      }
+
+      console.log('✅ Pedido temporal creado:', pedidoTemporal);
+
+      // 2. Crear los pedido_items directamente (el método del PedidoService fuerza estado 'Pendiente')
+      const pedidoItemsCreados: PedidoItem[] = [];
+
+      for (const item of currentItems) {
+        const itemData = {
+          pedido_id: pedidoTemporal.id,
+          producto_id: item.producto?.id || item.producto_id,
+          cantidad: item.cantidad || 1,
+          unidad_medida_id: item.unidad_medida_id || item.unidad_medida?.id,
+          razon_pedido:
+            item.razon_pedido || 'Item para orden de compra abierta',
+          estado: 'Aprobado', // ✅ Crear directamente como aprobado
+        };
+
+        console.log('🔄 Creando pedido item directamente:', itemData);
+
+        const { data: nuevoItem, error: itemError } = await this._supabaseClient
+          .from('pedido_items')
+          .insert(itemData)
+          .select('*')
+          .single();
+
+        if (itemError || !nuevoItem) {
+          console.error('❌ Error creando pedido item:', itemError);
+          // Si falla, eliminar el pedido temporal (los items se eliminan en cascada)
+          await this._supabaseClient
+            .from('pedidos')
+            .delete()
+            .eq('id', pedidoTemporal.id);
+          return { data: null, error: itemError };
+        }
+
+        console.log('✅ Pedido item creado:', nuevoItem);
+        pedidoItemsCreados.push(nuevoItem as PedidoItem);
+      }
+
+      // 3. Crear la orden de compra
+      const ocData = {
+        ...ordenCompraData,
+        jefe_compra_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12',
+      };
+
+      console.log('🔄 Creando orden de compra:', ocData);
+
+      const { data: newOrdenCompra, error: ocError } =
+        await this._supabaseClient
+          .from('orden_compra')
+          .insert(ocData)
+          .select('*')
+          .single();
+
+      if (ocError || !newOrdenCompra) {
+        console.error('❌ Error creando orden de compra:', ocError);
+        // Si falla, eliminar el pedido temporal y sus items
+        await this._supabaseClient
+          .from('pedidos')
+          .delete()
+          .eq('id', pedidoTemporal.id);
+        return { data: null, error: ocError };
+      }
+
+      console.log('✅ Orden de compra creada:', newOrdenCompra);
+
+      // 4. Crear los orden_compra_items usando los pedido_items recién creados
+      const ordenCompraItems = this.ordenCompraItems();
+      const ocItemsData = pedidoItemsCreados.map((pedidoItem, index) => {
+        const ocItem = ordenCompraItems[index];
+        return {
+          orden_compra_id: newOrdenCompra.id,
+          pedido_item_id: pedidoItem.id,
+          precio_unitario: ocItem?.precio_unitario || 0,
+          cantidad: pedidoItem.cantidad || 1,
+          subtotal: (ocItem?.precio_unitario || 0) * (pedidoItem.cantidad || 1),
+          recibido: false, // ✅ Por defecto no recibido
+        };
+      });
+
+      console.log('🔄 Creando orden_compra_items:', ocItemsData);
+
+      const { data: ocItemsCreados, error: ocItemsError } =
+        await this._supabaseClient
+          .from('orden_compra_items')
+          .insert(ocItemsData)
+          .select('*');
+
+      if (ocItemsError) {
+        console.error('❌ Error creando orden_compra_items:', ocItemsError);
+        // Si falla, eliminar todo lo creado
+        await this._supabaseClient
+          .from('orden_compra')
+          .delete()
+          .eq('id', newOrdenCompra.id);
+        await this._supabaseClient
+          .from('pedidos')
+          .delete()
+          .eq('id', pedidoTemporal.id);
+        return { data: null, error: ocItemsError };
+      }
+
+      console.log('✅ Orden_compra_items creados:', ocItemsCreados);
+
+      // 5. Actualizar señales locales
+      if (newOrdenCompra) {
+        this.ordenesCompra.update((currentOrdenes) => [
+          ...currentOrdenes,
+          newOrdenCompra,
+        ]);
+        this.addItem(newOrdenCompra);
+      }
+
+      if (ocItemsCreados) {
+        this.ordenCompraItems.set(ocItemsCreados);
+      }
+
+      // 6. Limpiar las señales temporales
+      this.clearOrderData();
+
+      console.log('🎉 OC Abierta creada exitosamente!');
+      return { data: newOrdenCompra, error: null };
+    } catch (err) {
+      console.error('💥 Error general creando orden de compra abierta:', err);
       return { data: null, error: err };
     }
   }

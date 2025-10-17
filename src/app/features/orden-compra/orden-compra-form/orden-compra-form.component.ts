@@ -9,6 +9,7 @@ import {
   Producto,
   Proveedor,
   UnidadMedida,
+  tipoOC,
 } from 'src/app/core/models/database.type';
 import { PedidoService } from '../../pedidos/services/pedido.service';
 import {
@@ -50,6 +51,7 @@ import { PresupuestoService } from '../../presupuesto/presupuesto.service';
 import { TableGenericFilterComponent } from 'src/app/shared/tables/table-generic-filter/table-generic-filter.component';
 import { InputBoxComponent } from 'src/app/shared/input/input-box/input-box.component';
 import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.component';
+import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
 
 export interface LocalPedidoItem extends PedidoItem {
   precio_asignado?: number;
@@ -76,6 +78,7 @@ export interface LocalPedidoItem extends PedidoItem {
     TableGenericNGComponent,
     ButtonWithIconComponent,
     PopUpNgComponent,
+    ProductoPedidoFormComponent,
   ],
   templateUrl: './orden-compra-form.component.html',
   styleUrls: ['./orden-compra-form.component.css'],
@@ -176,6 +179,7 @@ export class OrdenCompraFormComponent implements OnInit {
       proveedor_id: [null, Validators.required],
       condicion_entrega: ['', Validators.required],
       condicion_pago: ['', Validators.required],
+      presupuesto_limite: [null, [Validators.required, Validators.min(0.01)]],
     });
   }
 
@@ -368,6 +372,57 @@ export class OrdenCompraFormComponent implements OnInit {
     this.cancelAdd();
   }
 
+  // ✅ Método para manejar items creados desde ProductoPedidoForm (modo OC)
+  handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
+    const { item, precio } = event;
+
+    // Verificar duplicados por nombre de producto (ya que son items temporales)
+    const exists = this.pedidoItems.some(
+      (x) =>
+        x.producto?.nombre === item.producto?.nombre &&
+        x.unidad_medida_id === item.unidad_medida_id
+    );
+
+    if (exists) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Duplicado',
+        detail: 'Ya existe un item similar en la orden.',
+      });
+      return;
+    }
+
+    // Crear el item con precio asignado
+    const itemWithPrice: LocalPedidoItem = {
+      ...item,
+      precio_asignado: precio,
+    };
+
+    // Agregar a la lista local
+    this.pedidoItems = [...this.pedidoItems, itemWithPrice];
+
+    // Agregar al servicio usando la función existente
+    this._ordenCompraService.addItemOC(itemWithPrice, precio);
+
+    console.log(
+      'Item agregado desde ProductoPedidoForm:',
+      this._ordenCompraService.ordenCompraItems()
+    );
+
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Item agregado',
+      detail: `${
+        item.producto?.nombre || 'Producto'
+      } agregado con precio ${this.currencyPipe.transform(
+        precio,
+        '$',
+        'symbol',
+        '1.0-0'
+      )}`,
+    });
+  }
+
   // El resto de tus métodos: editProductItem, deleteItemPedido, etc.
   editProductItem(item: PedidoItem) {
     /* ... */
@@ -514,16 +569,63 @@ export class OrdenCompraFormComponent implements OnInit {
     }
 
     try {
-      // 1. Crear la OC
+      // Mapear el tipo al formato de base de datos
+      const tipoOCDB = (
+        this.tipoOC === 'solicitud' ? 'SOLICITUD' : 'ABIERTA'
+      ) as tipoOC;
+
+      // Datos comunes para ambos tipos de OC
       const ordenCompraData = {
-        proveedor_id: this.ordenCompraForm.value.proveedor_id, // ✅ Corregido el campo
+        proveedor_id: this.ordenCompraForm.value.proveedor_id,
         condicion_entrega: this.ordenCompraForm.value.condicion_entrega,
         condicion_pago: this.ordenCompraForm.value.condicion_pago,
         total: this.totalOC,
+        tipo: tipoOCDB, // Usar el valor correcto para la DB
       };
 
-      const { data: newOrdenCompra, error: errorOC } =
-        await this._ordenCompraService.createOrdenCompra(ordenCompraData);
+      let newOrdenCompra: any = null;
+      let errorOC: any = null;
+
+      // Manejar según el tipo de OC
+      if (this.tipoOC === 'solicitud') {
+        // Flujo original para OC tipo solicitud
+        const result = await this._ordenCompraService.createOrdenCompra(
+          ordenCompraData
+        );
+        newOrdenCompra = result.data;
+        errorOC = result.error;
+
+        if (!errorOC && newOrdenCompra) {
+          // Insertar los items en la OC (items de pedidos existentes)
+          const { error: errorItem } =
+            await this._ordenCompraService.addItemToOrdenCompra(
+              newOrdenCompra.id
+            );
+
+          if (errorItem) {
+            this._messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail:
+                'Error al agregar items: ' +
+                (errorItem &&
+                typeof errorItem === 'object' &&
+                'message' in errorItem
+                  ? (errorItem as any).message
+                  : JSON.stringify(errorItem)),
+            });
+            console.error('Error al agregar items:', errorItem);
+            return;
+          }
+        }
+      } else if (this.tipoOC === 'abierta') {
+        // Nuevo flujo para OC tipo abierta
+        const result = await this._ordenCompraService.createOrdenCompraAbierta(
+          ordenCompraData
+        );
+        newOrdenCompra = result.data;
+        errorOC = result.error;
+      }
 
       if (errorOC || !newOrdenCompra) {
         this._messageService.add({
@@ -536,27 +638,7 @@ export class OrdenCompraFormComponent implements OnInit {
         return;
       }
 
-      // 2. Insertar los items en la OC
-      const { error: errorItem } =
-        await this._ordenCompraService.addItemToOrdenCompra(newOrdenCompra.id);
-
-      if (errorItem) {
-        this._messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail:
-            'Error al agregar items: ' +
-            (errorItem &&
-            typeof errorItem === 'object' &&
-            'message' in errorItem
-              ? (errorItem as any).message
-              : JSON.stringify(errorItem)),
-        });
-        console.error('Error al agregar items:', errorItem);
-        return;
-      }
-
-      // 3. Asignar presupuestos si los hay
+      // 3. Asignar presupuestos si los hay (común para ambos tipos)
       const presupuestosAsignados =
         this._presupuestoService.presupuestoAsignados();
       if (presupuestosAsignados.length > 0) {
@@ -570,11 +652,11 @@ export class OrdenCompraFormComponent implements OnInit {
             severity: 'warn',
             summary: 'Advertencia',
             detail:
-              'Error al agregar items: ' +
-              (errorItem &&
-              typeof errorItem === 'object' &&
-              'message' in errorItem
-                ? (errorItem as any).message
+              'Error al asignar presupuestos: ' +
+              (typeof errorPresupuesto === 'object' &&
+              errorPresupuesto &&
+              'message' in errorPresupuesto
+                ? (errorPresupuesto as any).message
                 : JSON.stringify(errorPresupuesto)),
           });
         }
@@ -584,7 +666,7 @@ export class OrdenCompraFormComponent implements OnInit {
       this._messageService.add({
         severity: 'success',
         summary: 'Éxito',
-        detail: 'Orden de compra creada correctamente',
+        detail: `Orden de compra ${this.tipoOCNombre.toLowerCase()} creada correctamente`,
       });
 
       // 5. Limpiar datos
