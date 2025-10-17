@@ -15,7 +15,7 @@ export function getBadgeClassByEstadoPedido(estado: string): string {
     case 'Rechazado':
       return 'text-bg-danger';
     case 'En Proceso de Entrega':
-      return 'text-bg-info'
+      return 'text-bg-info';
     default:
       return 'text-bg-secondary';
   }
@@ -31,9 +31,9 @@ export function getBadgeClassByPedidoItem(estado: string) {
     case 'Rechazado':
       return 'text-bg-danger';
     case 'Aceptado':
-      return 'text-bg-success'
+      return 'text-bg-success';
     case 'En Envio':
-      return 'text-bg-warning'
+      return 'text-bg-warning';
     default:
       return 'text-bg-secondary';
   }
@@ -44,7 +44,7 @@ export function getBadgeClassByOC(estado: string) {
       return 'text-bg-secondary';
     case 'EN PROCESO':
       return 'text-bg-warning';
-    case 'CERRADA':
+    case 'FINALIZADA':
       return 'text-bg-success';
     case 'ABIERTA':
       return 'text-bg-primary';
@@ -73,8 +73,8 @@ export function getIconByArea(area: Areas): string {
   }
 }
 
-export function getEstadoTiempo(tiempo_item:TiempoItem){
-  switch (tiempo_item){
+export function getEstadoTiempo(tiempo_item: TiempoItem) {
+  switch (tiempo_item) {
     case 'DEMORADO':
       return 'danger';
     case 'EN PLAZO':

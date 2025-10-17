@@ -7,10 +7,7 @@ export type EstadoPedido =
   | 'En Proceso de Entrega'
   | 'Cerrado'
   | 'Rechazado';
-export type tipoOC=
-  | 'SOLICITUD'
-  | 'PRESUPUESTO'
-  | 'SIN ESPECIFICAR'
+export type tipoOC = 'SOLICITUD' | 'PRESUPUESTO' | 'ABIERTA';
 export type EstadoItemPedido =
   | 'Pendiente'
   | 'Aprobado'
@@ -18,7 +15,7 @@ export type EstadoItemPedido =
   | 'Aprobado parcial'
   | 'En Envio';
 export type EstadoOC =
-  | 'Borrador'
+  | 'FINALIZADA'
   | 'EN PROCESO'
   | 'CERRADA'
   | 'ABIERTA'
@@ -112,23 +109,23 @@ export interface OrdenCompra {
   estado: EstadoOC;
   fecha_creacion: string;
   notas?: string;
-  condicion_entrega:string;
-  fecha_pago?:Date;
-  total:number;
-  condicion_pago:string;
-  orden_compra_items?:OrdenCompraItem[];
+  condicion_entrega: string;
+  fecha_pago?: Date;
+  total: number;
+  condicion_pago: string;
+  orden_compra_items?: OrdenCompraItem[];
   proveedores?: Proveedor;
-  tipo?:tipoOC
-  presupuesto?:Presupuesto[];
-  facturas?:Factura[];
+  tipo?: tipoOC;
+  presupuesto?: Presupuesto[];
+  facturas?: Factura[];
 }
 
-export interface Remito{
-  id:number;
-  numero_remito:string;
-  factura_id:Factura;
-  fecha:Date;
-  creado?:boolean;
+export interface Remito {
+  id: number;
+  numero_remito: string;
+  factura_id: Factura;
+  fecha: Date;
+  creado?: boolean;
 }
 export interface OrdenCompraItem {
   id: number;
@@ -143,17 +140,17 @@ export interface OrdenCompraItem {
   pedido_items?: PedidoItem;
   producto_id?: number;
   factura_id?: Factura;
-  recibido:boolean
+  recibido: boolean;
 }
-export interface Factura{
-  id:number;
-  numero_factura:string;
-  proveedor_id:Proveedor;
-  orden_compra_id:OrdenCompra;
-  fecha_pago:Date;
-  fecha:Date;
-  remitos?:Remito;
-  importe:number;
+export interface Factura {
+  id: number;
+  numero_factura: string;
+  proveedor_id: Proveedor;
+  orden_compra_id: OrdenCompra;
+  fecha_pago: Date;
+  fecha: Date;
+  remitos?: Remito;
+  importe: number;
 }
 export interface Presupuesto {
   id: number;

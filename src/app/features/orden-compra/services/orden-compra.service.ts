@@ -250,22 +250,48 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     item: OrdenCompraItem
   ): Promise<{ data: any; error: any }> {
     try {
-      const { data, error } = await this._supabaseClient
+      const { data: ordenData, error: ordenError } = await this._supabaseClient
         .from('orden_compra_items')
         .update({ recibido: true })
         .eq('id', item.id)
         .select()
         .single();
 
-      if (!error && data) {
-        // ✅ Actualizar la signal de la orden individual
+      if (ordenError) {
+        return { data: null, error: ordenError };
+      }
+
+      const { data: pedidoData, error: pedidoError } =
+        await this._supabaseClient
+          .from('pedido_items')
+          .update({ estado: 'Cerrado' })
+          .eq('id', item.pedido_item_id)
+          .select()
+          .single();
+
+      if (pedidoError) {
+        console.warn('Error actualizando estado del pedido item:', pedidoError);
+        // No retornamos error aquí porque el item ya se marcó como recibido
+      }
+
+      if (ordenData) {
         this.ordenCompra.update((ordenActual) => {
           if (!ordenActual) return ordenActual;
 
           // Crear un nuevo array completo para forzar la detección de cambios
           const nuevosItems =
             ordenActual.orden_compra_items?.map((i) =>
-              i.id === item.id ? { ...i, recibido: true } : { ...i }
+              i.id === item.id
+                ? {
+                    ...i,
+                    recibido: true,
+                    // También actualizar el estado del pedido_item anidado si existe
+                    pedido_item_id:
+                      i.pedido_item_id && typeof i.pedido_item_id === 'object'
+                        ? { ...(i.pedido_item_id as any), estado: 'Cerrado' }
+                        : i.pedido_item_id,
+                  }
+                : { ...i }
             ) ?? [];
 
           return {
@@ -275,7 +301,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
         });
       }
 
-      return { data, error };
+      return { data: ordenData, error: null };
     } catch (err) {
       console.error('Error marcando item como recibido:', err);
       return { data: null, error: err };
@@ -402,6 +428,41 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       return { data, error };
     } catch (err) {
       console.error('Error relacionando item con factura:', err);
+      return { data: null, error: err };
+    }
+  }
+  async finalizarOC(orden_compra_id: number) {
+    try {
+      const { data, error } = await this._supabaseClient
+        .from('orden_compra')
+        .update({ estado: 'FINALIZADA' })
+        .eq('id', orden_compra_id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        this.ordenCompra.update((ordenActual) => {
+          if (!ordenActual) return ordenActual;
+
+          return {
+            ...ordenActual,
+            estado: 'FINALIZADA',
+          };
+        });
+        this.ordenesCompra.update((ordenes) => {
+          const index = ordenes.findIndex((o) => o.id === orden_compra_id);
+          if (index !== -1) {
+            const newOrdenes = [...ordenes];
+            newOrdenes[index] = { ...newOrdenes[index], estado: 'FINALIZADA' };
+            return newOrdenes;
+          }
+          return ordenes;
+        });
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error('Error cerrando orden de compra:', err);
       return { data: null, error: err };
     }
   }

@@ -13,6 +13,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterModule } from '@angular/router';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonElegantComponent } from './shared/buttons/button-elegant/button-elegant.component';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +26,8 @@ import { Router, RouterLink, RouterModule } from '@angular/router';
     AvatarModule,
     BadgeModule,
     RippleModule,
+    DialogModule,
+    ButtonElegantComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
@@ -37,6 +41,11 @@ export class AppComponent implements OnInit {
   items: MenuItem[] = []; // Inicializamos como array vacío
   expanded = false;
   private router = inject(Router);
+
+  // Variables para el modal de selección de tipo OC
+  seleccionarOC: boolean = false;
+  tipoOCSolicitud: boolean = true;
+
   ngOnInit() {
     this.expanded = false;
     this.items = [
@@ -70,7 +79,10 @@ export class AppComponent implements OnInit {
             label: 'Nueva',
             icon: 'pi pi-plus',
             shortcut: '⌘+O',
-            routerLink: '/oc',
+            command: () => {
+              this.abrirModalSeleccionOC();
+            },
+            routerLink: '',
           },
           {
             label: 'Pedidos pendientes',
@@ -83,7 +95,7 @@ export class AppComponent implements OnInit {
             icon: 'pi pi-file',
             shortcut: '⌘+O',
             routerLink: '/oc/home',
-          }
+          },
         ],
       },
       {
@@ -103,6 +115,23 @@ export class AppComponent implements OnInit {
         ],
       },
     ];
-    
+  }
+
+  // Función para seleccionar el tipo de OC y navegar al form
+  seleccionarTipoOC(esSolicitud: boolean): void {
+    this.tipoOCSolicitud = esSolicitud;
+    this.seleccionarOC = false; // Cerrar el modal
+
+    // Navegar al formulario de orden de compra con el tipo seleccionado
+    this.router.navigate(['/oc'], {
+      queryParams: {
+        tipo: esSolicitud ? 'solicitud' : 'abierta',
+      },
+    });
+  }
+
+  // Función para abrir el modal de selección (puedes llamarla desde el menú)
+  abrirModalSeleccionOC(): void {
+    this.seleccionarOC = true;
   }
 }

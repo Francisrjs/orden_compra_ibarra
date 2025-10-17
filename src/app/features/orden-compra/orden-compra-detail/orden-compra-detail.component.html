@@ -102,6 +102,7 @@
           type="button"
           class="btn btn-success btn-sm"
           (click)="openAddRemito()"
+          [disabled]="isOrdenFinalizada()"
         >
           <i class="bi bi-plus me-1"></i>
           Agregar
@@ -124,8 +125,11 @@
             [rounded]="true"
             [text]="true"
             severity="danger"
-          ></p-button> </ng-template
-      ></app-table-generic-ng>
+            [disabled]="isOrdenFinalizada()"
+          ></p-button>
+        </ng-template>
+        ></app-table-generic-ng
+      >
       <div class="d-flex mt-2">
         <i
           class="bi bi-asterisk text-danger fs-6 mx-1"
@@ -169,7 +173,7 @@
           type="button"
           label="Aceptar"
           (click)="addEditFactura()"
-          [disabled]="!isPrecioValid()"
+          [disabled]="!isPrecioValid() || isOrdenFinalizada()"
         ></button>
       </div>
     </div>
@@ -266,13 +270,16 @@
           type="button"
           label="Agregar"
           (click)="agregarRemito()"
-          [disabled]="!remitoForm.valid"
+          [disabled]="!remitoForm.valid || isOrdenFinalizada()"
         ></button>
       </div>
     </div>
   </p-dialog>
 
-  <div class="row justify-content-center mb-3">
+  <div
+    class="row justify-content-center mb-3"
+    *ngIf="dataOrden.estado != 'FINALIZADA'"
+  >
     <div class="col-md-5 mb-2">
       <app-custom-button
         text="Agregar factura"
@@ -282,6 +289,7 @@
         (buttonClick)="showAddFactura = true"
         pTooltip="Agregar una nueva factura a esta orden de compra"
         tooltipPosition="top"
+        [disabled]="isOrdenFinalizada()"
       />
     </div>
     <div class="col-md-5 mb-2">
@@ -292,16 +300,19 @@
         styleType="danger"
         pTooltip="Cancelar la orden de compra actual"
         tooltipPosition="top"
+        [disabled]="isOrdenFinalizada()"
       />
     </div>
     <div class="col-md-5 mb-2">
       <app-custom-button
-        text="Cerrar"
+        text="Finalizar"
         icon="bi-check2"
         type="submit"
         styleType="success"
-        pTooltip="Cerrar y finalizar la orden de compra"
+        pTooltip="Solo podra cerrar la OC, si todos los elementos fueron entregados"
         tooltipPosition="top"
+        [disabled]="!todosLosItemsRecibidos() || isOrdenFinalizada()"
+        (buttonClick)="finalizarOrdenCompra()"
       />
     </div>
   </div>
@@ -314,7 +325,7 @@
           <i class="bi bi-calendar" style="font-size: 1.5rem"></i>
           <div class="mt-2">
             <b>Creación:</b> <br />
-            {{ dataOrden.fecha_creacion | date : "shortDate" }}
+            {{ dataOrden.fecha_creacion | date : "dd/MM/yyyy" }}
           </div>
         </div>
       </div>
@@ -342,33 +353,7 @@
       </div>
     </div>
   </div>
-  <!-- Estado: EN PROCESO -->
-  <!-- <div class="row justify-content-center mb-3">
-    <div class="col-md-3 mb-2" *ngIf="dataOrden.factura">
-      <div class="card text-center border-0 shadow-sm" >
-        <div class="card-body">
-          <i class="bi bi-file" style="font-size: 1.5rem;"></i>
-          <div class="mt-2"><b>Factura:</b> <br> {{dataOrden.factura}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-2" *ngIf="dataOrden.remito" >
-      <div class="card text-center border-0 shadow-sm">
-        <div class="card-body">
-          <i class="bi bi-file" style="font-size: 1.5rem;"></i>
-          <div class="mt-2"> <b>Remito:</b> <br> {{dataOrden.remito}}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-2" *ngIf="dataOrden.fecha_pago">
-      <div class="card text-center border-0 shadow-sm">
-        <div class="card-body">
-          <i class="bi bi-wallet" style="font-size: 1.5rem;"></i>
-          <div class="mt-2"><b>Fecha pago:</b> <br> {{dataOrden.fecha_pago}}</div>
-        </div>
-      </div>
-    </div>
-  </div> -->
+
   <!-- Estado: Información -->
   <div class="row justify-content-center">
     <div class="col-md-5 mb-3">
@@ -459,6 +444,7 @@
           severity="success"
           tooltipPosition="left"
           (onClick)="openItemRecibidoModal(item)"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
         <p-button
           icon="pi pi-file"
@@ -469,6 +455,7 @@
           pTooltip="Relacionar el item con una factura"
           (onClick)="openRelacionarFacturaModal(item)"
           severity="info"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
         <p-button
           icon="pi pi-pencil"
@@ -479,6 +466,7 @@
           [text]="true"
           (onClick)="openEditOrdenCompraItem(item)"
           severity="warning"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
       </ng-template>
     </app-table-generic-ng>
@@ -498,7 +486,7 @@
       ]"
       [data]="_ordenCompraService.facturas"
       [showFooter]="true"
-      [footerColumns]="['subtotal']"
+      [footerColumns]="['importe']"
       [footerLabel]="'Total General'"
       minWidth="40rem"
     >
@@ -512,6 +500,7 @@
           severity="success"
           pTooltip="Actualizar Fecha de Pago"
           (onClick)="openActualizarFechaPago(item)"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
         <p-button
           icon="pi pi-pencil"
@@ -522,6 +511,7 @@
           pTooltip="Editar Factura"
           severity="warning"
           (onClick)="editarFactura(item)"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
         <p-button
           icon="pi pi-trash"
@@ -531,6 +521,7 @@
           [text]="true"
           pTooltip="Eliminar Factura"
           severity="danger"
+          [disabled]="isOrdenFinalizada()"
         ></p-button>
       </ng-template>
     </app-table-generic-ng>

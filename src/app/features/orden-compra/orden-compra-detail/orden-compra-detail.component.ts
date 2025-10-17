@@ -177,6 +177,29 @@ export class OrdenCompraDetailComponent implements OnInit {
     return getBadgeClassByOC(estado);
   }
 
+  todosLosItemsRecibidos(): boolean {
+    if (
+      !this.dataOrden?.orden_compra_items ||
+      this.dataOrden.orden_compra_items.length === 0
+    ) {
+      return false; // Si no hay items, no se puede cerrar
+    }
+    return this.dataOrden.orden_compra_items.every(
+      (item) => item.recibido === true
+    );
+  }
+
+  // ✅ Nueva función para verificar si la orden está finalizada
+  isOrdenFinalizada(): boolean {
+    return this.dataOrden?.estado === 'FINALIZADA';
+  }
+
+  finalizarOrdenCompra(): void {
+    if (!this.dataOrden) return;
+
+    this._ordenCompraService.finalizarOC(this.dataOrden.id);
+  }
+
   isPrecioValid(): boolean {
     return this.facturaForm.valid;
   }

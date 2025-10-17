@@ -1,3 +1,61 @@
+<p-dialog
+  header="Selecciona el tipo de OC"
+  [(visible)]="seleccionarOC"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '750px' }"
+>
+  <div class="p-fluid">
+    <div class="row justify-content-center mb-3">
+      <div class="col-xl-4 mb-2">
+        <div class="card text-center border-0 shadow-sm">
+          <div class="card-body">
+            <i
+              class="bi bi-envelope-fill text-warning"
+              style="font-size: 1.5rem"
+            ></i>
+            <div class="mt-2">
+              <h5>Orden tipo Solicitud</h5>
+              <br />
+              <ul>
+                <li>Selecciona todos tus items <b>aprobados</b></li>
+                <li>Sin presupuesto fijo</li>
+              </ul>
+              <app-custom-button
+                text="Seleccionar"
+                type="submit"
+                styleType="warning"
+                (buttonClick)="seleccionarTipoOC(true)"
+              ></app-custom-button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 mb-2">
+        <div class="card text-center border-0 shadow-sm">
+          <div class="card-body">
+            <i class="bi bi-shop text-success" style="font-size: 1.5rem"></i>
+            <div class="mt-2">
+              <h5>Orden tipo Abierta</h5>
+              <br />
+              <ul>
+                <li>Crea los pedidos con un precio</li>
+                <li>con presupuesto <b>fijo</b></li>
+                <li>ideal para los pro</li>
+              </ul>
+              <app-custom-button
+                text="Seleccionar"
+                type="submit"
+                styleType="success"
+                (buttonClick)="seleccionarTipoOC(false)"
+              ></app-custom-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
 <div class="layout-wrapper">
   <!-- Sidebar -->
   <aside
