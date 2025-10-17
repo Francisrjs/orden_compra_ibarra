@@ -116,6 +116,7 @@ export interface OrdenCompra {
   orden_compra_items?: OrdenCompraItem[];
   proveedores?: Proveedor;
   tipo?: tipoOC;
+  presupuesto_limite?: number;
   presupuesto?: Presupuesto[];
   facturas?: Factura[];
 }

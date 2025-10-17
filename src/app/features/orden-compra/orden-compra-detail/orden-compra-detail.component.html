@@ -353,6 +353,41 @@
       </div>
     </div>
   </div>
+  <div *ngIf="dataOrden.presupuesto_limite" class="w-100">
+    <div
+      class="d-flex justify-content-center align-items-center w-100 mb-3"
+      style="min-height: 160px"
+    >
+      <div class="col-md-3 mb-2 d-flex justify-content-center">
+        <div class="card text-center border-0 shadow-sm">
+          <div class="card-body">
+            <i
+              class="bi bi-currency-dollar text-success"
+              style="font-size: 1.5rem"
+            ></i>
+            <div class="mt-2">
+              <b>Presupuesto limite :</b> <br />
+              {{ dataOrden.presupuesto_limite | currency : "$" }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-2 d-flex justify-content-center">
+        <div class="card text-center border-0 shadow-sm">
+          <div class="card-body">
+            <i
+              class="bi bi-card-text text-success"
+              style="font-size: 1.5rem"
+            ></i>
+            <div class="mt-2">
+              <b>Tipo OC :</b> <br />
+              {{ dataOrden.tipo }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Estado: Información -->
   <div class="row justify-content-center">
@@ -396,7 +431,7 @@
             <i class="bi bi-person-fill text-secondary me-2"></i>
             <strong>Nombre:</strong>
             {{
-              dataOrden.jefe_compra_id?.user_metadata ||
+              dataOrden.jefe_compra_id.user_metadata ||
                 dataOrden.jefe_compra_id ||
                 "Sin nombre"
             }}
@@ -404,7 +439,7 @@
           <p class="mb-0">
             <i class="bi bi-envelope-fill text-secondary me-2"></i>
             <strong>Email:</strong>
-            {{ dataOrden.jefe_compra_id?.email || "Sin email" }}
+            {{ dataOrden.jefe_compra_id.email || "Sin email" }}
           </p>
         </div>
       </div>
