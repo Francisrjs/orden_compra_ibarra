@@ -129,6 +129,7 @@
   [data]="ordenesCompra"
   [columns]="[
     { field: 'numero_oc', header: 'Numero OC' },
+    { field: 'titulo', header: 'Titulo' },
     { field: 'tipo', header: 'Tipo' },
     { field: 'estado', header: 'Estado', pipe: getEstadoBadge, isHtml: true },
     { field: 'proveedor_id.nombre', header: 'Proveedor' },

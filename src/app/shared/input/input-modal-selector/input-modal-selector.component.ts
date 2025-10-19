@@ -63,6 +63,8 @@ export class InputModalSelectorComponent
   @Input() modalTitle: string = 'Seleccionar un Producto';
   @Input() isDisabled: boolean = false;
   @Input() required: boolean = false;
+  @Input() maxLength: number | null = null;
+  @Input() minLength: number | null = null;
   private _data: SelectorData[] = [];
   @Input()
   set data(value: SelectorData[]) {
@@ -157,6 +159,30 @@ export class InputModalSelectorComponent
       this.displayedValueName = selectedItem ? selectedItem.name : '';
     } else {
       this.displayedValueName = '';
+    }
+  }
+
+  // Valida la longitud del texto de búsqueda
+  validateSearchLength(value: string): boolean {
+    if (this.minLength !== null && value.length < this.minLength) {
+      return false;
+    }
+    if (this.maxLength !== null && value.length > this.maxLength) {
+      return false;
+    }
+    return true;
+  }
+
+  // Maneja el evento de input con validación de longitud
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+
+    if (this.validateSearchLength(value)) {
+      this.pTable.filterGlobal(value, 'contains');
+    } else {
+      // Opcional: mostrar mensaje de error o limitar la entrada
+      console.warn(`Longitud de búsqueda inválida. Debe estar entre ${this.minLength || 0} y ${this.maxLength || 'ilimitado'} caracteres.`);
     }
   }
 }

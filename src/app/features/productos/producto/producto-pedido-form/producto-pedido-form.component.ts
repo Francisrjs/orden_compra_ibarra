@@ -209,10 +209,6 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       return;
     }
 
-    console.log(
-      'Formulario después de patchValue:',
-      this.productoPedidoForm.value
-    );
     // Si no hay pedidoItemOC
     this.productoPedidoForm.patchValue({
       pedido_id: this.pedidoId ?? null, // 👈 también lo seteo acá
@@ -222,10 +218,6 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       razon_pedido: this.razonPedido ?? '',
       link_referencia: this.link_Referencia ?? '',
     });
-    console.log(
-      'Formulario después de patchValue:',
-      this.productoPedidoForm.value
-    );
   }
   filterData(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
@@ -239,16 +231,10 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
 
   // ✅ Método para manejar la selección de unidad de medida
   onUnidadMedidaSelect(event: any) {
-    console.log('Unidad de medida seleccionada:', event);
     // El evento ya actualiza el formControl automáticamente
-    // Este método es principalmente para debug o lógica adicional si necesario
+    // Este método es principalmente para lógica adicional si necesario
   }
   async onSubmit() {
-    console.log(
-      this.productoPedidoForm.value,
-      this.productoPedidoForm.valid,
-      this.productoPedidoForm.errors
-    );
     this.productoPedidoForm.markAllAsTouched();
 
     // En modo normal (no OC), validar el formulario tradicional
@@ -263,6 +249,10 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
 
     // ✅ CASO ESPECIAL: Si estamos en modo OC, crear PedidoItem temporal y enviarlo al padre
     if (this.OCform) {
+      // Solo mostrar debug si el formulario es inválido y el usuario intentó enviar
+      if (this.productoPedidoForm.invalid) {
+        this.debugFormValidation();
+      }
       this.handleOCFormSubmit();
       return;
     }
@@ -299,7 +289,6 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
         });
         return;
       }
-      console.log('Aceptando parcialmente el pedido item (pedidoItemOC)');
       result = await this._pedidoService.aceptarParcialPedidoItem(
         this.pedidoItemOC.id,
         formValues.cantidad_aceptada,
@@ -455,28 +444,28 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   isFormInvalid(): boolean {
     if (this.OCform) {
       // En modo OC, usar las validaciones del FormGroup que ya incluyen el campo total
-      const formInvalid = this.productoPedidoForm.invalid;
-
-      // Debug solo cuando hay errores
-      if (formInvalid) {
-        const formValues = this.productoPedidoForm.value;
-        console.log('Validación OCform - Formulario inválido:', {
-          formErrors: this.productoPedidoForm.errors,
-          controlsInvalid: Object.keys(this.productoPedidoForm.controls)
-            .filter((key) => this.productoPedidoForm.get(key)?.invalid)
-            .map((key) => ({
-              control: key,
-              errors: this.productoPedidoForm.get(key)?.errors,
-              value: this.productoPedidoForm.get(key)?.value,
-            })),
-          formValues,
-        });
-      }
-
-      return formInvalid;
+      return this.productoPedidoForm.invalid;
     } else {
       // Modo normal, solo validar formulario
       return this.productoPedidoForm.invalid;
+    }
+  }
+
+  // ✅ Método separado para debug (llamar solo cuando sea necesario)
+  debugFormValidation(): void {
+    if (this.OCform && this.productoPedidoForm.invalid) {
+      const formValues = this.productoPedidoForm.value;
+      console.log('Validación OCform - Formulario inválido:', {
+        formErrors: this.productoPedidoForm.errors,
+        controlsInvalid: Object.keys(this.productoPedidoForm.controls)
+          .filter((key) => this.productoPedidoForm.get(key)?.invalid)
+          .map((key) => ({
+            control: key,
+            errors: this.productoPedidoForm.get(key)?.errors,
+            value: this.productoPedidoForm.get(key)?.value,
+          })),
+        formValues,
+      });
     }
   }
 }

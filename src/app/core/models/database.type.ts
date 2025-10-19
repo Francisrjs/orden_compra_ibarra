@@ -27,7 +27,7 @@ export type Areas =
   | 'SISTEMAS'
   | 'TALLER'
   | 'PREDIO';
-
+export type TipoPedidoItem = 'SOLICITUD_NORMAL' | 'OC_ABIERTA';
 export type TiempoItem = 'EN PLAZO' | 'POR VENCER' | 'DEMORADO';
 
 // Ahora, las interfaces para cada tabla de la base de datos
@@ -99,10 +99,12 @@ export interface PedidoItem {
   producto?: Producto;
   unidad_medida_id_aceptada?: UnidadMedida;
   cantidad_aceptada?: number;
+  tipo?: TipoPedidoItem;
 }
 
 export interface OrdenCompra {
   id: number;
+  titulo?: string;
   numero_oc?: string;
   jefe_compra_id: User; // UUID del usuario
   proveedor_id?: Proveedor;

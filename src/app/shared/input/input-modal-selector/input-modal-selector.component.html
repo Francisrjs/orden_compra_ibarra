@@ -69,11 +69,11 @@
                 <input
                   pInputText
                   type="text"
-                  (input)="
-                    dt.filterGlobal($any($event.target).value, 'contains')
-                  "
+                  (input)="onSearchInput($event)"
                   class="w-100"
                   placeholder="Buscar por nombre..."
+                  [attr.maxlength]="maxLength"
+                  [attr.minlength]="minLength"
                 />
               </span>
             </div>

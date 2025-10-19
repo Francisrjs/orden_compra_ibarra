@@ -177,9 +177,31 @@ export class OrdenCompraFormComponent implements OnInit {
     });
     this.ordenCompraForm = this.fb.group({
       proveedor_id: [null, Validators.required],
-      condicion_entrega: ['', Validators.required],
-      condicion_pago: ['', Validators.required],
+      condicion_entrega: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(100),
+        ]
+      ],
+      condicion_pago: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(100),
+        ]
+      ],
       presupuesto_limite: [null, [Validators.required, Validators.min(0.01)]],
+      titulo: [
+        null,
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(30),
+        ],
+      ],
     });
   }
 
@@ -577,6 +599,7 @@ export class OrdenCompraFormComponent implements OnInit {
       // Datos comunes para ambos tipos de OC
       const ordenCompraData = {
         proveedor_id: this.ordenCompraForm.value.proveedor_id,
+        titulo: this.ordenCompraForm.value.titulo,
         condicion_entrega: this.ordenCompraForm.value.condicion_entrega,
         condicion_pago: this.ordenCompraForm.value.condicion_pago,
         total: this.totalOC,

@@ -23,7 +23,9 @@
       [maxFractionDigits]="2"
       placeholder="Ingrese el precio de compra"
       inputId="precioInput"
-      class="mb-2"
+      class="mb-2 w-100"
+      styleClass="w-100"
+      inputStyleClass="w-100"
       (keydown.enter)="onEnterPrecio()"
       mode="decimal"
       prefix="$"
@@ -71,6 +73,15 @@
       (ngSubmit)="onSubmit()"
       class="space-y-6"
     >
+      <app-input-box
+        label="Titulo"
+        id="titulo"
+        placeholder="Compra de neumaticos.."
+        formControlName="titulo"
+        [required]="true"
+        [minLength]="3"
+        [maxLength]="30"
+      />
       <app-input-modal-selector
         label="Selecciona un Proovedor"
         id="proovedor_id"
@@ -87,6 +98,8 @@
         placeholder="Ej: ENVIO AL TRANSPORTE"
         formControlName="condicion_entrega"
         [required]="true"
+        [minLength]="3"
+        [maxLength]="30"
       ></app-input-box>
       <app-input-box
         label="Condiciones de Pago"
@@ -95,6 +108,8 @@
         placeholder="EJ: 30 Días, 60 días"
         formControlName="condicion_pago"
         [required]="true"
+        [minLength]="3"
+        [maxLength]="30"
       ></app-input-box>
       <div *ngIf="tipoOC == 'abierta'">
         <div class="d-flex align-items-center">
@@ -102,7 +117,7 @@
             class="bi bi-asterisk text-danger fs-6"
             style="font-size: 0.85rem"
           ></i>
-          <label>Presupuesto limitite:</label>
+          <label>Presupuesto limite:</label>
         </div>
         <p-inputNumber
           formControlName="presupuesto_limite"
@@ -110,8 +125,10 @@
           [minFractionDigits]="0"
           [maxFractionDigits]="2"
           placeholder="$500.000"
-          inputId="precioInput"
-          class="mb-2"
+          inputId="presupuestoLimiteInput"
+          class="mb-2 w-100"
+          styleClass="w-100"
+          inputStyleClass="w-100 h-100"
           mode="decimal"
           prefix="$"
         >
