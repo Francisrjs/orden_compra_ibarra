@@ -183,7 +183,7 @@ export class OrdenCompraFormComponent implements OnInit {
           Validators.required,
           Validators.minLength(3),
           Validators.maxLength(100),
-        ]
+        ],
       ],
       condicion_pago: [
         '',
@@ -191,7 +191,7 @@ export class OrdenCompraFormComponent implements OnInit {
           Validators.required,
           Validators.minLength(3),
           Validators.maxLength(100),
-        ]
+        ],
       ],
       presupuesto_limite: [null, [Validators.required, Validators.min(0.01)]],
       titulo: [
@@ -642,6 +642,17 @@ export class OrdenCompraFormComponent implements OnInit {
           }
         }
       } else if (this.tipoOC === 'abierta') {
+        let saldo =
+          this.ordenCompraForm.value.presupuesto_limite - ordenCompraData.total;
+        if (saldo < 0) {
+          this._messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail:
+              'El total de la orden de compra excede el presupuesto límite.',
+          });
+          return;
+        }
         // Nuevo flujo para OC tipo abierta
         const result = await this._ordenCompraService.createOrdenCompraAbierta(
           ordenCompraData

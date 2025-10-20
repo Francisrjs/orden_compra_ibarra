@@ -121,6 +121,9 @@ export interface OrdenCompra {
   presupuesto_limite?: number;
   presupuesto?: Presupuesto[];
   facturas?: Factura[];
+  saldo?: number; // presupuesto - total
+
+  saldo_pendiente?: number;
 }
 
 export interface Remito {
