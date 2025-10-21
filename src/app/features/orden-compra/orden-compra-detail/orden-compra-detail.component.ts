@@ -38,6 +38,8 @@ import { AccordionModule } from 'primeng/accordion';
 import { TooltipModule } from 'primeng/tooltip';
 import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
 import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.component';
+import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -57,6 +59,7 @@ import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.compo
     AccordionModule,
     TooltipModule,
     PopUpNgComponent,
+    ButtonWithIconComponent
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],
@@ -72,7 +75,7 @@ export class OrdenCompraDetailComponent implements OnInit {
   showAddRemito: boolean = false;
   facturaForm!: FormGroup;
   remitoForm!: FormGroup;
-
+  public route=inject(ActivatedRoute)
   public _remitoService = inject(RemitoService);
   public _facturaService = inject(FacturaService);
 
@@ -81,6 +84,7 @@ export class OrdenCompraDetailComponent implements OnInit {
 
   // ✅ Getter para acceso más fácil en el template
   get dataOrden() {
+  
     return this._ordenCompraService.ordenCompra();
   }
 
@@ -125,6 +129,24 @@ export class OrdenCompraDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (!idParam) {
+      console.warn('No se recibió id en la ruta');
+
+      return;
+    }
+
+    const id = Number(idParam);
+     this._ordenCompraService.getOCById(id)
+    if (Number.isNaN(id)) {
+      console.warn('id de ruta no es numérico:', idParam);
+
+      return;
+    }
+
+
+
+
     this.initFacturaForm();
     this.initRemitoForm();
   }
@@ -688,4 +710,10 @@ export class OrdenCompraDetailComponent implements OnInit {
       }
     }
   }
+  getImporteTotalOC(): number {
+  return this.dataOrden?.orden_compra_items?.reduce(
+    (total, item) => total + (item.subtotal || 0), 
+    0
+  ) ?? 0;
+}
 }

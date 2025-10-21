@@ -1,3 +1,18 @@
+   <div *ngIf="addButton"
+            class="d-flex align-items-center justify-content-center w-100 h-2/12 mb-2"
+          >
+            <div class="w-75">
+              <p class="text-center">Agregar Items</p>
+            </div>
+
+            <div class="w-25">
+              <app-button-with-icon
+                text="Agregar"
+                iconClass="plus"
+                (buttonClick)="onAddButtonClick()"
+              />
+            </div>
+          </div>
 <p-table 
   #dt
   [value]="dataSignal()" 

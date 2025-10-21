@@ -15,6 +15,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { ProveedoresDetalleComponent } from './features/proveedores/proveedores-detalle/proveedores-detalle.component';
 import { ProveedoresFormComponent } from './features/proveedores/proveedores-form/proveedores-form.component';
 import { OrdenCompraHomeComponent } from './features/orden-compra/orden-compra-home/orden-compra-home.component';
+import { OrdenCompraDetailComponent } from './features/orden-compra/orden-compra-detail/orden-compra-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
@@ -34,7 +35,9 @@ export const routes: Routes = [
   { path: 'oc/pendientes', component: ConfirmacionPedidosComponent },
   { path: 'oc', component: OrdenCompraFormComponent },
   {path: 'oc/home', component: OrdenCompraHomeComponent},
+  {path: 'oc/:id',component: OrdenCompraDetailComponent},
   { path: '**', redirectTo: 'pedidos' },
+  
   
 ];
 

@@ -1,14 +1,15 @@
-import { Component, Input, ContentChild, TemplateRef, Signal, computed } from '@angular/core';
+import { Component, Input, ContentChild, TemplateRef, Signal, computed, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { RippleModule } from 'primeng/ripple';
+import { ButtonWithIconComponent } from '../../buttons/button-with-icon/button-with-icon.component';
 
 @Component({
   selector: 'app-table-generic-ng',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, TagModule, RippleModule],
+  imports: [CommonModule, TableModule, ButtonModule, TagModule, RippleModule,ButtonWithIconComponent],
   templateUrl: './table-generic-ng.component.html',
   styleUrls: ['./table-generic-ng.component.css']
 })
@@ -25,7 +26,8 @@ export class TableGenericNGComponent<T = any> {
   @Input() showFooter: boolean = false;
   @Input() footerColumns: string[] = [];
   @Input() footerLabel: string = 'Total';
-
+  @Input() addButton:boolean=false;
+  @Output() addButtonClick = new EventEmitter<void>();
   dataSignal = computed(() => {
     if (typeof this.data === 'function') {
       return (this.data as Signal<T[]>)() ?? [];
@@ -66,6 +68,11 @@ export class TableGenericNGComponent<T = any> {
   // Método para verificar si una columna debe mostrar total
   shouldShowTotal(field: string): boolean {
     return this.footerColumns.includes(field);
+  }
+  
+  // Método para manejar el click del botón de agregar
+  onAddButtonClick(): void {
+    this.addButtonClick.emit();
   }
   
   onToggle(row: any, dt: any) {
