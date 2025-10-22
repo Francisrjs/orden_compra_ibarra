@@ -225,13 +225,15 @@ addOrdenCompraItem() {
     });
   }
 
-  getTotalCurrency(value: number): string {
-    return value ? '$' + value.toFixed(2) : '$0.00';
-  }
+ getTotalCurrency = (value: number): string => {
+  return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
+  // Formato: $1,234,567.89
+};
 
-  getImporteCurrency(value: number): string {
-    return value ? '$' + value.toFixed(2) : '$0.00';
-  }
+getImporteCurrency = (value: number): string => {
+  return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
+  // Formato: $1,234,567.89
+};
   getRecibido(value: boolean): string {
     return value ? 'SI' : 'NO';
   }

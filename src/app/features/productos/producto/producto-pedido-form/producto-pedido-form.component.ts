@@ -400,7 +400,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     }
 
     // Buscamos la unidad de medida completa
-    const unidadMedidaSeleccionada = this.medidasData().find(
+    const unidadMedidaSeleccionada: UnidadMedida | undefined = this.medidasData().find(
       (um) => um.id === formValues.unidad_medida_id
     );
 
@@ -412,7 +412,9 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       producto_id: productoSeleccionado.id, // Asignamos el ID
       productos: productoSeleccionado, // Y aquí asignamos el OBJETO COMPLETO
       cantidad: formValues.cantidad,
-      unidad_medida_id: unidadMedidaSeleccionada,
+        unidad_medida_id: unidadMedidaSeleccionada 
+    ? unidadMedidaSeleccionada 
+    : formValues.unidad_medida_id,
       unidad_medida: unidadMedidaSeleccionada,
       estado: 'Pendiente',
       razon_pedido: formValues.razon_pedido || '',
