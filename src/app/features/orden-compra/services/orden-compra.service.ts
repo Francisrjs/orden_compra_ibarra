@@ -484,36 +484,13 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
         };
       }
 
-      // 1. Crear pedido temporal usando el servicio existente (con campos correctos)
-      const pedidoData = {
-        titulo: 'Pedido temporal para OC Abierta',
-        descripcion: `Pedido temporal para OC Abierta - ${new Date().toLocaleDateString(
-          'es-AR'
-        )}`,
-        estado: 'En Proceso de Entrega' as const,
-        plazo_entrega: new Date().toISOString().split('T')[0], // ✅ CAMPO CORRECTO
-        urgente: false,
-        area: 'LOGISTICA' as const,
-      };
+     
 
-      console.log('🔄 Creando pedido temporal con datos:', pedidoData);
-
-      const { data: pedidoTemporal, error: pedidoError } =
-        await this._pedidoService.addPedido(pedidoData);
-
-      if (pedidoError || !pedidoTemporal) {
-        console.error('❌ Error creando pedido temporal:', pedidoError);
-        return { data: null, error: pedidoError };
-      }
-
-      console.log('✅ Pedido temporal creado:', pedidoTemporal);
-
-      // 2. Crear los pedido_items directamente (el método del PedidoService fuerza estado 'Pendiente')
+      //1. Creo los pedido_item directamente aprobandos
       const pedidoItemsCreados: PedidoItem[] = [];
 
       for (const item of currentItems) {
         const itemData = {
-          pedido_id: pedidoTemporal.id,
           producto_id: item.producto?.id || item.producto_id,
           cantidad: item.cantidad || 1,
           unidad_medida_id: item.unidad_medida_id || item.unidad_medida?.id,
@@ -529,22 +506,26 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           .insert(itemData)
           .select('*')
           .single();
-
-        if (itemError || !nuevoItem) {
-          console.error('❌ Error creando pedido item:', itemError);
-          // Si falla, eliminar el pedido temporal (los items se eliminan en cascada)
+      if (itemError || !nuevoItem) {
+        console.error('❌ Error creando pedido item:', itemError);
+        
+        // ❌ ROLLBACK: Eliminar todos los pedido_items creados hasta ahora
+        if (pedidoItemsCreados.length > 0) {
+          const idsAEliminar = pedidoItemsCreados.map(pi => pi.id);
+          console.log('🔄 Haciendo rollback de pedido_items:', idsAEliminar);
+          
           await this._supabaseClient
-            .from('pedidos')
+            .from('pedido_items')
             .delete()
-            .eq('id', pedidoTemporal.id);
-          return { data: null, error: itemError };
-        }
+          
+            .in('id', idsAEliminar);
+        }}
 
         console.log('✅ Pedido item creado:', nuevoItem);
         pedidoItemsCreados.push(nuevoItem as PedidoItem);
       }
 
-      // 3. Crear la orden de compra
+      // 2. Crear la orden de compra
       const ocData = {
         ...ordenCompraData,
         jefe_compra_id: '077cd8cc-72aa-4870-82f2-3ee619c24b12',
@@ -559,19 +540,24 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           .select('*')
           .single();
 
-      if (ocError || !newOrdenCompra) {
-        console.error('❌ Error creando orden de compra:', ocError);
-        // Si falla, eliminar el pedido temporal y sus items
-        await this._supabaseClient
-          .from('pedidos')
-          .delete()
-          .eq('id', pedidoTemporal.id);
-        return { data: null, error: ocError };
-      }
+         if (ocError || !newOrdenCompra) {
+      console.error('❌ Error creando orden de compra:', ocError);
+      
+      // ❌ ROLLBACK: Eliminar todos los pedido_items creados
+      const idsAEliminar = pedidoItemsCreados.map(pi => pi.id);
+      console.log('🔄 Haciendo rollback de pedido_items:', idsAEliminar);
+      
+      await this._supabaseClient
+        .from('pedido_items')
+        .delete()
+        .in('id', idsAEliminar);
+      
+      return { data: null, error: ocError };
+    }
 
       console.log('✅ Orden de compra creada:', newOrdenCompra);
 
-      // 4. Crear los orden_compra_items usando los pedido_items recién creados
+      // 3. Crear los orden_compra_items usando los pedido_items recién creados
       const ordenCompraItems = this.ordenCompraItems();
       const ocItemsData = pedidoItemsCreados.map((pedidoItem, index) => {
         const ocItem = ordenCompraItems[index];
@@ -600,11 +586,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           .from('orden_compra')
           .delete()
           .eq('id', newOrdenCompra.id);
-        await this._supabaseClient
-          .from('pedidos')
-          .delete()
-          .eq('id', pedidoTemporal.id);
-        return { data: null, error: ocItemsError };
+    
       }
 
       console.log('✅ Orden_compra_items creados:', ocItemsCreados);

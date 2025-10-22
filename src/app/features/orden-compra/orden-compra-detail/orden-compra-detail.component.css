@@ -1,0 +1,41 @@
+/* Cambiar el color de los tabs */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  color: #495057 !important; /* Color gris oscuro por defecto */
+}
+
+/* Tab activo */
+::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: #198754 !important; /* Color gris para el tab activo */
+  border-color: #6c757d !important; /* Borde gris */
+}
+
+/* Hover sobre los tabs */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  color: #198754 !important; /* Color negro en hover */
+  background-color: #f8f9fa !important; /* Fondo gris claro */
+}
+
+/* Iconos dentro de los tabs */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link i {
+  color: inherit !important;
+}
+/* Eliminar underline del tab completo */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  text-decoration: none !important;
+}
+
+/* Asegurar que el ícono tampoco tenga underline */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link i {
+  text-decoration: none !important;
+}
+
+/* Hover - sin underline */
+::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  text-decoration: none !important;
+}
+
+/* Tab activo - sin underline */
+::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  text-decoration: none !important;
+}
+

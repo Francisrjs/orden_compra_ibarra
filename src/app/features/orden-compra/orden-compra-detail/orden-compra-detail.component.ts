@@ -29,6 +29,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { TabViewModule } from 'primeng/tabview';
 import { ButtonModule } from 'primeng/button';
 import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
@@ -59,7 +60,8 @@ import { ActivatedRoute } from '@angular/router';
     AccordionModule,
     TooltipModule,
     PopUpNgComponent,
-    ButtonWithIconComponent
+    ButtonWithIconComponent,
+    TabViewModule 
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],
@@ -182,19 +184,30 @@ export class OrdenCompraDetailComponent implements OnInit {
   getFactura(value: string): string {
     return value ? value : 'Sin Factura';
   }
-  formatDate(value: Date | string | null | undefined): string {
-    if (!value) return '-';
+ formatDate(value: Date | string | null | undefined): string {
+  if (!value) return '-';
 
-    const date = typeof value === 'string' ? new Date(value) : value;
+  // Si es string en formato YYYY-MM-DD, convertir directamente a DD/MM/YYYY
+  if (typeof value === 'string') {
+    const [year, month, day] = value.split('-');
+    if (year && month && day) {
+      return `${day}/${month}/${year}`;
+    }
+  }
 
-    if (!(date instanceof Date) || isNaN(date.getTime())) return '-';
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-
+  // Si es un objeto Date
+  if (value instanceof Date) {
+    if (isNaN(value.getTime())) return '-';
+    
+    const day = String(value.getDate()).padStart(2, '0');
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const year = value.getFullYear();
+    
     return `${day}/${month}/${year}`;
   }
+
+  return '-';
+}
   getBadgeClass(estado: string) {
     return getBadgeClassByOC(estado);
   }

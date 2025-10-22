@@ -15,12 +15,17 @@
   [dropdownOptionValue]="dropdownOptionValue"
 ></app-pop-up-ng>
 <div *ngIf="dataOrden; else noInfo">
-  <h2 class="text-center mb-4 d-flex align-items-center justify-content-center">
+<div class="title mb-4 text-center">
+  <h2 class="d-flex align-items-center justify-content-center gap-2 mb-2">
     <span>{{ dataOrden.numero_oc }}</span>
-    <span class="badge ms-2 fs-6" [ngClass]="getBadgeClass(dataOrden.estado)">
+    <span class="badge fs-6" [ngClass]="getBadgeClass(dataOrden.estado)">
       {{ dataOrden.estado }}
     </span>
   </h2>
+  <span class="text-secondary d-block">{{dataOrden.titulo}}</span>
+</div>
+
+
   <p-dialog
     header="Agregar/Editar factura y remito"
     [(visible)]="showAddFactura"
@@ -111,9 +116,8 @@
 
       <app-table-generic-ng
         [columns]="[
-          { field: 'id', header: 'ID', width: '2rem' },
-          { field: 'numero_remito', header: 'NRO REMITO', width: '20rem' },
-          { field: 'fecha', header: 'Fecha', pipe: formatDate }
+          { field: 'numero_remito', header: 'NRO REMITO', width: '10rem' },
+          { field: 'fecha', header: 'Fecha', width:'8rem', pipe:formatDate }
         ]"
         [data]="_remitoService.remitos"
       >
@@ -276,52 +280,15 @@
     </div>
   </p-dialog>
 
-  <div
-    class="row justify-content-center mb-3"
-    *ngIf="dataOrden.estado != 'FINALIZADA'"
-  >
-    <div class="col-md-5 mb-2">
-      <app-custom-button
-        text="Agregar factura"
-        icon="bi-paperclip"
-        type="submit"
-        styleType="warning"
-        (buttonClick)="showAddFactura = true"
-        pTooltip="Agregar una nueva factura a esta orden de compra"
-        tooltipPosition="top"
-        [disabled]="isOrdenFinalizada()"
-      />
-    </div>
-    <div class="col-md-5 mb-2">
-      <app-custom-button
-        text="Cancelar"
-        icon="bi-ban"
-        type="submit"
-        styleType="danger"
-        pTooltip="Cancelar la orden de compra actual"
-        tooltipPosition="top"
-        [disabled]="isOrdenFinalizada()"
-      />
-    </div>
-    <div class="col-md-5 mb-2">
-      <app-custom-button
-        text="Finalizar"
-        icon="bi-check2"
-        type="submit"
-        styleType="success"
-        pTooltip="Solo podra cerrar la OC, si todos los elementos fueron entregados"
-        tooltipPosition="top"
-        [disabled]="!todosLosItemsRecibidos() || isOrdenFinalizada()"
-        (buttonClick)="finalizarOrdenCompra()"
-      />
-    </div>
-  </div>
+
   <p-divider></p-divider>
   
   <!-- Layout con 2 columnas: Cards info en centro (col-8) y Personas a la derecha (col-4) -->
   <div class="row mb-3">
+
     <!-- COLUMNA IZQUIERDA/CENTRO: Cards de información -->
-    <div class="col-lg-8 mt-4">
+    <div class="col-lg-8 mt-5">
+
       <!-- Fila 1: Creación, Entrega, Pago -->
       <div class="row justify-content-center mb-3">
         <div class="col-md-4 mb-2">
@@ -455,8 +422,16 @@
   </div>
 
   <!-- Sección de Items de la orden -->
-  <div class="row">
-    <div class="col-12">
+   <div class="card">
+
+   
+   <p-tabView styleClass="tabview-custom">
+    <p-tabPanel>
+        <ng-template pTemplate="header" style="color:none">
+            <i class="pi pi-box mx-1 "></i>
+            <span>Items de la orden</span>
+        </ng-template>
+          <div class="col-12">
       <div class="d-flex justify-content-center align-items-center">
         <i class="bi bi-box-fill mx-2 mb-2" style="font-size: 1.5rem"></i>
         <h4 class="text-center">Items de la orden:</h4>
@@ -480,6 +455,7 @@
       [showFooter]="true"
       [footerColumns]="['subtotal']"
       [footerLabel]="'Total General'"
+      
       minWidth="40rem"
       [addButton]="dataOrden.tipo=='ABIERTA'&& dataOrden.estado!='FINALIZADA'"
     >
@@ -520,9 +496,17 @@
       </ng-template>
     </app-table-generic-ng>
 
-    <div class="d-flex justify-content-center align-items-center">
+
+  </div>
+    </p-tabPanel>
+    <p-tabPanel header="Header II">
+        <ng-template pTemplate="header">
+            <i class="pi pi-file mx-2"></i>
+            <span>Facturas</span>
+        </ng-template>
+           <div class="d-flex justify-content-center align-items-center">
       <i class="bi bi-file-earmark-text-fill" style="font-size: 1.5rem"></i>
-      <h4 class="text-center mt-2">Facturas:</h4>
+      <h4 class="text-center mt-2 mx-2">Facturas:</h4>
     </div>
 
     <p-divider></p-divider>
@@ -538,6 +522,7 @@
       [footerColumns]="['importe']"
       [footerLabel]="'Total General'"
       minWidth="40rem"
+      (addButtonClick)="showAddFactura = true"
       [addButton]="dataOrden.estado!='FINALIZADA'"
     >
       <ng-template #actions let-item>
@@ -575,11 +560,15 @@
         ></p-button>
       </ng-template>
     </app-table-generic-ng>
-  </div>
-
-  <div class="d-flex justify-content-center align-items-center">
-    <i class="bi bi-currency-dollar" style="font-size: 1.5rem"></i>
-    <h4 class="text-center mt-2">Presupuestos:</h4>
+    </p-tabPanel>
+    <p-tabPanel header="Header IV">
+        <ng-template pTemplate="header">
+            <i class="pi pi-folder mx-2"></i>
+            <span>Presupuestos</span>
+        </ng-template>
+         <div class="d-flex justify-content-center align-items-center">
+          <i class="bi bi-folder mx-2" style="font-size: 1.5rem"></i>
+          <h4 class="text-center mt-2">Presupuestos:</h4>
   </div>
 
   <p-divider></p-divider>
@@ -595,8 +584,65 @@
     [addButton]="dataOrden.estado!='FINALIZADA'"
   >
   </app-table-generic-ng>
+    </p-tabPanel>
+    <p-tabPanel header="Header IV">
+        <ng-template pTemplate="header">
+            <i class="pi pi-search mx-2"></i>
+            <span>Remitos </span>
+        
+        </ng-template>
+         <div class="d-flex justify-content-center align-items-center">
+    <i class="bi bi-search mx-2" style="font-size: 1.5rem"></i>
+    <h4 class="text-center mt-2">Remitos:</h4>
+  </div>
+
+  <p-divider></p-divider>
+  <app-table-generic-ng
+    [columns]="[
+      { field: 'pedido_item_id.productos.nombre', header: 'Producto' },
+      { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
+      { field: 'cantidad', header: 'Cantidad' },
+      { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+    ]"
+    [data]="_ordenCompraService.presupuestos"
+    minWidth="40rem"
+    [addButton]="dataOrden.estado!='FINALIZADA'"
+  >
+  </app-table-generic-ng>
+    </p-tabPanel>
+</p-tabView>
+</div>
+  <div
+    class="row justify-content-around align-items-center mb-3 mt-2"
+    *ngIf="dataOrden.estado != 'FINALIZADA'"
+  >
+  
+    <div class="col-md-5 mb-2 w-25">
+      <app-custom-button
+        text="Cancelar"
+        icon="bi-ban"
+        type="submit"
+        styleType="danger"
+        pTooltip="Cancelar la orden de compra actual"
+        tooltipPosition="top"
+        [disabled]="isOrdenFinalizada()"
+      />
+    </div>
+    <div class="col-md-5 mb-2 w-25">
+      <app-custom-button
+        text="Finalizar"
+        icon="bi-check2"
+        type="submit"
+        styleType="success"
+        pTooltip="Solo podra cerrar la OC, si todos los elementos fueron entregados"
+        tooltipPosition="top"
+        [disabled]="!todosLosItemsRecibidos() || isOrdenFinalizada()"
+        (buttonClick)="finalizarOrdenCompra()"
+      />
     </div>
   </div>
+  </div>
+  
 
 <ng-template #noInfo>
   <h1>Sin Información a mostrar</h1>
