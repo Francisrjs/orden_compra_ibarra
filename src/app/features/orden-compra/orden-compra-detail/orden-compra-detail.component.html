@@ -599,12 +599,11 @@
   <p-divider></p-divider>
   <app-table-generic-ng
     [columns]="[
-      { field: 'pedido_item_id.productos.nombre', header: 'Producto' },
-      { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
-      { field: 'cantidad', header: 'Cantidad' },
-      { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+      { field: 'numero_remito', header: 'Número Remito' },
+      { field: 'numero_factura', header: 'Factura Relacionada' },
+      { field: 'fecha', header: 'Fecha', pipe: formatDateString }
     ]"
-    [data]="_ordenCompraService.presupuestos"
+    [data]="_ordenCompraService.remitos()"
     minWidth="40rem"
     [addButton]="dataOrden.estado!='FINALIZADA'"
   >

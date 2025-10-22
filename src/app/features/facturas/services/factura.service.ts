@@ -30,6 +30,7 @@ export class FacturaService extends StateService<Factura> {
         // Cargar los remitos en el servicio de remitos
         if (data.remitos) {
           this._remitoService.remitos.set(data.remitos);
+          console.log(this.factura())
         }
       }
 

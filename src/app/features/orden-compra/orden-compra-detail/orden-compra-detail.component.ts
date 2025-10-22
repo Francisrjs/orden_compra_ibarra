@@ -29,7 +29,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { TabViewModule } from 'primeng/tabview';
+import { TabPanel, TabViewModule } from 'primeng/tabview';
 import { ButtonModule } from 'primeng/button';
 import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
@@ -92,8 +92,6 @@ export class OrdenCompraDetailComponent implements OnInit {
 
   // ✅ Computed signals para las tablas (se actualizan automáticamente)
 
-  public remitos: Remito[] | null = this._remitoService.remitos();
-
   // Fecha máxima para remitos y facturas (hoy)
   public maxDate: string = new Date().toISOString().split('T')[0];
 
@@ -116,15 +114,12 @@ export class OrdenCompraDetailComponent implements OnInit {
   dropdownOptionValue: string = 'value';
 
   constructor(private fb: FormBuilder) {
-    effect(() => {
-      this.remitos = this._remitoService.remitos() ?? [];
-    });
-
     // ✅ Effect para forzar detección cuando cambia la orden
     effect(() => {
       this._ordenCompraService.ordenCompra();
       this._ordenCompraService.facturas();
       this._ordenCompraService.presupuestos();
+      this._ordenCompraService.remitos();
       this._ordenCompraService.ordenCompraItemsSignal();
       this.cdr.markForCheck();
     });

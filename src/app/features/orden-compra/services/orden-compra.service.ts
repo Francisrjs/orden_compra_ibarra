@@ -27,6 +27,20 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   facturas = computed(() => this.ordenCompra()?.facturas ?? []);
 
   presupuestos = computed(() => this.ordenCompra()?.presupuesto ?? []);
+  
+  remitos = computed(() => {
+    const facturas = this.ordenCompra()?.facturas ?? [];
+    
+    // Flatten: extraer todos los remitos de todas las facturas y agregar info de la factura
+    return facturas.flatMap((factura: any) => {
+      const remitosArray = Array.isArray(factura.remitos) ? factura.remitos : [];
+      return remitosArray.map((remito: any) => ({
+        ...remito,
+        numero_factura: factura.numero_factura,
+        factura_id: factura.id
+      }));
+    });
+  });
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
     {
       this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
@@ -539,7 +553,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
           .insert(ocData)
           .select('*')
           .single();
-
+      
          if (ocError || !newOrdenCompra) {
       console.error('❌ Error creando orden de compra:', ocError);
       
@@ -554,7 +568,9 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       
       return { data: null, error: ocError };
     }
-
+    //actualizo la señal
+    this.ordenesCompra.update((currentOrdenes) => [...currentOrdenes, newOrdenCompra]);
+    this.addItem(newOrdenCompra);
       console.log('✅ Orden de compra creada:', newOrdenCompra);
 
       // 3. Crear los orden_compra_items usando los pedido_items recién creados
