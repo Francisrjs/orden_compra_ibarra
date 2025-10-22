@@ -213,7 +213,7 @@ export class TableItemsPedidosCardComponent implements OnChanges {
   getOrdenCompra(item: PedidoItem | OrdenCompraItem): string {
     const ocItem = this._ordenesCompraService
       .ordenCompraItems()
-      .find((oc) => oc.pedido_item_id === item.id) as OrdenCompraItem;
+      .find((oc) => oc.pedido_item_id?.id === item.id) as OrdenCompraItem;
     return ocItem.orden_compra_id?.numero_oc ?? '';
   }
 }

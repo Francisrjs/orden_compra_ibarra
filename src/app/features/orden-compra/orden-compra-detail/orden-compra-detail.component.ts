@@ -8,10 +8,12 @@ import {
   computed,
   ChangeDetectorRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import {
   Factura,
   OrdenCompra,
+  OrdenCompraItem,
+  PedidoItem,
   Remito,
 } from 'src/app/core/models/database.type';
 import { CardModule } from 'primeng/card';
@@ -41,6 +43,10 @@ import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
 import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.component';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 import { ActivatedRoute } from '@angular/router';
+import { SidebarModule } from 'primeng/sidebar';
+import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
+import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
+import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -61,12 +67,21 @@ import { ActivatedRoute } from '@angular/router';
     TooltipModule,
     PopUpNgComponent,
     ButtonWithIconComponent,
-    TabViewModule 
+    TabViewModule,
+    SidebarComponent
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],
+  providers:[MessageService,CurrencyPipe]
 })
 export class OrdenCompraDetailComponent implements OnInit {
+  //sidebar
+   sidebarVisible = false;
+    sidebarTitle = '';
+    componentToLoad: Type<any> | null = null;
+    sidebarInputs: Record <string, unknown> | undefined; 
+    @Input() onSaveSuccess?: () => void;
+  
   @Input() formResult?: (result: {
     severity?: string;
     success: boolean;
@@ -80,7 +95,8 @@ export class OrdenCompraDetailComponent implements OnInit {
   public route=inject(ActivatedRoute)
   public _remitoService = inject(RemitoService);
   public _facturaService = inject(FacturaService);
-
+  private _messageService=inject(MessageService);
+  private currencyPipe = inject(CurrencyPipe);
   public _ordenCompraService = inject(OrdenCompraService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -147,7 +163,50 @@ export class OrdenCompraDetailComponent implements OnInit {
     this.initFacturaForm();
     this.initRemitoForm();
   }
+addOrdenCompraItem() {
+  console.log('Abriendo producto ..');
+  this.sidebarTitle = 'Agregar Item a la OC:';
+  this.componentToLoad = ProductoPedidoFormComponent;
+  this.sidebarInputs = {
+    OCform: true,
+    onSaveSuccess: () => this.handleCloseSidebar(),
+    
+    // ✅ Usar el @Input function en lugar del @Output
+    itemCreatedForOCAbierta: (event: { item: PedidoItem; precio: number }) => 
+      this.handleItemCreatedForOC(event),
+    
+    formResult: (result: {
+      severity?: string;
+      success: boolean;
+      message: string;
+    }) => this.handleFormResult(result),
+  };
 
+  this.sidebarVisible = true;
+}
+    handleCloseSidebar() {
+    console.log('Producto guardado, cerrando sidebar...');
+    this.sidebarVisible = false;
+  }
+  handleFormResult(result: {
+    severity?: string;
+    success?: boolean;
+    message: string;
+  }): void {
+    if (!result.severity) {
+      this._messageService.add({
+        severity: result.success ? 'success' : 'error',
+        summary: result.success ? 'Éxito' : 'Error',
+        detail: result.message,
+      });
+    } else {
+      this._messageService.add({
+        severity: result.severity,
+        summary: 'Info',
+        detail: result.message,
+      });
+    }
+  }
   initFacturaForm(): void {
     this.facturaForm = this.fb.group({
       id: [null], // Para edición
@@ -432,7 +491,33 @@ export class OrdenCompraDetailComponent implements OnInit {
 
     this.closeModal();
   }
+handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
+  const { item, precio } = event;
 
+  // Agregar a la signal usando el servicio
+  this._ordenCompraService.addItemOC(item, precio);
+
+  console.log(
+    'Item agregado a la OC:',
+    this._ordenCompraService.ordenCompraItems()
+  );
+
+  this._messageService.add({
+    severity: 'success',
+    summary: 'Item agregado',
+    detail: `${
+      item.producto?.nombre || 'Producto'
+    } agregado con precio ${this.currencyPipe.transform(
+      precio,
+      '$',
+      'symbol',
+      '1.0-0'
+    )}`,
+  });
+
+  // Cerrar el sidebar
+  this.handleCloseSidebar();
+}
   /**
    * Maneja la cancelación del modal
    */

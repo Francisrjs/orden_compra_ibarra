@@ -91,6 +91,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     item: PedidoItem;
     precio: number;
   }>();
+  @Input() itemCreatedForOCAbierta?: (event: { item: PedidoItem; precio: number }) => void;
 
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
@@ -256,7 +257,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       this.handleOCFormSubmit();
       return;
     }
-
+    
     const formValues: any = { ...this.productoPedidoForm.value };
 
     if (
@@ -335,7 +336,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
             ? 'El producto fue actualizado correctamente ✅'
             : 'El producto fue agregado correctamente ✅',
       });
-
+     
       if (this.onSaveSuccess) {
         this.onSaveSuccess();
       }
@@ -411,7 +412,7 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
       producto_id: productoSeleccionado.id, // Asignamos el ID
       productos: productoSeleccionado, // Y aquí asignamos el OBJETO COMPLETO
       cantidad: formValues.cantidad,
-      unidad_medida_id: formValues.unidad_medida_id,
+      unidad_medida_id: unidadMedidaSeleccionada,
       unidad_medida: unidadMedidaSeleccionada,
       estado: 'Pendiente',
       razon_pedido: formValues.razon_pedido || '',
@@ -424,11 +425,18 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
     } as PedidoItem;
 
     // Emitir el evento al componente padre con el item y el precio
+   if (this.itemCreatedForOCAbierta) {
+    this.itemCreatedForOCAbierta({ 
+      item: pedidoItemTemporal, 
+      precio: totalValue 
+    });
+  } else {
+    // ✅ Fallback: Si no hay input function, usar el @Output (compatibilidad)
     this.itemCreatedForOC.emit({
       item: pedidoItemTemporal,
       precio: totalValue,
     });
-
+  }
     // Mostrar mensaje de éxito
     this._messageService.add({
       severity: 'success',

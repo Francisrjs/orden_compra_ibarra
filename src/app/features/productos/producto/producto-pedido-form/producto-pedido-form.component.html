@@ -80,9 +80,9 @@
         </div>
 
         <!-- Campos adicionales solo para modo usuario normal (no OCform) -->
-        <div *ngIf="modeUser && !OCform">
+        <div *ngIf="modeUser">
           <app-input-box
-            label="Razon del pedido"
+            [label]="OCform? 'Razon de la Compra':'Link de Pedido (opcional)'"
             type="text"
             id="razon_pedido"
             placeholder="Ej: Este pedido es urgente por.."
@@ -92,7 +92,7 @@
             formControlName="razon_pedido"
           ></app-input-box>
           <app-input-box
-            label="Link de Pedido (opcional)"
+            [label]="OCform? 'Link de referencia':'Link de Pedido (opcional)'"
             type="text"
             id="link_referencia"
             placeholder="www.mercadolibre.com.ar/.."

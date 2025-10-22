@@ -92,7 +92,7 @@ export interface PedidoItem {
   estado: EstadoItemPedido;
   justificacion_rechazo?: string;
   razon_pedido?: string;
-  unidad_medida_id: number;
+  unidad_medida_id: UnidadMedida;
   link_referencia: string;
   unidad_medida: UnidadMedida;
   //Relacion opcional
@@ -136,7 +136,7 @@ export interface Remito {
 export interface OrdenCompraItem {
   id: number;
   orden_compra_id?: OrdenCompra;
-  pedido_item_id?: number;
+  pedido_item_id?: PedidoItem;
   precio_unitario?: number;
   cantidad: number;
   subtotal: number;

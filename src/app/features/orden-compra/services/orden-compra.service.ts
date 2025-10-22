@@ -42,17 +42,42 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     });
   });
   addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
-    {
-      this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
-      this.ordenCompraItems.update((items) => [
-        ...items,
-        {
-          pedido_item_id: newItem.id,
-          pedido_items: newItem,
-          precio_unitario: new_precio_unitario,
-        } as OrdenCompraItem,
-      ]);
-    }
+    // Agregar a itemsOC
+    this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
+    
+    // Agregar a ordenCompraItems
+    this.ordenCompraItems.update((items) => [
+      ...items,
+      {
+        pedido_item_id: newItem,
+        pedido_items: newItem,
+        precio_unitario: new_precio_unitario,
+        cantidad: newItem.cantidad || 1,
+        subtotal: new_precio_unitario * (newItem.cantidad || 1),
+      } as OrdenCompraItem,
+    ]);
+          const nuevoOrdenCompraItem: OrdenCompraItem = {
+    pedido_item_id: newItem,
+    pedido_items: newItem, // ✅ Objeto completo para acceder a productos, unidad_medida, etc.
+    precio_unitario: new_precio_unitario,
+    cantidad: newItem.cantidad || 1,
+    subtotal: new_precio_unitario * (newItem.cantidad || 1),
+    recibido: false,
+  } as OrdenCompraItem;
+    // Actualizar la ordenCompra signal si existe
+    this.ordenCompra.update((ordenActual) => {
+    if (!ordenActual) return ordenActual; // Si no hay OC cargada, no hacer nada
+    
+    // Actualizar inmutablemente el array de items
+    return {
+      ...ordenActual,
+      orden_compra_items: [
+        ...(ordenActual.orden_compra_items || []),
+        nuevoOrdenCompraItem
+      ],
+    };
+  });
+  console.log('✅ Item agregado a las signals:', nuevoOrdenCompraItem);
   }
   deleteItemOC(item: PedidoItem) {
     // Elimina el PedidoItem de itemsOC
@@ -61,7 +86,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     );
     // Elimina el OrdenCompraItem correspondiente de ordenCompraItems
     this.ordenCompraItems.update((items) =>
-      items.filter((ocItem) => ocItem.pedido_item_id !== item.id)
+      items.filter((ocItem) => ocItem.pedido_item_id?.id !== item.id)
     );
   }
   sumProductsOC() {
@@ -120,7 +145,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
   }
   async getOrdenDeCompra(item: PedidoItem) {
     if (this.ordenesCompra().length === 0) this.getAllItemsEnvio();
-    return this.ordenCompraItems().filter((p) => p.pedido_item_id == item.id);
+    return this.ordenCompraItems().filter((p) => p.pedido_item_id?.id == item.id);
   }
   async getAllItemsEnvio() {
     try {
