@@ -128,6 +128,7 @@
 <app-table-generic-ng-big-data
   [data]="ordenesCompra"
   [columns]="[
+    { field: 'created_at', header: 'Creacion', pipe:getFormateDate },
     { field: 'numero_oc', header: 'Numero OC' },
     { field: 'titulo', header: 'Titulo' },
     { field: 'tipo', header: 'Tipo' },
@@ -161,7 +162,7 @@
       [rounded]="true"
       [text]="true"
       severity="info"
-      (onClick)="openOrdenCompra(row)"
+      [routerLink]="['/oc', row.id]"
     />
   </ng-template>
 </app-table-generic-ng-big-data>

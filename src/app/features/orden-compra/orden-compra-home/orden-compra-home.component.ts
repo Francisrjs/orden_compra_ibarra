@@ -16,11 +16,12 @@ import { TableGenericNgBigDataComponent } from "src/app/shared/tables/table-gene
 import { ButtonModule } from 'primeng/button';
 import { OrdenCompraDetailComponent } from '../orden-compra-detail/orden-compra-detail.component';
 import { getBadgeClassByOC } from 'src/app/shared/funtions/pedidosFuntions';
-
+import { extractDateFromTimestamp } from 'src/app/shared/funtions/OCFuntions';
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-orden-compra-home',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, CarouselCardsComponent, TableGenericNgBigDataComponent, ButtonModule],
+  imports: [CommonModule, SidebarComponent, ToastModule, CardDashboardIconComponent, AccordionModule, CarouselCardsComponent, TableGenericNgBigDataComponent, ButtonModule,RouterLink],
   templateUrl: './orden-compra-home.component.html',
   styleUrls: ['./orden-compra-home.component.css'],
   providers: [MessageService, CurrencyPipe]
@@ -64,7 +65,9 @@ export class OrdenCompraHomeComponent implements OnInit{
       const badgeClass = getBadgeClassByOC(estado);
       return `<span class="badge ${badgeClass}">${estado}</span>`;
     }
-    
+    getFormateDate= (value:string)=>{
+      return extractDateFromTimestamp(value)
+    }
       // Getter para items de pedidos urgentes (para el carousel)
   get pedidosUrgentesItems() {
     return this.pedidosUrgentes().flatMap(p => p.pedido_items || []);
