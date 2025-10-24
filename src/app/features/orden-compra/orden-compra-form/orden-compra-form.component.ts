@@ -451,7 +451,31 @@ export class OrdenCompraFormComponent implements OnInit {
   }
   deleteItemPedido(item: PedidoItem | undefined) {
     if (item === undefined) return;
-    this._ordenCompraService.deleteItemOC(item);
+    
+    // ✅ Buscar el OrdenCompraItem correspondiente en itemsOC
+    const ordenCompraItem = this.itemsOC?.find((ocItem) => {
+      const pedidoItemId = typeof ocItem.pedido_item_id === 'object'
+        ? ocItem.pedido_item_id?.id
+        : ocItem.pedido_item_id;
+      
+      return pedidoItemId === item.id;
+    });
+
+    if (!ordenCompraItem) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Item no encontrado',
+        detail: 'No se encontró el item en la orden de compra.',
+      });
+      return;
+    }
+
+    // Llamar al servicio con el OrdenCompraItem correcto y indicar que es temporal
+    this._ordenCompraService.deleteItemOC(ordenCompraItem, true);
+    
+    // Eliminar también de la lista local pedidoItems
+    this.pedidoItems = this.pedidoItems.filter((i) => i.id !== item.id);
+    
     this._messageService.add({
       severity: 'info',
       summary: 'Item eliminado',

@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <app-sidebar
   [(isVisible)]="sidebarVisible"
   [title]="sidebarTitle"
@@ -37,7 +38,7 @@
     [(visible)]="showAddFactura"
     [modal]="true"
     [closable]="false"
-    [style]="{ width: '550px' }"
+    [style]="{ width: '750px' }"
   >
     <div class="p-fluid" [formGroup]="facturaForm">
       <div class="d-flex">
@@ -106,91 +107,115 @@
         <i class="bi bi-arrow-return-right me-1"></i>
         Número de factura: últimos dígitos después del guión
       </small>
-      <p-tabView styleClass="tabview-custom">
-    <p-tabPanel>
-        <ng-template pTemplate="header" style="color:none">
-            <i class="pi pi-box mx-1 "></i>
-            <span>Items de la factura</span>
-        </ng-template>
-          <div class="col-12">
-           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="container"></div>
-        <button
-          type="button"
-          class="btn btn-success btn-sm"
-          (click)="addOrdenCompraItem()"
-          [disabled]="isOrdenFinalizada()"
-        >
-          <i class="bi bi-plus me-1"></i>
-          Agregar
-        </button>
-      </div>
-      <app-table-generic-ng
-      [columns]="[
-        {
-          field: 'factura_id.numero_factura',
-          header: 'Factura Relacionada',
-          pipe: getFactura
-        },
-        { field: 'pedido_item_id.productos.nombre', header: 'Producto' },
-        { field: 'pedido_item_id.unidad_medida_id.nombre', header: 'Medida' },
-        { field: 'cantidad', header: 'Cantidad' },
-        { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency },
-      ]"
-      [data]="_ordenCompraService.ordenCompraItems"
-      [showFooter]="true"
-      [footerColumns]="['subtotal']"
-      [footerLabel]="'Total General'"
-      minWidth="40rem"
-
-    >
-      <ng-template #actions let-item>
-        <p-button
-          icon="pi pi-check"
-          styleClass="p-button-rounded p-button-outlined"
-          [rounded]="true"
-          [text]="true"
-          pTooltip="Item recibido"
-          severity="success"
-          tooltipPosition="left"
-          (onClick)="openItemRecibidoModal(item)"
-          [disabled]="isOrdenFinalizada()"
-        ></p-button>
-        <p-button
-          icon="pi pi-file"
-          styleClass="p-button-rounded p-button-outlined"
-          [rounded]="true"
-          tooltipPosition="left"
-          [text]="true"
-          pTooltip="Relacionar el item con una factura"
-          (onClick)="openRelacionarFacturaModal(item)"
-          severity="info"
-          [disabled]="isOrdenFinalizada()"
-        ></p-button>
-        <p-button
-          icon="pi pi-pencil"
-          styleClass="p-button-rounded p-button-outlined"
-          pTooltip="Editar precio del item"
-          tooltipPosition="left"
-          [rounded]="true"
-          [text]="true"
-          (onClick)="openEditOrdenCompraItem(item)"
-          severity="warning"
-          [disabled]="isOrdenFinalizada()"
-        ></p-button>
-      </ng-template>
-    </app-table-generic-ng>
-          </div>
-    </p-tabPanel>
-        <p-tabPanel header="Header II">
+    <p-tabView styleClass="tabview-custom">
+      <!-- Tab 1: Items de la factura -->
+      <p-tabPanel>
         <ng-template pTemplate="header">
-            <i class="pi pi-file mx-2"></i>
-            <span>Remitos</span>
+          <i class="bi bi-box mx-2"></i>
+          <span>Items de la factura</span>
         </ng-template>
-        </p-tabPanel>
-      </p-tabView>
+        
+        <div class="d-flex justify-content-end mb-2">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            (click)="addOrdenCompraItem()"
+            [disabled]="isOrdenFinalizada()"
+          >
+            <i class="bi bi-plus me-1"></i>
+            Agregar Item
+          </button>
+        </div>
+
+        <app-table-generic-ng
+          [columns]="[
+            { field: 'pedido_items.productos.nombre', header: 'Producto' },
+            { field: 'pedido_items.unidad_medida.nombre', header: 'Medida' },
+            { field: 'cantidad', header: 'Cantidad' },
+            { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+          ]"
+          [data]="_ordenCompraService.ordenCompraItems"
+          [showFooter]="true"
+          [footerColumns]="['subtotal']"
+          [footerLabel]="'Total Items'"
+          minWidth="40rem"
+        >
+          <ng-template #actions let-item>
+            <p-button
+              icon="pi pi-pencil"
+              styleClass="p-button-rounded p-button-outlined"
+              [rounded]="true"
+              [text]="true"
+              pTooltip="Editar item"
+              tooltipPosition="left"
+              severity="warning"
+              (onClick)="openEditPriceItemFacturaSignal(item)"
+              [disabled]="isOrdenFinalizada()"
+
+            ></p-button>
+              <p-button
+    icon="pi pi-trash"
+    (onClick)="eliminarItemTemporal(item)"
+    styleClass="p-button-rounded p-button-outlined"
+    [rounded]="true"
+    [text]="true"
+    pTooltip="Eliminar Item"
+    tooltipPosition="left"
+    severity="danger"
+    [disabled]="isOrdenFinalizada()"
+  ></p-button>
+          </ng-template>
+        </app-table-generic-ng>
+      </p-tabPanel>
+
+      <!-- Tab 2: Remitos relacionados -->
+      <p-tabPanel>
+        <ng-template pTemplate="header">
+          <i class="bi bi-file-text mx-2"></i>
+          <span>Remitos relacionados</span>
+        </ng-template>
+        
+        <div class="d-flex justify-content-end mb-2">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            (click)="openAddRemito()"
+            [disabled]="isOrdenFinalizada()"
+          >
+            <i class="bi bi-plus me-1"></i>
+            Agregar Remito
+          </button>
+        </div>
+
+        <app-table-generic-ng
+          [columns]="[
+            { field: 'numero_remito', header: 'NRO REMITO', width: '12rem' },
+            { field: 'fecha', header: 'Fecha', width: '10rem', pipe: formatDate }
+          ]"
+          [data]="_remitoService.remitos"
+        >
+          <ng-template #actions let-item>
+            <p-button
+              icon="pi pi-trash"
+              (onClick)="this._remitoService.deleteItemRemito(item)"
+              styleClass="p-button-rounded p-button-outlined"
+              [rounded]="true"
+              [text]="true"
+              pTooltip="Eliminar remito"
+              tooltipPosition="left"
+              severity="danger"
+              [disabled]="isOrdenFinalizada()"
+            ></p-button>
+          </ng-template>
+        </app-table-generic-ng>
+      </p-tabPanel>
+    </p-tabView>
     <!-- Termina Items -->
-      <div class="d-flex justify-content-between align-items-center">
+
+
+    <!-- Empieza remitos -->
+
+      <!-- <div class="d-flex justify-content-between align-items-center">
         <label class="">Remitos relacionados:</label>
         <button
           type="button"
@@ -222,7 +247,7 @@
           ></p-button>
         </ng-template>
         ></app-table-generic-ng
-      >
+      > -->
       <div class="d-flex mt-2">
         <i
           class="bi bi-asterisk text-danger fs-6 mx-1"

@@ -41,7 +41,7 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       }));
     });
   });
-  addItemOC(newItem: PedidoItem, new_precio_unitario: number) {
+  addItemOC(newItem: PedidoItem, new_precio_unitario: number,newFactura?:boolean) {
     // Agregar a itemsOC
     this.itemsOC.update((items) => (items ? [...items, newItem] : [newItem]));
     
@@ -65,7 +65,8 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
     recibido: false,
   } as OrdenCompraItem;
     // Actualizar la ordenCompra signal si existe
-    this.ordenCompra.update((ordenActual) => {
+   if (!newFactura){
+        this.ordenCompra.update((ordenActual) => {
     if (!ordenActual) return ordenActual; // Si no hay OC cargada, no hacer nada
     
     // Actualizar inmutablemente el array de items
@@ -77,18 +78,67 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       ],
     };
   });
+   }
+
   console.log('✅ Item agregado a las signals:', nuevoOrdenCompraItem);
   }
-  deleteItemOC(item: PedidoItem) {
-    // Elimina el PedidoItem de itemsOC
-    this.itemsOC.update((items) =>
-      items ? items.filter((i) => i.id !== item.id) : items
-    );
-    // Elimina el OrdenCompraItem correspondiente de ordenCompraItems
+
+ deleteItemOC(item: OrdenCompraItem, isFromSignal: boolean = false) {
+  console.log('🗑️ Eliminando item:', item, 'isFromSignal:', isFromSignal);
+  
+  if (isFromSignal) {
+    // ✅ CASO 1: Item temporal en signal (antes de guardar en BD)
     this.ordenCompraItems.update((items) =>
-      items.filter((ocItem) => ocItem.pedido_item_id?.id !== item.id)
+      items.filter((ocItem) => {
+        // Comparar por ID si existe
+        if (ocItem.id && item.id) {
+          return ocItem.id !== item.id;
+        }
+        
+        // Si no hay ID, comparar por pedido_item_id
+        const ocPedidoItemId = typeof ocItem.pedido_item_id === 'object' 
+          ? ocItem.pedido_item_id?.id 
+          : ocItem.pedido_item_id;
+          
+        const itemPedidoItemId = typeof item.pedido_item_id === 'object'
+          ? item.pedido_item_id?.id
+          : item.pedido_item_id;
+          
+        return ocPedidoItemId !== itemPedidoItemId;
+      })
     );
+
+    // También eliminar de itemsOC si existe el pedido_item
+    const pedidoItemId = typeof item.pedido_item_id === 'object'
+      ? item.pedido_item_id?.id
+      : item.pedido_item_id;
+    
+    if (pedidoItemId) {
+      this.itemsOC.update((items) =>
+        items ? items.filter((i) => i.id !== pedidoItemId) : items
+      );
+    }
+
+    console.log('✅ Item eliminado de signals temporales');
+    
+  } else {
+    // ✅ CASO 2: Item de OC existente en BD
+    this.ordenCompra.update((ordenActual) => {
+      if (!ordenActual) return ordenActual;
+
+      const nuevosItems = ordenActual.orden_compra_items?.filter(
+        (ocItem) => ocItem.id !== item.id
+      ) ?? [];
+
+      return {
+        ...ordenActual,
+        orden_compra_items: nuevosItems,
+      };
+    });
+
+    console.log('✅ Item eliminado de ordenCompra signal');
   }
+}
   sumProductsOC() {
     return this.ordenCompraItems().reduce(
       (acc, item) => acc + (item.precio_unitario || 0),
@@ -347,6 +397,11 @@ export class OrdenCompraService extends StateService<OrdenCompra> {
       console.error('Error marcando item como recibido:', err);
       return { data: null, error: err };
     }
+  }
+  async editPriceItemSignal(item:OrdenCompra,newPrice:number){
+    console.log("EDITO PREICO");
+       this.ordenCompraItems.update((items) =>
+      items.map((i)=> i.id == item.id ? {...i,subtotal:newPrice,precio_unitario:(i.cantidad/newPrice)}: {...i}));
   }
   async editPriceItem(
     item: OrdenCompraItem,

@@ -47,6 +47,7 @@ import { SidebarModule } from 'primeng/sidebar';
 import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.component';
 import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
 import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -68,11 +69,12 @@ import { MessageService } from 'primeng/api';
     PopUpNgComponent,
     ButtonWithIconComponent,
     TabViewModule,
-    SidebarComponent
+    SidebarComponent,
+    ToastModule
   ],
   templateUrl: './orden-compra-detail.component.html',
   styleUrls: ['./orden-compra-detail.component.css'],
-  providers:[MessageService,CurrencyPipe]
+  providers:[MessageService,CurrencyPipe,MessageService]
 })
 export class OrdenCompraDetailComponent implements OnInit {
   //sidebar
@@ -486,6 +488,9 @@ getImporteCurrency = (value: number): string => {
       case 'actualizarFechaPago':
         await this.actualizarFechaPago(this.currentItem, value);
         break;
+      case 'editPriceItemNewFactura':
+         this.editarPrecioItem(this.currentItem,value,true);
+             break;
 
       default:
         console.log('Acción no manejada');
@@ -493,11 +498,20 @@ getImporteCurrency = (value: number): string => {
 
     this.closeModal();
   }
+  eliminarItemTemporal(item: OrdenCompraItem) {
+  this._ordenCompraService.deleteItemOC(item, true);
+  
+  this._messageService.add({
+    severity: 'warning',
+    summary: 'Item eliminado',
+    detail: 'El item fue eliminado de la lista'
+  });
+}
 handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
   const { item, precio } = event;
 
   // Agregar a la signal usando el servicio
-  this._ordenCompraService.addItemOC(item, precio);
+  this._ordenCompraService.addItemOC(item, precio,true);
 
   console.log(
     'Item agregado a la OC:',
@@ -563,6 +577,16 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
     this.typeModal = 'number';
     this.showModal = true;
   }
+    openEditPriceItemFacturaSignal(item: any) {
+    this.currentAction = 'editPriceItemNewFactura';
+    this.currentItem = item;
+    this.type = 'warning';
+    this.prefix = '$';
+    this.titleModal = `Cambiando el SUBTOTAL del item del SIGNAL  `;
+    this.descriptionModal = `Usted va a cambiar el subtotal del item  "${item.pedido_item_id?.productos?.nombre}, ${item.cantidad}  ${item.pedido_item_id?.unidad_medida_id.nombre}"`;
+    this.typeModal = 'number';
+    this.showModal = true;
+  }
   openRelacionarFacturaModal(item: any) {
     this.currentAction = 'relacionarFactura';
     this.currentItem = item;
@@ -624,7 +648,7 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
       }
     }
   }
-  async editarPrecioItem(item: any, nuevoPrecio: number) {
+  async editarPrecioItem(item: any, nuevoPrecio: number,newFactura?:boolean) {
     try {
       if (!nuevoPrecio || nuevoPrecio <= 0) {
         if (this.formResult) {
@@ -642,8 +666,8 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
         'Nuevo precio:',
         nuevoPrecio
       );
-
-      const { data, error } = await this._ordenCompraService.editPriceItem(
+      if(!newFactura){
+        const { data, error } = await this._ordenCompraService.editPriceItem(
         item,
         nuevoPrecio
       );
@@ -659,6 +683,10 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
         return;
       }
 
+      }else{
+        this._ordenCompraService.editPriceItemSignal(item,nuevoPrecio);
+      }
+      
       // Si todo salió bien
       if (this.formResult) {
         this.formResult({
