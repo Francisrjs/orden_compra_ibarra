@@ -1,6 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~bootstrap-icons/font/bootstrap-icons.css";
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* PrimeNG Theme - Necesario para que los toasts tengan color */
+@import "primeng/resources/themes/saga-green/theme.css";
+@import "primeng/resources/primeng.css";
 * {
   font-family: "Montserrat", sans-serif;
 }
@@ -8,5 +12,5 @@
   --input-border-color: #ced4da; /* Color de borde por defecto de PrimeNG */
   --input-background: #ffffff;
   --input-border-radius: 6px;
-  --primary-color: #3b82f6; /* Un azul como color primario */
+  --primary-color: #68B06C; /* Color verde principal del tema */
 }

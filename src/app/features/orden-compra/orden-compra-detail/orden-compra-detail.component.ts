@@ -502,7 +502,7 @@ getImporteCurrency = (value: number): string => {
   this._ordenCompraService.deleteItemOC(item, true);
   
   this._messageService.add({
-    severity: 'warning',
+    severity: 'danger',
     summary: 'Item eliminado',
     detail: 'El item fue eliminado de la lista'
   });
