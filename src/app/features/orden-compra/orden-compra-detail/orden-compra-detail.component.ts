@@ -21,25 +21,12 @@ import { DividerModule } from 'primeng/divider';
 import { TableGenericNGComponent } from 'src/app/shared/tables/table-generic-ng/table-generic-ng.component';
 import { getBadgeClassByOC } from 'src/app/shared/funtions/pedidosFuntions';
 import { ButtonElegantComponent } from 'src/app/shared/buttons/button-elegant/button-elegant.component';
-import { DialogModule } from 'primeng/dialog';
-import { InputNumber, InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { TabPanel, TabViewModule } from 'primeng/tabview';
-import { ButtonModule } from 'primeng/button';
+import { AccordionModule } from 'primeng/accordion';
+import { TooltipModule } from 'primeng/tooltip';
+import { TabViewModule } from 'primeng/tabview';
 import { RemitoService } from '../../facturas/services/remito.service';
 import { FacturaService } from '../../facturas/services/factura.service';
 import { OrdenCompraService } from '../services/orden-compra.service';
-import { InputDateComponent } from 'src/app/shared/input/input-date/input-date.component';
-import { AccordionModule } from 'primeng/accordion';
-import { TooltipModule } from 'primeng/tooltip';
-import { notFutureDateValidator } from 'src/app/shared/funtions/validator';
 import { PopUpNgComponent } from 'src/app/shared/modal/pop-up-ng/pop-up-ng.component';
 import { ButtonWithIconComponent } from 'src/app/shared/buttons/button-with-icon/button-with-icon.component';
 import { ActivatedRoute } from '@angular/router';
@@ -48,6 +35,10 @@ import { SidebarComponent } from 'src/app/shared/sidebar/sidebar/sidebar.compone
 import { ProductoPedidoFormComponent } from '../../productos/producto/producto-pedido-form/producto-pedido-form.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ProductoFormComponent } from '../../productos/producto/producto-form/producto-form.component';
+import { RemitoFormDialogComponent } from 'src/app/shared/modal/remito-form-dialog/remito-form-dialog.component';
+import { FacturaFormDialogComponent } from 'src/app/shared/modal/factura-form-dialog/factura-form-dialog.component';
+import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-orden-compra-detail',
   standalone: true,
@@ -57,17 +48,12 @@ import { ToastModule } from 'primeng/toast';
     TableGenericNGComponent,
     DividerModule,
     ButtonElegantComponent,
-    DialogModule,
-    InputNumberModule,
-    InputTextModule,
-    FormsModule,
-    ReactiveFormsModule,
     ButtonModule,
-    InputDateComponent,
+    RemitoFormDialogComponent,
+    FacturaFormDialogComponent,
     AccordionModule,
     TooltipModule,
     PopUpNgComponent,
-    ButtonWithIconComponent,
     TabViewModule,
     SidebarComponent,
     ToastModule
@@ -77,41 +63,25 @@ import { ToastModule } from 'primeng/toast';
   providers:[MessageService,CurrencyPipe,MessageService]
 })
 export class OrdenCompraDetailComponent implements OnInit {
-  //sidebar
-   sidebarVisible = false;
-    sidebarTitle = '';
-    componentToLoad: Type<any> | null = null;
-    sidebarInputs: Record <string, unknown> | undefined; 
-    @Input() onSaveSuccess?: () => void;
-  
-  @Input() formResult?: (result: {
-    severity?: string;
-    success: boolean;
-    message: string;
-  }) => void;
+  // Sidebar
+  sidebarVisible = false;
+  sidebarTitle = '';
+  componentToLoad: Type<any> | null = null;
+  sidebarInputs: Record<string, unknown> | undefined;
 
+  // Modales
+  facturaToEdit?: Factura;
   showAddFactura: boolean = false;
   showAddRemito: boolean = false;
-  facturaForm!: FormGroup;
-  remitoForm!: FormGroup;
-  public route=inject(ActivatedRoute)
+
+  // Servicios
+  public route = inject(ActivatedRoute);
   public _remitoService = inject(RemitoService);
   public _facturaService = inject(FacturaService);
-  private _messageService=inject(MessageService);
+  private _messageService = inject(MessageService);
   private currencyPipe = inject(CurrencyPipe);
   public _ordenCompraService = inject(OrdenCompraService);
   private cdr = inject(ChangeDetectorRef);
-
-  // ✅ Getter para acceso más fácil en el template
-  get dataOrden() {
-  
-    return this._ordenCompraService.ordenCompra();
-  }
-
-  // ✅ Computed signals para las tablas (se actualizan automáticamente)
-
-  // Fecha máxima para remitos y facturas (hoy)
-  public maxDate: string = new Date().toISOString().split('T')[0];
 
   // Propiedades del modal pop-up
   showModal: boolean = false;
@@ -119,19 +89,19 @@ export class OrdenCompraDetailComponent implements OnInit {
   descriptionModal: string = '';
   typeModal: 'number' | 'date' | 'dropdown' | 'none' = 'none';
   type: 'default' | 'danger' | 'warning' | 'done' = 'default';
-  estados: any[] = [];
   prefix: '$' | '' = '';
   numberPlaceHolder: string = '';
   currentAction: string = '';
   currentItem: any = null;
   iconClass = 'bi bi-check2-circle';
-  //propiedades dropdwon
+  
+  // Propiedades dropdown
   dropdownOptions: any[] = [];
   dropdownPlaceholder: string = 'Seleccione una opción';
   dropdownOptionLabel: string = 'label';
   dropdownOptionValue: string = 'value';
 
-  constructor(private fb: FormBuilder) {
+  constructor() {
     // ✅ Effect para forzar detección cuando cambia la orden
     effect(() => {
       this._ordenCompraService.ordenCompra();
@@ -143,27 +113,25 @@ export class OrdenCompraDetailComponent implements OnInit {
     });
   }
 
+  // ✅ Getter para acceso más fácil en el template
+  get dataOrden() {
+    return this._ordenCompraService.ordenCompra();
+  }
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {
       console.warn('No se recibió id en la ruta');
-
       return;
     }
 
     const id = Number(idParam);
-     this._ordenCompraService.getOCById(id)
+    this._ordenCompraService.getOCById(id);
+    
     if (Number.isNaN(id)) {
       console.warn('id de ruta no es numérico:', idParam);
-
       return;
     }
-
-
-
-
-    this.initFacturaForm();
-    this.initRemitoForm();
   }
 addOrdenCompraItem() {
   console.log('Abriendo producto ..');
@@ -171,6 +139,7 @@ addOrdenCompraItem() {
   this.componentToLoad = ProductoPedidoFormComponent;
   this.sidebarInputs = {
     OCform: true,
+    
     onSaveSuccess: () => this.handleCloseSidebar(),
     
     // ✅ Usar el @Input function en lugar del @Output
@@ -182,10 +151,44 @@ addOrdenCompraItem() {
       success: boolean;
       message: string;
     }) => this.handleFormResult(result),
+       onNavigateToCreateProduct: () => this.openProductoForm(),
   };
 
   this.sidebarVisible = true;
 }
+
+openProductoForm(): void {
+    this.sidebarTitle = 'Crear Nuevo Producto';
+    this.componentToLoad = ProductoFormComponent; // <-- Cambias el componente aquí
+    this.sidebarInputs = {
+      // Opcional: Cuando este formulario se guarde, puedes volver al anterior o cerrar todo
+      onSaveSuccess: () => {
+        console.log('Producto nuevo creado! Volviendo...');
+        // Vuelve a abrir el formulario para agregar el producto recién creado al pedido
+        this.openPedidoProducto();
+      },
+         onNavigateToCreateProduct: () => this.openProductoForm(),
+      formResult: (result: { success: boolean; message: string }) =>
+        this.handleFormResult(result),
+    };
+    // No es necesario cambiar 'sidebarVisible', porque el sidebar ya está abierto.
+  }
+    openPedidoProducto(): void {
+      console.log('abriendo');
+      this.sidebarTitle = 'Agregar nuevo producto a tu Pedido';
+      this.componentToLoad = ProductoPedidoFormComponent;
+      this.sidebarInputs = {
+        onNavigateToCreateProduct: () => this.openProductoForm(),
+        onSaveSuccess: () => this.handleCloseSidebar(),
+        formResult: (result: {
+          severity?: string;
+          success: boolean;
+          message: string;
+        }) => this.handleFormResult(result),
+      };
+  
+      this.sidebarVisible = true;
+    }
     handleCloseSidebar() {
     console.log('Producto guardado, cerrando sidebar...');
     this.sidebarVisible = false;
@@ -209,33 +212,17 @@ addOrdenCompraItem() {
       });
     }
   }
-  initFacturaForm(): void {
-    this.facturaForm = this.fb.group({
-      id: [null], // Para edición
-      primerosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
-      ultimosDigitosFactura: [null, [Validators.required, Validators.min(1)]],
-      fecha: [null, [Validators.required, notFutureDateValidator]],
-      importe: [null, [Validators.required, Validators.min(0.01)]],
-    });
-  }
 
-  initRemitoForm(): void {
-    this.remitoForm = this.fb.group({
-      puntoVentaRemito: [null, [Validators.required, Validators.min(1)]],
-      numeroRemito: [null, [Validators.required, Validators.min(1)]],
-      fecha: [null, [Validators.required, notFutureDateValidator]],
-    });
-  }
+  // ==================== MÉTODOS DE FORMATEO ====================
 
- getTotalCurrency = (value: number): string => {
-  return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
-  // Formato: $1,234,567.89
-};
+  getTotalCurrency = (value: number): string => {
+    return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
+  };
 
-getImporteCurrency = (value: number): string => {
-  return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
-  // Formato: $1,234,567.89
-};
+  getImporteCurrency = (value: number): string => {
+    return this.currencyPipe.transform(value, '$', 'symbol', '1.2-2') || '$0.00';
+  };
+
   getRecibido(value: boolean): string {
     return value ? 'SI' : 'NO';
   }
@@ -289,80 +276,47 @@ getImporteCurrency = (value: number): string => {
 
   finalizarOrdenCompra(): void {
     if (!this.dataOrden) return;
-
     this._ordenCompraService.finalizarOC(this.dataOrden.id);
-  }
-
-  isPrecioValid(): boolean {
-    return this.facturaForm.valid;
-  }
-
-  onEnterPrecio(): void {
-    if (this.isPrecioValid()) {
-      this.addEditFactura();
-    }
   }
 
   // ==================== FACTURA ====================
 
-  async addEditFactura() {
-    if (!this.facturaForm.valid || !this.dataOrden) {
-      return;
-    }
+  async editarFactura(factura: Factura) {
+  this.facturaToEdit = factura;
+  this.showAddFactura = true;
+}
 
-    const facturaId = this.facturaForm.get('id')?.value;
-    const primerosDigitos = this.facturaForm.get(
-      'primerosDigitosFactura'
-    )?.value;
-    const ultimosDigitos = this.facturaForm.get('ultimosDigitosFactura')?.value;
-    const fecha = this.facturaForm.get('fecha')?.value;
-    const importe = this.facturaForm.get('importe')?.value;
-
-    const numeroFactura = `${String(primerosDigitos).padStart(4, '0')}-${String(
-      ultimosDigitos
-    ).padStart(8, '0')}`;
-
-    let result;
-
-    if (facturaId) {
-      // EDITAR factura existente
-      result = await this._facturaService.updateFactura(facturaId, {
-        numero_factura: numeroFactura,
-        fecha: fecha,
-        importe: importe,
-      });
-    } else {
-      // CREAR nueva factura
-      result = await this._facturaService.createFactura({
-        orden_compra_id: this.dataOrden.id,
-        numero_factura: numeroFactura,
-        fecha: fecha,
-        importe: importe,
-      });
-    }
-
-    // Mostrar resultado
-    if (this.formResult) {
-      this.formResult({
-        success: result.success,
-        message: result.message,
-      });
-    }
-
+  handleFacturaSaved(result: { success: boolean; message: string }) {
+    this.handleFormResult(result);
+    
     if (result.success) {
-      this.cancelAdd();
-      // Recargar la orden de compra para ver los cambios
-      await this._ordenCompraService.getOCById(this.dataOrden.id);
+      this.showAddFactura = false;
+      this.facturaToEdit = undefined;
+      
+      if (this.dataOrden) {
+        this._ordenCompraService.getOCById(this.dataOrden.id);
+      } else {
+        this._messageService.add({
+    severity: 'danger',
+    summary: 'Item eliminado',
+    detail: 'No hay información de la orden'
+  });
     }
+    
+  }
+}
+
+  handleRemitoSaved(remito: Remito): void {
+    this._remitoService.addItemRemito(remito);
+    
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Remito agregado',
+      detail: `Remito ${remito.numero_remito} agregado correctamente`
+    });
   }
 
-  cancelAdd() {
-    this.facturaForm.reset();
-    this._facturaService.clearFactura();
-    this.showAddFactura = false;
-  }
-
-  // Formatea fecha (Date o string 'YYYY-MM-DD') a 'DD/MM/YYYY' (sin timezone)
+  // ==================== FORMATEO DE FECHAS ====================
   formatDateString(value: Date | string | null | undefined): string {
     if (!value) return '-';
 
@@ -388,90 +342,8 @@ getImporteCurrency = (value: number): string => {
     return '-';
   }
 
-  deleteItemRemito(item: Remito) {
-    this._remitoService.deleteItemRemito(item);
-  }
-
-  async editarFactura(factura: any) {
-    // Parsear el número de factura
-    const [puntoVenta, numeroFactura] = factura.numero_factura.split('-');
-
-    // Convertir la fecha a formato ISO string para el input de fecha (sin desfase de zona horaria)
-    let fechaFormatted = null;
-    if (factura.fecha) {
-      const fecha = new Date(factura.fecha);
-      const year = fecha.getFullYear();
-      const month = String(fecha.getMonth() + 1).padStart(2, '0');
-      const day = String(fecha.getDate()).padStart(2, '0');
-      fechaFormatted = `${year}-${month}-${day}`; // Formato YYYY-MM-DD
-    }
-
-    // Llenar el formulario
-    this.facturaForm.patchValue({
-      id: factura.id,
-      primerosDigitosFactura: parseInt(puntoVenta),
-      ultimosDigitosFactura: parseInt(numeroFactura),
-      fecha: fechaFormatted,
-      importe: factura.importe,
-    });
-    this._remitoService.remitos.set(factura.remitos);
-    // Abrir el modal
-    this.showAddFactura = true;
-  }
-
-  // ==================== REMITO ====================
-
-  openAddRemito(): void {
-    this.showAddRemito = true;
-  }
-
-  cancelAddRemito(): void {
-    this.remitoForm.reset();
-    this.showAddRemito = false;
-  }
-
-  agregarRemito(): void {
-    if (this.remitoForm.valid) {
-      const puntoVenta = this.remitoForm.get('puntoVentaRemito')?.value;
-      const numero = this.remitoForm.get('numeroRemito')?.value;
-      const fechaValue = this.remitoForm.get('fecha')?.value;
-
-      const numeroRemito = `${String(puntoVenta).padStart(4, '0')}-${String(
-        numero
-      ).padStart(8, '0')}`;
-
-      // Guardar fecha como string YYYY-MM-DD para evitar desfase de zona horaria
-      let fecha: string | undefined;
-      if (fechaValue) {
-        if (typeof fechaValue === 'string') {
-          fecha = fechaValue;
-        } else {
-          const d = new Date(fechaValue);
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          fecha = `${year}-${month}-${day}`;
-        }
-      }
-
-      // Crear remito temporal (fecha como string)
-      const nuevoRemito = {
-        id: `temp-${Date.now()}` as any, // ID temporal único
-        numero_remito: numeroRemito,
-        fecha: fecha as any, // forzar tipo para evitar error TS
-        factura_id: {} as Factura,
-      };
-
-      this._remitoService.addItemRemito(nuevoRemito);
-      this.cancelAddRemito();
-    }
-  }
-
   // ==================== MODAL POP-UP ====================
 
-  /**
-   * Maneja la confirmación del modal
-   */
   async handleAccept(value?: any) {
     console.log('Acción aceptada:', this.currentAction, 'Valor:', value);
 
@@ -489,73 +361,68 @@ getImporteCurrency = (value: number): string => {
         await this.actualizarFechaPago(this.currentItem, value);
         break;
       case 'editPriceItemNewFactura':
-         this.editarPrecioItem(this.currentItem,value,true);
-             break;
-
+        this.editarPrecioItem(this.currentItem, value, true);
+        break;
       default:
         console.log('Acción no manejada');
     }
 
     this.closeModal();
   }
-  eliminarItemTemporal(item: OrdenCompraItem) {
-  this._ordenCompraService.deleteItemOC(item, true);
-  
-  this._messageService.add({
-    severity: 'danger',
-    summary: 'Item eliminado',
-    detail: 'El item fue eliminado de la lista'
-  });
-}
-handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
-  const { item, precio } = event;
 
-  // Agregar a la signal usando el servicio
-  this._ordenCompraService.addItemOC(item, precio,true);
-
-  console.log(
-    'Item agregado a la OC:',
-    this._ordenCompraService.ordenCompraItems()
-  );
-
-  this._messageService.add({
-    severity: 'success',
-    summary: 'Item agregado',
-    detail: `${
-      item.producto?.nombre || 'Producto'
-    } agregado con precio ${this.currencyPipe.transform(
-      precio,
-      '$',
-      'symbol',
-      '1.0-0'
-    )}`,
-  });
-
-  // Cerrar el sidebar
-  this.handleCloseSidebar();
-}
-  /**
-   * Maneja la cancelación del modal
-   */
   handleCancel() {
     console.log('Acción cancelada');
     this.closeModal();
   }
 
-  /**
-   * Cierra el modal y limpia las propiedades
-   */
   closeModal() {
     this.showModal = false;
     this.currentAction = '';
     this.currentItem = null;
   }
 
+  // ==================== ACCIONES DE ITEMS TEMPORALES ====================
+
+  eliminarItemTemporal(item: OrdenCompraItem) {
+    this._ordenCompraService.deleteItemOC(item, true);
+    
+    this._messageService.add({
+      severity: 'danger',
+      summary: 'Item eliminado',
+      detail: 'El item fue eliminado de la lista'
+    });
+  }
+
+  handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
+    const { item, precio } = event;
+
+    // Agregar a la signal usando el servicio
+    this._ordenCompraService.addItemOC(item, precio, true);
+
+    console.log(
+      'Item agregado a la OC:',
+      this._ordenCompraService.ordenCompraItems()
+    );
+
+    this._messageService.add({
+      severity: 'success',
+      summary: 'Item agregado',
+      detail: `${
+        item.producto?.nombre || 'Producto'
+      } agregado con precio ${this.currencyPipe.transform(
+        precio,
+        '$',
+        'symbol',
+        '1.0-0'
+      )}`,
+    });
+
+    // Cerrar el sidebar
+    this.handleCloseSidebar();
+  }
+
   // ==================== ACCIONES DE ITEMS ====================
 
-  /**
-   * Abre el modal de confirmación para marcar un item como recibido
-   */
   openItemRecibidoModal(item: any) {
     this.currentAction = 'itemRecibido';
     this.currentItem = item;
@@ -620,43 +487,39 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
 
       if (error) {
         console.error('Error al marcar item como recibido:', error);
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Error al marcar el item como recibido',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al marcar el item como recibido'
+        });
         return;
       }
 
       // Si todo salió bien
-      if (this.formResult) {
-        this.formResult({
-          success: true,
-          message: 'Item marcado como recibido correctamente',
-        });
-      }
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Item marcado como recibido correctamente'
+      });
 
       // ✅ No es necesario recargar, la signal se actualiza automáticamente en el servicio
     } catch (error) {
       console.error('Error inesperado al marcar item como recibido:', error);
-      if (this.formResult) {
-        this.formResult({
-          success: false,
-          message: 'Error inesperado al marcar el item como recibido',
-        });
-      }
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error inesperado al marcar el item como recibido'
+      });
     }
   }
-  async editarPrecioItem(item: any, nuevoPrecio: number,newFactura?:boolean) {
+  async editarPrecioItem(item: any, nuevoPrecio: number, newFactura?: boolean) {
     try {
       if (!nuevoPrecio || nuevoPrecio <= 0) {
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Debe ingresar un precio válido mayor a 0',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Debe ingresar un precio válido mayor a 0'
+        });
         return;
       }
 
@@ -666,55 +529,51 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
         'Nuevo precio:',
         nuevoPrecio
       );
-      if(!newFactura){
+      
+      if (!newFactura) {
         const { data, error } = await this._ordenCompraService.editPriceItem(
-        item,
-        nuevoPrecio
-      );
+          item,
+          nuevoPrecio
+        );
 
-      if (error) {
-        console.error('Error al editar precio del item:', error);
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Error al actualizar el precio del item',
+        if (error) {
+          console.error('Error al editar precio del item:', error);
+          this._messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error al actualizar el precio del item'
           });
+          return;
         }
-        return;
-      }
-
-      }else{
-        this._ordenCompraService.editPriceItemSignal(item,nuevoPrecio);
+      } else {
+        this._ordenCompraService.editPriceItemSignal(item, nuevoPrecio);
       }
       
       // Si todo salió bien
-      if (this.formResult) {
-        this.formResult({
-          success: true,
-          message: 'Precio del item actualizado correctamente',
-        });
-      }
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Precio del item actualizado correctamente'
+      });
 
       // ✅ No es necesario recargar, la signal se actualiza automáticamente en el servicio
     } catch (error) {
       console.error('Error inesperado al editar precio:', error);
-      if (this.formResult) {
-        this.formResult({
-          success: false,
-          message: 'Error inesperado al actualizar el precio',
-        });
-      }
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error inesperado al actualizar el precio'
+      });
     }
   }
   async relacionarFactura(item: any, factura: Factura) {
     try {
       if (!factura) {
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Debe seleccionar una factura',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Debe seleccionar una factura'
+        });
         return;
       }
 
@@ -725,7 +584,7 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
         factura
       );
 
-      // Llamar al servicio para relacionar (implementarás esto después)
+      // Llamar al servicio para relacionar
       const { data, error } =
         await this._ordenCompraService.relacionarItemConFactura(
           item.id,
@@ -734,36 +593,50 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
 
       if (error) {
         console.error('Error al relacionar item con factura:', error);
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Error al relacionar el item con la factura',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al relacionar el item con la factura'
+        });
         return;
       }
 
       // Si todo salió bien
-      if (this.formResult) {
-        this.formResult({
-          success: true,
-          message: 'Item relacionado con la factura correctamente',
-        });
-      }
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Item relacionado con la factura correctamente'
+      });
     } catch (error) {
       console.error('Error inesperado al relacionar item con factura:', error);
-      if (this.formResult) {
-        this.formResult({
-          success: false,
-          message: 'Error inesperado al relacionar el item',
-        });
-      }
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error inesperado al relacionar el item'
+      });
     }
   }
 
   /**
-   * Abre el modal para actualizar la fecha de pago de una factura
+   * Abre el modal para agregar/editar una factura
    */
+  openModalFactura() {
+    if (!this.dataOrden) {
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No hay información de la orden de compra'
+      });
+      return;
+    }
+    
+    this.facturaToEdit = undefined; // Limpiar factura a editar
+    this.showAddFactura = true;
+    console.log('Abriendo modal factura, showAddFactura:', this.showAddFactura);
+    
+    // Forzar detección de cambios
+    this.cdr.detectChanges();
+  }
   openActualizarFechaPago(factura: any) {
     this.currentAction = 'actualizarFechaPago';
     this.currentItem = factura;
@@ -781,12 +654,11 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
   async actualizarFechaPago(factura: any, nuevaFecha: string) {
     try {
       if (!nuevaFecha) {
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Debe seleccionar una fecha válida',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Debe seleccionar una fecha válida'
+        });
         return;
       }
 
@@ -805,32 +677,29 @@ handleItemCreatedForOC(event: { item: PedidoItem; precio: number }) {
 
       if (error) {
         console.error('Error al actualizar fecha de pago:', error);
-        if (this.formResult) {
-          this.formResult({
-            success: false,
-            message: 'Error al actualizar la fecha de pago',
-          });
-        }
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al actualizar la fecha de pago'
+        });
         return;
       }
 
       // Si todo salió bien
-      if (this.formResult) {
-        this.formResult({
-          success: true,
-          message: 'Fecha de pago actualizada correctamente',
-        });
-      }
+      this._messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Fecha de pago actualizada correctamente'
+      });
 
       // ✅ No es necesario recargar, la signal se actualiza automáticamente en el servicio
     } catch (error) {
       console.error('Error inesperado al actualizar fecha de pago:', error);
-      if (this.formResult) {
-        this.formResult({
-          success: false,
-          message: 'Error inesperado al actualizar la fecha de pago',
-        });
-      }
+      this._messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error inesperado al actualizar la fecha de pago'
+      });
     }
   }
   getImporteTotalOC(): number {

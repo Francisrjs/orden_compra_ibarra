@@ -1,0 +1,96 @@
+ <p-dialog
+    header="Agregar Remito"
+    (visibleChange)="visibleChange.emit($event)"
+    [(visible)]="visible"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '400px' }"
+  >
+    <div class="p-fluid" [formGroup]="remitoForm">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center">
+          <i
+            class="bi bi-asterisk text-danger fs-6 mx-1"
+            style="font-size: 0.85rem"
+          ></i>
+          <label class="mb-0">Número de Remito</label>
+        </div>
+        <span class="badge bg-info text-dark">
+          <i class="bi bi-info-circle me-1"></i>
+          Ejemplo: 0001-111133
+        </span>
+      </div>
+
+      <p-inputNumber
+        formControlName="puntoVentaRemito"
+        [min]="1"
+        [mode]="'decimal'"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="0"
+        placeholder="0001 (Punto de venta)"
+        class="mb-2"
+      />
+      <small class="text-muted d-block mb-2">
+        <i class="bi bi-arrow-return-right me-1"></i>
+        Punto de venta: primeros dígitos antes del guión
+      </small>
+
+      <div class="d-flex">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Número de remito</label>
+      </div>
+
+      <p-inputNumber
+        formControlName="numeroRemito"
+        [min]="1"
+        [mode]="'decimal'"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="0"
+        placeholder="111133 (Número de remito)"
+        class="mb-2"
+      />
+      <small class="text-muted d-block mb-3">
+        <i class="bi bi-arrow-return-right me-1"></i>
+        Número de remito: últimos dígitos después del guión
+      </small>
+      <div class="d-flex">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Fecha del remito:</label>
+      </div>
+      <app-input-date
+        id="fecha_remito"
+        formControlName="fecha"
+        [max]="maxDate"
+      ></app-input-date>
+      <div class="d-flex justify-center text-center my-2">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Campos Obligatorios</label>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button
+          pButton
+          type="button"
+          label="Cancelar"
+          class="p-button-text"
+          (click)="cancelAddRemito()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Agregar"
+          (click)="agregarRemito()"
+          [disabled]="!remitoForm.valid || isDisabled"
+        ></button>
+      </div>
+    </div>
+  </p-dialog>

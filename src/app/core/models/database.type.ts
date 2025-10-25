@@ -155,7 +155,7 @@ export interface Factura {
   orden_compra_id: OrdenCompra;
   fecha_pago: Date;
   fecha: Date;
-  remitos?: Remito;
+  remitos?: Remito[];
   importe: number;
 }
 export interface Presupuesto {

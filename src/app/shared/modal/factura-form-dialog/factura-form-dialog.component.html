@@ -1,0 +1,264 @@
+ <p-dialog
+    header="Agregar/Editar factura y remito"
+    [(visible)]="visible"
+    (visibleChange)="visibleChange.emit($event)"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '750px' }"
+  >
+    <div class="p-fluid" [formGroup]="facturaForm">
+      <div class="d-flex">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Fecha de la factura:</label>
+      </div>
+      <app-input-date
+        id="fecha_factura"
+        formControlName="fecha"
+        [max]="maxDate"
+      ></app-input-date>
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center">
+          <i
+            class="bi bi-asterisk text-danger fs-6 mx-1"
+            style="font-size: 0.85rem"
+          ></i>
+          <label class="mb-0">Numero de Factura</label>
+        </div>
+        <span class="badge bg-info text-dark">
+          <i class="bi bi-info-circle me-1"></i>
+          Ejemplo: 0001-111133
+        </span>
+      </div>
+
+      <!-- Usamos p-inputNumber (si lo importaste) -->
+      <p-inputNumber
+        formControlName="primerosDigitosFactura"
+        [min]="1"
+        [mode]="'decimal'"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="0"
+        placeholder="0001 (Punto de venta)"
+        inputId="primerDigitoFactura"
+        class="mb-2"
+        
+      />
+      <small class="text-muted d-block mb-2">
+        <i class="bi bi-arrow-return-right me-1"></i>
+        Punto de venta: primeros dígitos antes del guión
+      </small>
+
+      <div class="d-flex">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Últimos dígitos</label>
+      </div>
+
+      <p-inputNumber
+        formControlName="ultimosDigitosFactura"
+        [min]="1"
+        [mode]="'decimal'"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="0"
+        placeholder="111133 (Número de factura)"
+        inputId="segundoDigitoFacturas"
+        class="mb-2"
+        
+      />
+      <small class="text-muted d-block mb-3">
+        <i class="bi bi-arrow-return-right me-1"></i>
+        Número de factura: últimos dígitos después del guión
+      </small>
+    <p-tabView styleClass="tabview-custom">
+      <!-- Tab 1: Items de la factura -->
+      <p-tabPanel>
+        <ng-template pTemplate="header">
+          <i class="bi bi-box mx-2"></i>
+          <span>Items de la factura</span>
+        </ng-template>
+        
+        <div class="d-flex justify-content-end mb-2">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+         (click)="handleAddItem()"
+            [disabled]="isOrdenFinalizada"
+          >
+            <i class="bi bi-plus me-1"></i>
+            Agregar Item
+          </button>
+        </div>
+
+        <app-table-generic-ng
+          [columns]="[
+            { field: 'pedido_items.productos.nombre', header: 'Producto' },
+            { field: 'pedido_items.unidad_medida.nombre', header: 'Medida' },
+            { field: 'cantidad', header: 'Cantidad' },
+            { field: 'subtotal', header: 'Importe', pipe: getTotalCurrency }
+          ]"
+          [data]="_ordenCompraService.ordenCompraItems"
+          [showFooter]="true"
+          [footerColumns]="['subtotal']"
+          [footerLabel]="'Total Items'"
+          minWidth="40rem"
+        >
+          <ng-template #actions let-item>
+            <p-button
+              icon="pi pi-pencil"
+              styleClass="p-button-rounded p-button-outlined"
+              [rounded]="true"
+              [text]="true"
+              pTooltip="Editar item"
+              tooltipPosition="left"
+              severity="warning"
+            (onClick)="handleEditItem(item)"
+              [disabled]="isOrdenFinalizada"
+
+            ></p-button>
+              <p-button
+    icon="pi pi-trash"
+    (onClick)="handleDeleteItem(item)"
+    styleClass="p-button-rounded p-button-outlined"
+    [rounded]="true"
+    [text]="true"
+    pTooltip="Eliminar Item"
+    tooltipPosition="left"
+    severity="danger"
+    [disabled]="isOrdenFinalizada"
+  ></p-button>
+          </ng-template>
+        </app-table-generic-ng>
+      </p-tabPanel>
+
+      <!-- Tab 2: Remitos relacionados -->
+      <p-tabPanel>
+        <ng-template pTemplate="header">
+          <i class="bi bi-file-text mx-2"></i>
+          <span>Remitos relacionados</span>
+        </ng-template>
+        
+        <div class="d-flex justify-content-end mb-2">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            (click)="handleAddRemito()"
+            
+          >
+            <i class="bi bi-plus me-1"></i>
+            Agregar Remito
+          </button>
+        </div>
+
+        <app-table-generic-ng
+          [columns]="[
+            { field: 'numero_remito', header: 'NRO REMITO', width: '12rem' },
+            { field: 'fecha', header: 'Fecha', width: '10rem', pipe: formatDate }
+          ]"
+          [data]="_remitoService.remitos"
+        >
+          <ng-template #actions let-item>
+            <p-button
+              icon="pi pi-trash"
+              (onClick)="this._remitoService.deleteItemRemito(item)"
+              styleClass="p-button-rounded p-button-outlined"
+              [rounded]="true"
+              [text]="true"
+              pTooltip="Eliminar remito"
+              tooltipPosition="left"
+              severity="danger"
+              [disabled]="isOrdenFinalizada"
+            ></p-button>
+          </ng-template>
+        </app-table-generic-ng>
+      </p-tabPanel>
+    </p-tabView>
+    <!-- Termina Items -->
+
+
+    <!-- Empieza remitos -->
+
+      <!-- <div class="d-flex justify-content-between align-items-center">
+        <label class="">Remitos relacionados:</label>
+        <button
+          type="button"
+          class="btn btn-success btn-sm"
+          (click)="openAddRemito()"
+          [disabled]="isOrdenFinalizada()"
+        >
+          <i class="bi bi-plus me-1"></i>
+          Agregar
+        </button>
+      </div>
+
+      <app-table-generic-ng
+        [columns]="[
+          { field: 'numero_remito', header: 'NRO REMITO', width: '10rem' },
+          { field: 'fecha', header: 'Fecha', width:'8rem', pipe:formatDate }
+        ]"
+        [data]="_remitoService.remitos"
+      >
+        <ng-template #actions let-item>
+          <p-button
+            icon="pi pi-trash"
+            (onClick)="this._remitoService.deleteItemRemito(item)"
+            styleClass="p-button-rounded p-button-outlined"
+            [rounded]="true"
+            [text]="true"
+            severity="danger"
+            [disabled]="isOrdenFinalizada()"
+          ></p-button>
+        </ng-template>
+        ></app-table-generic-ng
+      > -->
+      <div class="d-flex mt-2">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Importe total</label>
+      </div>
+
+      <p-inputNumber
+        formControlName="importe"
+        [min]="1"
+        mode="decimal"
+        prefix="$"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="2"
+        placeholder="Ingrese el importe"
+        inputId="importe"
+        class="mb-2"
+      />
+      <small class="text-muted d-block mb-3">
+        <i class="bi bi-arrow-return-right me-1"></i>
+        Importe total sin iva
+      </small>
+      <div class="d-flex justify-center text-center my-2">
+        <i
+          class="bi bi-asterisk text-danger fs-6 mx-1"
+          style="font-size: 0.85rem"
+        ></i>
+        <label class="mb-2">Campos Obligatorios</label>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+         <button
+        pButton
+        type="button"
+        label="Cancelar"
+        class="p-button-text"
+        (click)="onCancel()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Aceptar"
+        (click)="onSubmit()"
+        [disabled]="!isFormValid || isOrdenFinalizada"
+      ></button>
+      </div>
+    </div>
+  </p-dialog>

@@ -23,7 +23,7 @@
       ></app-input-modal-selector>
       <!-- Campos de cantidad y unidad de medida para modeUser O OCform -->
       <div *ngIf="modeUser || OCform">
-        <p class="mt-0 mb-2 text-secondary fs-6" *ngIf="modeUser && !OCform">
+        <p class="mt-0 mb-2 text-secondary fs-6" *ngIf="modeUser && OCform">
           ¿no te aparece el producto que buscas ?
           <a
             (click)="onNavigateToCreateProduct()"

@@ -121,6 +121,10 @@ export class ProductoPedidoFormComponent implements OnInit, OnChanges {
   }
 
   async ngOnInit(): Promise<void> {
+    // ✅ DEBUG: Verificar que OCform llega correctamente
+    console.log('🔍 ProductoPedidoForm - OCform:', this.OCform);
+    console.log('🔍 ProductoPedidoForm - modeUser:', this.modeUser);
+    
     // ✅ Configurar validaciones dinámicamente según el modo
     const formConfig: any = {
       producto_id: [null, Validators.required],
